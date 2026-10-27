@@ -6,13 +6,20 @@ chrome.action.onClicked.addListener((tab) => {
 });
 
 // Descarga una carátula y la devuelve como data URL: así el canvas del PiP no queda "contaminado" por CORS.
-chrome.runtime.onMessage.addListener((m, _sender, reply) => {
-  if (!m || m.type !== 'img' || typeof m.url !== 'string') return;
-  fetch(m.url)
-    .then((r) => r.blob())
-    .then((b) => new Promise((ok, ko) => { const fr = new FileReader(); fr.onload = () => ok(fr.result); fr.onerror = ko; fr.readAsDataURL(b); }))
-    .then((data) => reply({ data }))
-    .catch(() => reply({}));
+// Solo http(s), solo imágenes y con tope de tamaño; el resto se responde vacío.
+const MAX_ART_BYTES = 5 * 1024 * 1024;
+const readAsDataURL = (blob) => new Promise((ok, ko) => { const fr = new FileReader(); fr.onload = () => ok(fr.result); fr.onerror = ko; fr.readAsDataURL(blob); });
+async function fetchArtwork(url) {
+  if (!/^https?:$/.test(new URL(url).protocol)) throw new Error('protocolo no permitido');
+  const res = await fetch(url);
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  const blob = await res.blob();
+  if (!blob.type.startsWith('image/') || blob.size > MAX_ART_BYTES) throw new Error('no es una imagen válida');
+  return readAsDataURL(blob);
+}
+chrome.runtime.onMessage.addListener((m, sender, reply) => {
+  if (sender.id !== chrome.runtime.id || !m || m.type !== 'img' || typeof m.url !== 'string') return;
+  fetchArtwork(m.url).then((data) => reply({ data }), () => reply({}));
   return true;
 });
 
