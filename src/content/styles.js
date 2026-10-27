@@ -23,6 +23,12 @@
   .card.show { opacity: 1; transform: none; pointer-events: auto; transition: opacity var(--dur-in) var(--ease-out), transform var(--dur-in) var(--ease-out); }
   .card.dragging { cursor: grabbing; transition: opacity var(--dur-in) var(--ease-out); }
   .card.edge { cursor: pointer; }
+  /* En pausa el fondo se calma y la carátula pierde color; cargando, el botón de play late. */
+  .card.paused .glow { opacity: .2; }
+  .card.paused .art { filter: saturate(.5) brightness(.85); }
+  .art { transition: filter .3s; }
+  .card.loading .play { animation: pulse 1s ease-in-out infinite; }
+  @keyframes pulse { 50% { opacity: .55; transform: scale(.94); } }
   .glow {
     position: absolute; inset: -40px; z-index: 0; background: var(--art) center/cover;
     filter: blur(36px) saturate(1.6); opacity: .42; transition: opacity .4s; pointer-events: none;
@@ -172,6 +178,7 @@
   @media (prefers-reduced-motion: reduce) {
     .card, .card.show, .ring .bar, button { transition: none; }
     .card { transform: none; }
+    .card.loading .play { animation: none; }
     .scroll > span { animation: none; display: inline; }
     .scroll { text-overflow: ellipsis !important; }
   }
