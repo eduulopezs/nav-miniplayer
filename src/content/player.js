@@ -94,7 +94,16 @@ ${NMP.css}
   const KNOWN_ACTIONS = new Set(['play', 'pause', 'stop', 'seekbackward', 'seekforward', 'seekto', 'previoustrack', 'nexttrack', '@pip']);
   document.addEventListener('__mp_actions', (e) => { actions = new Set(String(e.detail).split(',').filter((n) => KNOWN_ACTIONS.has(n))); });
   // Medios fuera del alcance del documento (sin insertar, en un shadow DOM): el puente manda su estado y recibe las órdenes.
-  document.addEventListener('__mp_media', (e) => MEDIA.ingest(e.detail, send, (m) => { lastPlayed = m; scanDirty = true; }));
+  const remotePlay = (m) => { lastPlayed = m; scanDirty = true; };
+  document.addEventListener('__mp_media', (e) => MEDIA.ingest('p', e.detail, send, remotePlay));
+  // Medios en iframes: los agentes de los subframes informan por el service worker, que también les lleva las órdenes.
+  try {
+    chrome.runtime.onMessage.addListener((m, sender) => {
+      if (sender.id !== chrome.runtime.id || !m || m.type !== 'mp-frame' || !Number.isInteger(m.frame) || m.frame < 1) return;
+      MEDIA.ingest('f' + m.frame, m.list, (cmd) => { try { chrome.runtime.sendMessage({ type: 'mp-cmd', frame: m.frame, cmd }); } catch (_) { /* contexto invalidado */ } }, remotePlay);
+      scanDirty = true;
+    });
+  } catch (_) { /* contexto invalidado */ }
   document.dispatchEvent(new CustomEvent('__mp_query'));
 
   // Registro de medios: se reescanea solo cuando un medio avisa (play, carga, fin...) o, como máximo, una vez por segundo.
@@ -107,6 +116,7 @@ ${NMP.css}
     return (picked = scanMedia());
   }
   function scanMedia() {
+    MEDIA.expire();
     const list = [...document.querySelectorAll('video,audio'), ...MEDIA.remotes()].filter((m) => MEDIA.usable(m, MIN_DURATION));
     return MEDIA.pick(list, lastPlayed);
   }

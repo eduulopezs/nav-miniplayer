@@ -49,10 +49,22 @@ async function fetchArtwork(url) {
     return `data:${mime};base64,${toBase64(bytes)}`;
   } finally { clearTimeout(timer); }
 }
+// Medios en iframes: un agente sin interfaz en cada subframe informa al marco superior, y este le manda órdenes. Los content scripts
+// no se ven entre sí, así que el service worker solo reenvía (agente -> marco 0 y marco 0 -> agente), sin salir de la pestaña emisora.
+const MAX_FRAME_MSG = 20000;
+function relayFrame(m, sender, tabId) {
+  if (m.type === 'mp-frame' && sender.frameId > 0 && typeof m.list === 'string' && m.list.length <= MAX_FRAME_MSG) {
+    chrome.tabs.sendMessage(tabId, { type: 'mp-frame', frame: sender.frameId, list: m.list }, { frameId: 0 }).catch(() => {});
+  } else if (m.type === 'mp-cmd' && sender.frameId === 0 && Number.isInteger(m.frame) && m.frame > 0 && typeof m.cmd === 'string' && m.cmd.length < 40) {
+    chrome.tabs.sendMessage(tabId, { type: 'mp-cmd', cmd: m.cmd }, { frameId: m.frame }).catch(() => {});
+  }
+}
 const inflight = new Set(); // una descarga a la vez por pestaña
 chrome.runtime.onMessage.addListener((m, sender, reply) => {
   const tabId = sender.tab && sender.tab.id;
-  if (sender.id !== chrome.runtime.id || tabId == null || !m || m.type !== 'img' || typeof m.url !== 'string' || m.url.length > MAX_URL) return;
+  if (sender.id !== chrome.runtime.id || tabId == null || !m) return;
+  if (m.type === 'mp-frame' || m.type === 'mp-cmd') return void relayFrame(m, sender, tabId);
+  if (m.type !== 'img' || typeof m.url !== 'string' || m.url.length > MAX_URL) return;
   if (inflight.has(tabId)) { reply({}); return; }
   inflight.add(tabId);
   fetchArtwork(m.url).then((data) => reply({ data }), () => reply({})).finally(() => inflight.delete(tabId));

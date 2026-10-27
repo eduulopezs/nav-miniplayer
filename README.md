@@ -11,7 +11,7 @@ Elige la carpeta del repositorio (la que contiene `manifest.json`) y recarga las
 ## Uso
 - Arrastra la tarjeta a cualquier punto de la pantalla (la posición se recuerda).
 - Play/pausa, ±10 s, anterior/siguiente (usa Media Session del sitio; en YouTube/Spotify Web funcionan).
-- Detecta `<audio>`/`<video>` de la página, `new Audio()` sin insertar y medios dentro de shadow DOM (abierto o cerrado) en cuanto se llama a `play()`. Si suenan varios elige el que tiene sonido, después el último que sonó y después el más largo; ignora los vídeos de fondo silenciados y en bucle. Aún no cubre iframes (#15).
+- Detecta `<audio>`/`<video>` de la página, `new Audio()` sin insertar y medios dentro de shadow DOM (abierto o cerrado) en cuanto se llama a `play()`. Si suenan varios elige el que tiene sonido, después el último que sonó y después el más largo; ignora los vídeos de fondo silenciados y en bucle. También los de iframes, con un agente sin interfaz en cada subframe.
 - El borde de la tarjeta es la barra de progreso: haz clic o arrastra sobre el borde para saltar.
 - Tamaño: arrastra cualquiera de las cuatro esquinas (aparecen al pasar el ratón) para cambiar ancho y alto; el contenido se adapta en tiempo real. Si lo aplastas verticalmente (menos de ~84 px de alto) pasa a un modo fino de una sola fila, hasta ~44 px de alto. En la ventana flotante, redimensiona la propia ventana desde cualquier borde o esquina.
 - Aparece solo al pulsar el icono de la extensión (clic izquierdo; otro clic lo oculta, sin cambiar de tipo). Clic derecho en el icono para elegir el tipo de ventana:
@@ -34,13 +34,15 @@ Clic derecho en el icono → **Diseño (desarrollo)** para cambiar el aspecto en
 manifest.json
 design/tokens.json              fuente única de tokens (primitivos y semánticos por diseño)
 src/
-  background/service-worker.js   clic en el icono, menú contextual y descarga de carátulas
+  background/service-worker.js   clic en el icono, menú contextual, descarga de carátulas y relevo de mensajes de iframes
   background/net-guard.js        reglas de red para carátulas (URL permitidas y detección de imagen por bytes)
   page/media-session-bridge.js   mundo de la página: captura los manejadores de Media Session y vigila los medios sin insertar o en shadow DOM
   content/
     config.js                    constantes y claves de almacenamiento
     util.js                      clamp y formato de tiempo
     icons.js                     iconos SVG
+    media.js                     medios remotos (del puente y de iframes) y política de selección
+    frame-agent.js               agente sin interfaz en cada iframe: informa al marco superior y ejecuta sus órdenes
     tokens.js                    GENERADO desde design/tokens.json (variables CSS y colores del lienzo)
     styles.js                    CSS del reproductor; sólo usa var(--token)
     themes.js                    paletas del lienzo de Mini, una por diseño, leídas de los tokens

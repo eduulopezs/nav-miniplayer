@@ -26,22 +26,28 @@
     seek(t) { this.currentTime = t; this.send(`m:${this.id}:seek:${t}`); } // el puente lo aplica; hasta su siguiente estado se ve ya
   }
 
-  const remotes = new Map(); // id -> RemoteMedia
-  // `send` manda una orden al puente; `onPlay(m)` avisa de un medio remoto que acaba de empezar a sonar.
-  function ingest(detail, send, onPlay) {
+  // Cada origen (el puente de la página, o un iframe) publica su lista completa; las claves llevan el origen delante.
+  const remotes = new Map(); // `${origen}:${id}` -> RemoteMedia
+  const STALE_MS = 3000; // un iframe que dice estar sonando y deja de dar señales (se cerró) se descarta
+  // `send(orden)` manda una orden al origen; `onPlay(m)` avisa de un medio remoto que acaba de empezar a sonar.
+  function ingest(source, detail, send, onPlay, now = Date.now()) {
     let list;
     try { list = JSON.parse(String(detail)); } catch (_) { return; }
     if (!Array.isArray(list)) return;
     const seen = new Set();
     for (const s of list.slice(0, 32)) {
       if (!s || !Number.isInteger(s.i) || s.i < 1) continue;
-      let m = remotes.get(s.i);
-      if (!m) remotes.set(s.i, (m = new RemoteMedia(s.i, send)));
+      const key = `${source}:${s.i}`;
+      let m = remotes.get(key);
+      if (!m) remotes.set(key, (m = new RemoteMedia(s.i, send)));
       const was = m.paused;
-      m.update(s); m.alive = true; seen.add(s.i);
+      m.update(s); m.alive = true; m.at = now; seen.add(key);
       if (was && !m.paused && onPlay) onPlay(m);
     }
-    for (const [id, m] of remotes) if (!seen.has(id)) { m.alive = false; remotes.delete(id); }
+    for (const [key, m] of remotes) if (key.startsWith(source + ':') && !seen.has(key)) { m.alive = false; remotes.delete(key); }
+  }
+  function expire(now = Date.now()) {
+    for (const [key, m] of remotes) if (!m.paused && !m.ended && now - m.at > STALE_MS && !key.startsWith('p:')) { m.alive = false; remotes.delete(key); }
   }
 
   // Un medio cuenta si ya tiene datos, dura lo bastante (o es un directo) y no es un vídeo de fondo (silenciado y en bucle).
@@ -61,5 +67,5 @@
     return list.includes(last) ? last : longest(list);
   }
 
-  NMP.media = { ingest, remotes: () => [...remotes.values()], usable, pick };
+  NMP.media = { ingest, expire, remotes: () => [...remotes.values()], usable, pick };
 })();

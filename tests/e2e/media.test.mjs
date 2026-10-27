@@ -61,3 +61,33 @@ test('un medio sin insertar que no suena no secuestra el reproductor', async () 
   assert.equal(await p.media(() => window.y.paused), true);
   await p.page.close();
 });
+
+// Iframes: el agente de cada subframe informa al marco superior y ejecuta sus órdenes (mismo origen y origen cruzado).
+for (const [nombre, host] of [['mismo origen', null], ['origen cruzado', 'localhost']]) {
+  test(`medio dentro de un iframe (${nombre})`, async () => {
+    const p = await openPage(env, server, { bare: true });
+    const src = (host ? server.base.replace('127.0.0.1', host) : server.base) + '/frame';
+    await p.media((u) => new Promise((ok) => {
+      const f = document.createElement('iframe');
+      f.src = u; f.onload = ok; document.body.append(f);
+    }), src);
+    const frame = p.page.frames().find((f) => f.url() === src);
+    assert.ok(frame, 'el iframe cargó');
+    const fEval = (fn) => frame.evaluate(fn);
+    await p.waitFor(() => fEval(() => document.getElementById('a').readyState > 0));
+    await fEval(() => document.getElementById('a').play());
+    await sleep(900); // el agente informa y el marco superior reescanea
+    await p.toggle();
+    await p.waitFor(async () => (await p.read()).shown);
+    assert.equal((await p.read()).playLabel, 'Pausar');
+    await p.click('play');
+    await p.waitFor(() => fEval(() => document.getElementById('a').paused));
+    await p.waitFor(async () => (await p.read()).playLabel === 'Reproducir');
+    await p.click('play');
+    await p.waitFor(async () => !(await fEval(() => document.getElementById('a').paused)));
+    const t0 = await fEval(() => document.getElementById('a').currentTime);
+    await p.click('fwd');
+    await p.waitFor(async () => (await fEval(() => document.getElementById('a').currentTime)) >= t0 + 8);
+    await p.page.close();
+  });
+}
