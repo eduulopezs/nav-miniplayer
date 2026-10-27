@@ -8,6 +8,7 @@
     "contrast": "node scripts/contrast.mjs",
     "check": "node scripts/build-tokens.mjs --check && node scripts/check.mjs && node scripts/contrast.mjs --strict",
     "smoke": "node scripts/smoke.mjs",
-    "test": "npm run check && npm run smoke"
+    "security": "node scripts/security.mjs",
+    "test": "npm run check && npm run security && npm run smoke"
   }
 }
