@@ -50,6 +50,25 @@ test('medio dentro de un shadow DOM cerrado', async () => {
   await p.page.close();
 });
 
+test('autoplay sin llamar a play(): shadow DOM abierto, cerrado y sin insertar', async () => {
+  for (const make of [
+    () => { const h = document.createElement('div'); document.body.append(h); h.attachShadow({ mode: 'open' }).innerHTML = '<audio id=q autoplay loop src="/a.wav"></audio>'; window.x = h.shadowRoot.getElementById('q'); },
+    () => { const h = document.createElement('div'); document.body.append(h); const r = h.attachShadow({ mode: 'closed' }); r.innerHTML = '<audio id=q autoplay loop src="/a.wav"></audio>'; window.x = r.getElementById('q'); },
+    () => { window.x = new Audio(); window.x.loop = true; window.x.autoplay = true; window.x.src = '/a.wav'; },
+  ]) {
+    const p = await openPage(env, server, { bare: true });
+    await p.media(make);
+    await p.waitFor(() => p.media(() => !window.x.paused && window.x.readyState > 0));
+    await sleep(700);
+    await p.toggle();
+    await p.waitFor(async () => (await p.read()).shown);
+    assert.equal((await p.read()).playLabel, 'Pausar');
+    await p.click('act:play');
+    await p.waitFor(() => xPaused(p));
+    await p.page.close();
+  }
+});
+
 test('un medio sin insertar que no suena no secuestra el reproductor', async () => {
   const p = await openPage(env, server);
   await p.media(() => { window.y = new Audio('/a.wav'); window.y.loop = true; window.y.play(); window.y.pause(); });
@@ -91,3 +110,25 @@ for (const [nombre, host] of [['mismo origen', null], ['origen cruzado', 'localh
     await p.page.close();
   });
 }
+
+// Dentro de un iframe, un medio que no está en el DOM (new Audio() con autoplay) también se ve y se controla.
+test('medio sin insertar dentro de un iframe', async () => {
+  const p = await openPage(env, server, { bare: true });
+  const src = server.base + '/frame-hidden';
+  await p.media((u) => new Promise((ok) => { const f = document.createElement('iframe'); f.src = u; f.onload = ok; document.body.append(f); }), src);
+  const frame = p.page.frames().find((f) => f.url() === src);
+  assert.ok(frame, 'el iframe cargó');
+  await p.waitFor(() => frame.evaluate(() => !window.x.paused && window.x.readyState > 0));
+  await sleep(1000);
+  await p.toggle();
+  await p.waitFor(async () => (await p.read()).shown);
+  assert.equal((await p.read()).playLabel, 'Pausar');
+  await p.click('act:play');
+  await p.waitFor(() => frame.evaluate(() => window.x.paused));
+  await p.click('act:play');
+  await p.waitFor(async () => !(await frame.evaluate(() => window.x.paused)));
+  const t0 = await frame.evaluate(() => window.x.currentTime);
+  await p.click('act:fwd');
+  await p.waitFor(async () => (await frame.evaluate(() => window.x.currentTime)) >= t0 + 8);
+  await p.page.close();
+});

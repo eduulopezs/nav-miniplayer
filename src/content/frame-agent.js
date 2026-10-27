@@ -7,6 +7,10 @@
   const MAX = 8;
   const ids = new WeakMap(), byId = new Map(); // elemento <-> id local
   let nextId = 1, timer = 0, queued = false, last = '';
+  // Medios que el puente del mundo de la página ve y este agente no (sin insertar, en shadow DOM): llegan por evento y sus ids se desplazan
+  // para no chocar con los del DOM normal.
+  const BRIDGE = 1e6;
+  let bridged = [];
 
   const idOf = (el) => {
     let id = ids.get(el);
@@ -23,7 +27,7 @@
 
   function publish() {
     queued = false;
-    const list = [...document.querySelectorAll('video,audio')].filter((el) => el.readyState > 0).slice(0, MAX).map(snap);
+    const list = [...document.querySelectorAll('video,audio')].filter((el) => el.readyState > 0).slice(0, MAX).map(snap).concat(bridged);
     const playing = list.some((s) => !s.p && !s.e);
     if (!playing) { clearInterval(timer); timer = 0; } else if (!timer) timer = setInterval(publish, 500);
     const json = JSON.stringify(list);
@@ -34,12 +38,21 @@
   const schedule = () => { if (!queued) { queued = true; queueMicrotask(publish); } };
   ['play', 'pause', 'ended', 'loadedmetadata', 'durationchange', 'emptied', 'seeked', 'volumechange'].forEach((ev) => document.addEventListener(ev, schedule, true));
   addEventListener('pagehide', () => { try { chrome.runtime.sendMessage({ type: 'mp-frame', list: '[]' }); } catch (_) { /* ya no hay a quién avisar */ } });
+  document.addEventListener('__mp_media', (e) => {
+    try {
+      const l = JSON.parse(String(e.detail));
+      bridged = Array.isArray(l) ? l.slice(0, MAX).filter((s) => s && Number.isInteger(s.i) && s.i > 0 && s.i < BRIDGE).map((s) => ({ ...s, i: s.i + BRIDGE })) : [];
+    } catch (_) { bridged = []; }
+    schedule();
+  });
+  document.dispatchEvent(new CustomEvent('__mp_query')); // el puente reenvía el estado que ya tuviera
   schedule(); // medios que ya estaban cargados antes de que llegara el agente
 
   // Órdenes `m:<id>:play|pause|seek:<segundos>` del marco superior.
   chrome.runtime.onMessage.addListener((m, sender) => {
     if (sender.id !== chrome.runtime.id || !m || m.type !== 'mp-cmd' || typeof m.cmd !== 'string') return;
     const c = /^m:(\d+):(play|pause|seek)(?::(\d{1,9}(?:\.\d+)?))?$/.exec(m.cmd);
+    if (c && +c[1] > BRIDGE) return void document.dispatchEvent(new CustomEvent('__mp_cmd', { detail: m.cmd.replace(/^m:\d+/, 'm:' + (+c[1] - BRIDGE)) }));
     const el = c && byId.get(+c[1])?.deref();
     if (!el) return;
     try {

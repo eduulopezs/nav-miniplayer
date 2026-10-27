@@ -80,7 +80,30 @@
       return Reflect.apply(target, self, args);
     },
   });
-  document.addEventListener('__mp_query', schedule);
+  document.addEventListener('__mp_query', () => { lastJson = ''; schedule(); }); // quien se une tarde (content script, agente de un iframe) recibe el estado actual
+
+  // Medios que arrancan solos (`autoplay`) sin llamar a play(): se registran al empezar a sonar. `play` y `playing` no burbujean ni cruzan
+  // un shadow root, así que se escuchan en cada raíz que se crea y en cada elemento creado por script (sin insertar).
+  const START = ['play', 'playing'];
+  const onStart = (e) => { try { track(e.target); schedule(); } catch (_) { /* el sitio decide */ } };
+  const watch = (el) => { if (el instanceof HTMLMediaElement) START.forEach((ev) => el.addEventListener(ev, onStart, { once: true })); return el; };
+  const nativeAttach = Element.prototype.attachShadow;
+  Element.prototype.attachShadow = new Proxy(nativeAttach, {
+    apply(target, self, args) {
+      const root = Reflect.apply(target, self, args);
+      try { START.forEach((ev) => root.addEventListener(ev, onStart, true)); } catch (_) { /* el sitio decide */ }
+      return root;
+    },
+  });
+  const nativeCreate = Document.prototype.createElement;
+  Document.prototype.createElement = new Proxy(nativeCreate, {
+    apply(target, self, args) {
+      const el = Reflect.apply(target, self, args);
+      try { if (el instanceof HTMLMediaElement) watch(el); } catch (_) { /* el sitio decide */ }
+      return el;
+    },
+  });
+  window.Audio = new Proxy(window.Audio, { construct(target, args, nt) { const el = Reflect.construct(target, args, nt); try { watch(el); } catch (_) { /* el sitio decide */ } return el; } });
   // Órdenes `m:<id>:play|pause|seek:<segundos>`; el id solo sirve para elementos que el propio puente registró.
   function mediaCmd(cmd) {
     const m = /^m:(\d+):(play|pause|seek)(?::(\d{1,9}(?:\.\d+)?))?$/.exec(cmd);

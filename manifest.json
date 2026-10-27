@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Nav Miniplayer",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "description": "Minirreproductor flotante con estilo glass para controlar el audio/vídeo de la pestaña: play/pausa, ±10 s, anterior/siguiente y progreso en el borde.",
   "minimum_chrome_version": "116",
   "permissions": ["storage", "contextMenus", "scripting", "tabCapture", "offscreen"],
@@ -19,6 +19,7 @@
     {
       "matches": ["<all_urls>"],
       "js": ["src/page/media-session-bridge.js"],
+      "all_frames": true,
       "run_at": "document_start",
       "world": "MAIN"
     },

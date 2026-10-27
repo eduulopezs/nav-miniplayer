@@ -44,6 +44,10 @@ export async function startServer() {
       r.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
       return r.end('<!doctype html><meta charset=utf-8><body><audio id=a src="/a.wav" loop></audio>');
     }
+    if (url.pathname === '/frame-hidden') { // iframe cuyo medio no está en el DOM: sin insertar y con autoplay, sin llamar a play()
+      r.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
+      return r.end('<!doctype html><meta charset=utf-8><body><script>window.x=new Audio();window.x.loop=true;window.x.autoplay=true;window.x.src="/a.wav";</script>');
+    }
     if (url.pathname === '/leak.png') { r.writeHead(200, { 'content-type': 'image/png' }); return r.end(Buffer.from('89504e470d0a1a0a000000000000000000000000', 'hex')); }
     const artwork = url.searchParams.get('art');
     const meta = `navigator.mediaSession.metadata=new MediaMetadata({title:'Canción de prueba',artist:'Artista',artwork:${artwork ? `[{src:${JSON.stringify(artwork)},sizes:'512x512'}]` : '[]'}});`;
