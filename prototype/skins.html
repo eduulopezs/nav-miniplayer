@@ -618,7 +618,7 @@ figcaption b { color: var(--ink); display: block; font-size: 15px; }
 .lm-wrap { --os: min(calc(100cqh - 2 * var(--pad)), 38cqw); --bs: min(30px, calc((100cqw - 2 * var(--pad) - var(--os) - 12px - 4 * 5px) / 5.3));
   grid-template-columns: var(--os) minmax(0, 1fr); grid-template-rows: auto auto 16px auto; grid-template-areas: "orb meta" "orb time" "orb bar" "orb ctl"; }
 .lm-orb { grid-row: 1 / 5; }
-@container (width < 320px) { .lm-b.bk, .lm-b.fw { display: none; } }
+@container (width < 320px) { .lm-b.bk, .lm-b.fw { display: none; } .lm-wrap { --bs: min(30px, calc((100cqw - 2 * var(--pad) - var(--os) - 22px) / 3.4)); } }
 @container (width < 270px) { .lm-time i { display: none; } }
 
 /* PASTILLA */
@@ -647,6 +647,7 @@ figcaption b { color: var(--ink); display: block; font-size: 15px; }
   .lm-title { font-size: clamp(15px, 8.2cqh, 24px); } .lm-artist { font-size: 12.5px; } .lm-time { font-size: 12px; margin-top: 2px; }
 }
 @container (height >= 140px) and (width >= 600px) and (aspect-ratio > 21 / 10) { .lm-ext { display: flex; } }
+@container (height >= 140px) and (width >= 400px) and (width < 480px) and (aspect-ratio > 21 / 10) { .lm-b.bk, .lm-b.fw { display: none; } }
 
 /* PORTADA */
 @container (height >= 280px) and (aspect-ratio < 23 / 20) {
