@@ -5,7 +5,8 @@
   const NMP = globalThis.__NMP;
   const { SKIP, MIN_DURATION, MARGIN, EDGE, POS_KEY, SIZE_KEY, THEME_KEY, MODE_KEY, SLIM, SLIM_BELOW, DESIGN, MIN, MAX, CW, CH, DPR0, SITE_BUTTONS } = NMP.cfg;
   const { clamp, fmt } = NMP.util;
-  const { icons, themes: TH } = NMP;
+  const { icons, themes: TH, tokens } = NMP;
+  const G = tokens.theme.glass; // degradado de la barra de progreso (Glass)
 
   // ---------- DOM ----------
   const host = document.createElement('div');
@@ -22,7 +23,7 @@ ${NMP.css}
   <svg class="ring" role="progressbar" aria-label="Progreso" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
     <defs>
       <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stop-color="#8ec5ff"/><stop offset=".5" stop-color="#c9a7ff"/><stop offset="1" stop-color="#ffb0e0"/>
+        <stop offset="0" stop-color="${G['bar-1']}"/><stop offset=".5" stop-color="${G['bar-2']}"/><stop offset="1" stop-color="${G['bar-3']}"/>
       </linearGradient>
     </defs>
     <rect class="track" pathLength="100"/>

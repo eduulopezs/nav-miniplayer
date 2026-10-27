@@ -4,7 +4,9 @@
   "description": "Extensión MV3 (Chrome/Edge): minirreproductor flotante para el audio/vídeo de la pestaña.",
   "license": "MIT",
   "scripts": {
-    "check": "node scripts/check.mjs",
+    "tokens": "node scripts/build-tokens.mjs",
+    "contrast": "node scripts/contrast.mjs",
+    "check": "node scripts/build-tokens.mjs --check && node scripts/check.mjs",
     "smoke": "node scripts/smoke.mjs",
     "test": "npm run check && npm run smoke"
   }

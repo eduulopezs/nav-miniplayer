@@ -31,6 +31,7 @@ Clic derecho en el icono → **Diseño (desarrollo)** para cambiar el aspecto en
 ## Estructura
 ```
 manifest.json
+design/tokens.json              fuente única de tokens (primitivos y semánticos por diseño)
 src/
   background/service-worker.js   clic en el icono, menú contextual y descarga de carátulas
   page/media-session-bridge.js   mundo de la página: captura los manejadores de Media Session
@@ -38,13 +39,20 @@ src/
     config.js                    constantes y claves de almacenamiento
     util.js                      clamp y formato de tiempo
     icons.js                     iconos SVG
-    styles.js                    CSS del reproductor (tokens + diseños)
-    themes.js                    paletas del lienzo de Mini, una por diseño
+    tokens.js                    GENERADO desde design/tokens.json (variables CSS y colores del lienzo)
+    styles.js                    CSS del reproductor; sólo usa var(--token)
+    themes.js                    paletas del lienzo de Mini, una por diseño, leídas de los tokens
     renderer.js                  dibuja Mini en un canvas
     player.js                    DOM, estado, ventanas flotantes, arrastre, tamaño y teclado
-scripts/                         check.mjs (manifest y sintaxis) y smoke.mjs (carga con DOM falso)
+scripts/                         build-tokens.mjs (genera tokens.js), contrast.mjs (auditoría WCAG), check.mjs (manifest y sintaxis) y smoke.mjs (carga con DOM falso)
 ```
 Los módulos de `content/` se cargan en el orden del manifest y comparten el espacio `__NMP`.
+
+## Tokens de diseño
+Los colores viven en `design/tokens.json` en tres capas: **primitivos** (`lavender-300`), **semánticos por diseño** (`ac`, `fg`, `track`, `play-bg`…) y, en el CSS, los componentes que los consumen con `var(--token)`. Los valores aceptan `{primitivo}` o `{primitivo}@alfa`. Las claves `mini-*` sólo se usan en el lienzo de Mini.
+
+- `npm run tokens` regenera `src/content/tokens.js` (no lo edites a mano; `npm test` falla si está desactualizado).
+- `npm run contrast` audita el contraste WCAG de texto/fondo de cada diseño (`-- --strict` para que falle).
 
 ## Desarrollo
 `npm test` comprueba que el manifest referencia archivos existentes, que todos los scripts compilan y que los módulos cargan y dibujan cada diseño. Sube el `version` del manifest en cada cambio.
