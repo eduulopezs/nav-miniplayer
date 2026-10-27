@@ -6,19 +6,19 @@
   "minimum_chrome_version": "111",
   "permissions": ["storage", "contextMenus", "scripting"],
   "host_permissions": ["<all_urls>"],
-  "background": { "service_worker": "background.js" },
+  "background": { "service_worker": "src/background/service-worker.js" },
   "action": { "default_title": "Mostrar/ocultar minirreproductor" },
   "icons": { "16": "icons/16.png", "48": "icons/48.png", "128": "icons/128.png" },
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["main.js"],
+      "js": ["src/page/media-session-bridge.js"],
       "run_at": "document_start",
       "world": "MAIN"
     },
     {
       "matches": ["<all_urls>"],
-      "js": ["content.js"],
+      "js": ["src/content/player.js"],
       "run_at": "document_idle"
     }
   ]
