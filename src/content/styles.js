@@ -45,7 +45,7 @@
   .art svg { width: 22px; height: 22px; opacity: .85; }
   .art.has-img svg { display: none; }
   .meta { flex: 1; min-width: 0; }
-  .title { font-size: 13.5px; font-weight: 600; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 1px 6px var(--text-shadow); }
+  .title { color: var(--title); font-size: 13.5px; font-weight: 600; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 1px 6px var(--text-shadow); }
   .scroll > span { display: inline-block; animation: marquee var(--t, 6s) ease-in-out infinite alternate; }
   @keyframes marquee { 0%, 15% { transform: translateX(0); } 85%, 100% { transform: translateX(var(--d)); } }
   .scroll { text-overflow: clip !important; }
