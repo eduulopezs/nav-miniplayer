@@ -17,9 +17,9 @@
 <style>
 ${NMP.css}
 </style>
-<div class="card" role="region" aria-label="Minirreproductor">
+<div class="card" role="region" aria-label="Minirreproductor" tabindex="0" aria-keyshortcuts="Space ArrowLeft ArrowRight Escape">
   <div class="glow"></div>
-  <svg class="ring" aria-hidden="true">
+  <svg class="ring" role="progressbar" aria-label="Progreso" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
     <defs>
       <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
         <stop offset="0" stop-color="#8ec5ff"/><stop offset=".5" stop-color="#c9a7ff"/><stop offset="1" stop-color="#ffb0e0"/>
@@ -31,7 +31,7 @@ ${NMP.css}
   <div class="inner">
   <div class="top">
     <div class="art">${icons.note}</div>
-    <div class="meta"><div class="title"></div><div class="artist"></div></div>
+    <div class="meta" aria-live="polite"><div class="title"></div><div class="artist"></div></div>
     <div class="side">
     <button class="mode" title="Pasar a Mini" aria-label="Pasar a Mini"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><rect x="12" y="11" width="6" height="5" rx="1.5" fill="currentColor"/></svg></button>
     <button class="close" title="Ocultar" aria-label="Ocultar">${icons.close}</button>
@@ -42,7 +42,7 @@ ${NMP.css}
     <div class="buttons">
       <button class="prev" title="Anterior" aria-label="Anterior">${icons.prev}</button>
       <button class="back" title="Retroceder ${SKIP} s" aria-label="Retroceder ${SKIP} segundos">${icons.back}</button>
-      <button class="play" title="Reproducir / pausa" aria-label="Reproducir o pausar">${icons.play}</button>
+      <button class="play" title="Reproducir" aria-label="Reproducir">${icons.play}</button>
       <button class="fwd" title="Avanzar ${SKIP} s" aria-label="Avanzar ${SKIP} segundos">${icons.fwd}</button>
       <button class="next" title="Siguiente" aria-label="Siguiente">${icons.next}</button>
     </div>
@@ -54,7 +54,7 @@ ${NMP.css}
 
   const $ = (s) => root.querySelector(s);
   const inner = $('.inner'), grips = root.querySelectorAll('.grip');
-  const card = $('.card'), bar = $('.bar'), art = $('.art');
+  const card = $('.card'), ring = $('.ring'), bar = $('.bar'), art = $('.art');
   const titleEl = $('.title'), artistEl = $('.artist'), curEl = $('.cur'), durEl = $('.dur');
   const btn = { prev: $('.prev'), back: $('.back'), play: $('.play'), fwd: $('.fwd'), next: $('.next'), close: $('.close'), mode: $('.mode') };
 
@@ -119,6 +119,20 @@ ${NMP.css}
     if (actions.has('nexttrack')) send('nexttrack'); else findSiteButton('next')?.click();
   });
   btn.close.addEventListener('click', () => { dismissed = true; render(); });
+
+  // Teclado con el reproductor enfocado (Tab): Espacio/K play-pausa, ←/→ ±SKIP s, Esc oculta.
+  // Sobre un botón, Espacio/Intro los gestiona el propio botón.
+  card.addEventListener('keydown', (e) => {
+    if (e.altKey || e.ctrlKey || e.metaKey || !media) return;
+    const onButton = e.composedPath()[0].tagName === 'BUTTON'; // sin instanceof: en la ventana flotante es otro documento
+    if ((e.key === ' ' || e.key === 'Enter') && onButton) return;
+    if (e.key === ' ' || e.key === 'k') btn.play.click();
+    else if (e.key === 'ArrowLeft' && !btn.back.disabled) btn.back.click();
+    else if (e.key === 'ArrowRight' && !btn.fwd.disabled) btn.fwd.click();
+    else if (e.key === 'Escape') btn.close.click();
+    else return;
+    e.preventDefault(); e.stopPropagation();
+  });
 
   // Respaldo: ventana flotante con marco (Document PiP), la abre main.js y mueve aquí el host.
   document.addEventListener('__mp_pip', (e) => {
@@ -269,11 +283,17 @@ ${NMP.css}
     const dur = media.duration;
     const p = live ? 100 : dur > 0 ? Math.min(100, (media.currentTime / dur) * 100) : 0;
     bar.style.strokeDasharray = p > 0 ? `${p} 100` : '0 100';
+    ring.setAttribute('aria-valuenow', Math.round(p));
     curEl.textContent = fmt(media.currentTime);
     durEl.textContent = live ? '' : fmt(dur);
 
     const playing = !media.paused && !media.ended;
-    if (playing !== lastPlaying) { lastPlaying = playing; btn.play.innerHTML = playing ? icons.pause : icons.play; }
+    if (playing !== lastPlaying) {
+      lastPlaying = playing;
+      btn.play.innerHTML = playing ? icons.pause : icons.play;
+      const label = playing ? 'Pausar' : 'Reproducir';
+      btn.play.title = label; btn.play.setAttribute('aria-label', label);
+    }
     btn.back.disabled = btn.fwd.disabled = live;
     btn.next.disabled = !(actions.has('nexttrack') || findSiteButton('next'));
   }
