@@ -24,17 +24,12 @@ const ratio = (fg, bg) => { const [a, b] = [lum(over(fg, bg)), lum(parse(bg))].s
 const hex = ([r, g, b]) => '#' + [r, g, b].map((v) => Math.round(v).toString(16).padStart(2, '0')).join('');
 
 // [tema, texto, token del texto, token del fondo, mínimo]; 4.5 texto normal, 3 texto grande / componentes de interfaz.
-const retroTube = (k) => k['tube-b'];
 const pairs = [
-  ['glass', 'título', 'title', 'bg-a', 4.5], ['glass', 'título', 'title', 'bg-b', 4.5],
-  ['glass', 'artista', 'text-2', 'bg-a', 4.5], ['glass', 'tiempo', 'text-3', 'bg-a', 4.5], ['glass', 'icono botón', 'btn', 'bg-a', 3],
-  ['glass', 'icono play', 'play-fg', 'play-bg', 3],
-  ['brutal', 'título', 'title', 'bg-a', 4.5], ['brutal', 'artista', 'mini-fg-2', 'bg-a', 4.5], ['brutal', 'tiempo', 'ac', 'bg-a', 4.5],
-  ['brutal', 'icono', 'fg', 'bg-a', 3], ['brutal', 'icono play', 'ink', 'play-bg', 3],
-  ['pixel', 'título', 'title', 'bg-a', 4.5], ['pixel', 'artista', 'fg-2', 'bg-a', 4.5], ['pixel', 'tiempo', 'ac', 'bg-a', 4.5],
-  ['pixel', 'icono', 'fg', 'bg-a', 3], ['pixel', 'icono play', 'ink', 'play-bg', 3],
-  ['retro', 'título', 'title', retroTube, 4.5], ['retro', 'artista', 'fg-2', retroTube, 4.5], ['retro', 'tiempo', 'ac', retroTube, 4.5],
-  ['retro', 'icono', 'fg', retroTube, 3], ['retro', 'icono play', 'ink', (k) => hex(over(k['play-bg'], k['tube-b'])), 3],
+  ['glass', 'título', 'text', 'bg-a', 4.5], ['glass', 'título', 'text', 'bg-b', 4.5],
+  ['glass', 'artista', 'mini-fg-2', 'bg-a', 4.5], ['glass', 'tiempo', 'mini-time', 'bg-a', 4.5],
+  ['noir', 'título', 'mini-fg', 'mini-bg-a', 4.5], ['noir', 'artista', 'mini-fg-2', 'mini-bg-a', 4.5], ['noir', 'tiempo', 'mini-time', 'mini-bg-a', 4.5],
+  ['crt', 'título', 'mini-fg', 'mini-bg-a', 4.5], ['crt', 'artista', 'mini-fg-2', 'mini-bg-a', 4.5], ['crt', 'tiempo', 'mini-time', 'mini-bg-a', 4.5],
+  ['metal', 'título', 'mini-fg', 'mini-bg-a', 4.5], ['metal', 'artista', 'mini-fg-2', 'mini-bg-a', 4.5], ['metal', 'tiempo', 'mini-time', 'mini-bg-a', 4.5],
 ];
 
 let fails = 0;
