@@ -1,3 +1,2 @@
-Fuentes incluidas (SIL Open Font License 1.1): Silkscreen, JetBrains Mono, Archivo Narrow, Space Mono, Figtree, Syne, VT323, Montserrat.
+Fuentes incluidas (SIL Open Font License 1.1): JetBrains Mono, Archivo Narrow, Space Mono, Figtree, Syne, VT323, Montserrat.
 Cada familia conserva su copyright original; ver https://openfontlicense.org
-Pixelify Sans y Jacquard 12 tambien incluidas (SIL OFL 1.1).

@@ -10,8 +10,6 @@
    y reorganiza la tarjeta en los cinco layouts con container queries. El estado es compartido.
    Fuentes empaquetadas en ./fonts (licencia OFL).
    ============================================================ */
-@font-face { font-family: "Silkscreen"; src: url(fonts/silkscreen-latin-400-normal.woff2) format("woff2"); font-weight: 400; font-display: swap; }
-@font-face { font-family: "Silkscreen"; src: url(fonts/silkscreen-latin-700-normal.woff2) format("woff2"); font-weight: 700; font-display: swap; }
 @font-face { font-family: "JetBrains Mono"; src: url(fonts/jetbrains-mono-latin-400-normal.woff2) format("woff2"); font-weight: 400; font-display: swap; }
 @font-face { font-family: "JetBrains Mono"; src: url(fonts/jetbrains-mono-latin-700-normal.woff2) format("woff2"); font-weight: 700; font-display: swap; }
 @font-face { font-family: "Archivo Narrow"; src: url(fonts/archivo-narrow-latin-500-normal.woff2) format("woff2"); font-weight: 500; font-display: swap; }
@@ -24,9 +22,6 @@
 @font-face { font-family: "Syne"; src: url(fonts/syne-latin-800-normal.woff2) format("woff2"); font-weight: 800; font-display: swap; }
 @font-face { font-family: "Montserrat"; src: url(fonts/montserrat-latin-300-normal.woff2) format("woff2"); font-weight: 300; font-display: swap; }
 @font-face { font-family: "Montserrat"; src: url(fonts/montserrat-latin-400-normal.woff2) format("woff2"); font-weight: 400; font-display: swap; }
-@font-face { font-family: "Pixelify Sans"; src: url(fonts/pixelify-sans-latin-400-normal.woff2) format("woff2"); font-weight: 400; font-display: swap; }
-@font-face { font-family: "Pixelify Sans"; src: url(fonts/pixelify-sans-latin-700-normal.woff2) format("woff2"); font-weight: 700; font-display: swap; }
-@font-face { font-family: "Jacquard 12"; src: url(fonts/jacquard-12-latin-400-normal.woff2) format("woff2"); font-weight: 400; font-display: swap; }
 @font-face { font-family: "VT323"; src: url(fonts/vt323-latin-400-normal.woff2) format("woff2"); font-weight: 400; font-display: swap; }
 
 :root { color-scheme: dark; --page: #0e0f15; --panel: #161823; --ink: #eceef6; --ink-2: #b6b9cb; --line: rgba(255,255,255,.14); --focus: #8ec5ff; font-family: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif; }
@@ -75,127 +70,6 @@ figcaption b { color: var(--ink); display: block; font-size: 15px; }
 .ic-play, .ic-mute { display: none; }
 .paused .ic-play, .muted .ic-mute { display: contents; }
 .paused .ic-pause, .muted .ic-vol { display: none; }
-</style>
-<style id="sk-pixel-css">
-/* ============================================================
-   PIXEL (referencia: "Pioneers", interfaz de estrategia retro). Paleta corta de verde bosque, crema de pergamino, azules y negro verdoso,
-   bordes de 1 px, esquinas rectas, ranuras de inventario como botones, sombreado con tramado ordenado y titulares en pixel gótico.
-   El visualizador es un paisaje: cielo tramado, montañas con paralaje y un pinar cuyos árboles son las bandas del espectro.
-   ============================================================ */
-.sk-pixel { --k: #0f1a12; --cr: #eee8c6; --cr2: #bdb68f; --g1: #1d5a26; --g2: #3f9b2c; --g3: #8bd24a; --slot: #14301a;
-  font-family: "Pixelify Sans", "Silkscreen", monospace; color: var(--cr); -webkit-font-smoothing: none; border-radius: 0; background: var(--k);
-  box-shadow: inset 0 0 0 1px var(--cr2), inset 0 0 0 3px var(--k), inset 0 0 0 4px var(--g2); }
-.sk-pixel::before { content: ""; position: absolute; inset: 4px; z-index: 0; pointer-events: none; background: repeating-conic-gradient(rgba(139,210,74,.05) 0 25%, transparent 0 50%) 0 0 / 4px 4px; }
-.px-wrap { position: absolute; inset: 0; z-index: 1; display: grid; --pad: 12px; --gap: 8px; --tg: 6px; padding: var(--pad); gap: var(--gap); min-width: 0; min-height: 0; }
-.px-wrap > * { min-width: 0; min-height: 0; }
-.px-wrap svg { width: 46%; height: 46%; display: block; }
-.px-cover { grid-area: cov; position: relative; overflow: hidden; background: var(--k); }
-.px-cover::after { content: ""; position: absolute; inset: 0; z-index: 4; pointer-events: none; box-shadow: inset 0 0 0 1px var(--cr2), inset 0 0 0 2px var(--k); }
-.paused .px-cover { filter: grayscale(.85) brightness(.65); }
-.px-viz { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; image-rendering: pixelated; }
-.px-time { grid-area: cov; z-index: 2; align-self: start; justify-self: start; margin: 8px 0 0 10px; font: 700 15px/1 "Pixelify Sans", monospace; color: var(--cr); letter-spacing: .04em; white-space: nowrap;
-  text-shadow: 1px 0 var(--k), -1px 0 var(--k), 0 1px var(--k), 0 -1px var(--k), 1px 1px var(--k), -1px -1px var(--k), 1px -1px var(--k), -1px 1px var(--k); }
-.px-time i { font: 400 10px/1 "Pixelify Sans", monospace; font-style: normal; color: var(--g3); margin-left: 6px; }
-.live-badge .px-time i { display: none; }
-.px-chips { grid-area: cov; z-index: 3; align-self: start; justify-self: end; margin: 7px 7px 0 0; display: flex; gap: 4px; }
-.px-chips button { width: 24px; height: 24px; background: var(--k); color: var(--cr); display: grid; place-items: center; box-shadow: inset 0 0 0 1px var(--cr2); }
-.px-chips button:hover { background: var(--g3); color: var(--k); }
-.px-chips svg { width: 56%; height: 56%; }
-.px-meta { grid-area: cov; z-index: 2; align-self: end; padding: 26px 11px 9px; background: linear-gradient(transparent, rgba(15,26,18,.96) 58%); min-width: 0; }
-.px-title, .px-artist { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.px-title { font: 700 13px/1.25 "Pixelify Sans", monospace; color: var(--cr); letter-spacing: .02em; text-shadow: 1px 1px 0 var(--k); }
-.px-artist { font: 400 10px/1.5 "Pixelify Sans", monospace; color: var(--g3); text-transform: uppercase; letter-spacing: .1em; }
-.px-tiles { grid-area: tiles; display: grid; gap: var(--tg); align-self: center; }
-.px-b { display: grid; place-items: center; background: var(--slot); color: var(--cr); width: 100%; height: 100%; font: 700 13px/1 "Pixelify Sans", monospace; letter-spacing: .02em;
-  box-shadow: inset 0 0 0 1px var(--cr2), inset 0 0 0 2px var(--k), 2px 2px 0 var(--k); transition: none; }
-.px-b:hover { background: var(--g3); color: var(--k); }
-.px-b:active { transform: translate(1px, 1px); background: var(--cr); color: var(--k); }
-.px-b[disabled] { opacity: .3; pointer-events: none; }
-.px-b.pl { background: var(--cr); color: var(--k); box-shadow: inset 0 0 0 1px var(--k), inset 0 0 0 2px var(--cr2), inset 0 0 0 3px var(--cr), 2px 2px 0 var(--k), 0 0 0 1px var(--cr2); }
-.px-b.pl:hover { background: var(--g3); }
-.px-b.pl svg { width: 40%; height: 40%; }
-.pv { grid-area: pv; } .bk { grid-area: bk; } .pl { grid-area: pl; } .fw { grid-area: fw; } .nx { grid-area: nx; } .sp { grid-area: sp; } .vl { grid-area: vl; }
-.px-bar { grid-area: bar; position: relative; height: 16px; align-self: center; cursor: pointer; touch-action: none; }
-.px-bar::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 10px; margin-top: -5px; box-shadow: inset 0 0 0 1px var(--cr2), 0 0 0 0 transparent;
-  background: linear-gradient(180deg, var(--g3) 0 3px, var(--g2) 3px) 1px 1px / calc(var(--p, 0) * (100% - 2px)) calc(100% - 2px) no-repeat, linear-gradient(var(--k), var(--k)); }
-.px-bar::after { content: ""; position: absolute; top: 50%; left: calc(var(--p, 0) * (100% - 4px)); width: 4px; height: 16px; margin-top: -8px; background: var(--cr); box-shadow: 0 0 0 1px var(--k); }
-.live-badge .px-bar { pointer-events: none; } .live-badge .px-bar::before { background: linear-gradient(180deg, var(--g3) 0 3px, var(--g2) 3px) 1px 1px / calc(100% - 2px) calc(100% - 2px) no-repeat, var(--k); animation: pxblink 1.2s steps(2) infinite; } .live-badge .px-bar::after { display: none; }
-@keyframes pxblink { 50% { opacity: .4; } }
-.px-times { grid-area: times; display: none; }
-.px-sub { display: none; }
-
-/* COMPACTO (base): fichas 2x2 a la izquierda, carátula con tiempo y título a la derecha, barra abajo */
-.px-wrap { --tile-s: clamp(34px, calc((100cqh - 2 * var(--pad) - 16px - var(--gap) - var(--tg)) / 2), 76px);
-  grid-template-columns: auto minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) 16px; grid-template-areas: "tiles cov" "bar bar"; }
-.px-tiles { grid-template-columns: repeat(2, var(--tile-s)); grid-template-rows: repeat(2, var(--tile-s)); grid-template-areas: "bk pl" "pv nx"; }
-.px-b.fw, .px-b.vl { display: none; }
-@container (width >= 430px) { .px-tiles { grid-template-columns: repeat(3, var(--tile-s)); grid-template-areas: "bk pl fw" "pv vl nx"; } .px-b.fw, .px-b.vl { display: grid; } }
-@container (width < 290px) { .px-time { font-size: 12px; } .px-time i { display: none; } }
-
-/* PASTILLA: una sola fila, barra de 4 px en el borde */
-@container (height < 64px) {
-  .px-wrap { --pad: 7px; --gap: 8px; --cv: calc(100cqh - var(--pad) - 12px); padding: var(--pad) 10px 4px 8px; row-gap: 2px; grid-template-columns: var(--cv) minmax(0, 1fr) auto; grid-template-rows: minmax(0, 1fr) 6px; grid-template-areas: "cov meta tiles" "bar bar bar"; }
-  .px-cover { width: var(--cv); height: var(--cv); align-self: center; }
-  .px-time, .px-chips, .px-times, .px-artist { display: none; }
-  .px-meta { grid-area: meta; align-self: center; background: none; padding: 0; }
-  .px-title { font-size: 10px; }
-  .px-tiles { grid-template-columns: repeat(3, 30px); grid-template-rows: 30px; grid-template-areas: "pv pl nx"; gap: 4px; }
-  .px-b.bk, .px-b.fw, .px-b.sp, .px-b.vl { display: none; }
-  .px-bar { height: 8px; margin: 0 -2px; } .px-bar::before { height: 4px; margin-top: -2px; } .px-bar::after { height: 8px; margin-top: -4px; width: 3px; box-shadow: none; }
-}
-@container (height < 64px) and (width >= 340px) { .px-tiles { grid-template-columns: repeat(5, 30px); grid-template-areas: "pv bk pl fw nx"; } .px-b.bk, .px-b.fw { display: grid; } }
-@container (height < 64px) and (width < 264px) { .px-b.pv, .px-b.nx { display: none; } .px-tiles { grid-template-columns: 30px; grid-template-areas: "pl"; } }
-
-/* FILA: carátula cuadrada, título y barra al centro, tres fichas a la derecha */
-@container (64px <= height < 140px) {
-  .px-wrap { --cv: min(calc(100cqh - 2 * var(--pad)), 80px); --tile-s: min(46px, calc(100cqh - 2 * var(--pad))); grid-template-columns: var(--cv) minmax(0, 1fr) auto; grid-template-rows: 1fr auto; grid-template-areas: "cov meta tiles" "cov bar tiles"; column-gap: 12px; row-gap: 2px; }
-  .px-cover { width: var(--cv); height: var(--cv); }
-  .px-time, .px-chips { display: none; }
-  .px-meta { grid-area: meta; align-self: end; background: none; padding: 0; }
-  .px-artist { color: var(--y2); }
-  .px-bar { align-self: start; }
-  .px-tiles { grid-template-columns: repeat(3, var(--tile-s)); grid-template-rows: var(--tile-s); grid-template-areas: "pv pl nx"; }
-  .px-b.bk, .px-b.fw, .px-b.sp, .px-b.vl { display: none; }
-}
-@container (64px <= height < 140px) and (width >= 520px) { .px-wrap { --tile-s: min(46px, calc(100cqh - 2 * var(--pad))); } .px-tiles { grid-template-columns: repeat(5, var(--tile-s)); grid-template-areas: "pv bk pl fw nx"; } .px-b.bk, .px-b.fw { display: grid; } }
-@container (64px <= height < 140px) and (width < 330px) { .px-b.pv, .px-b.nx { display: none; } .px-tiles { grid-template-columns: var(--tile-s); grid-template-areas: "pl"; } }
-
-/* PANORÁMICO: carátula a la izquierda; título, barra y fichas a la derecha */
-@container (height >= 140px) and (width >= 400px) and (aspect-ratio > 21 / 10) {
-  .px-wrap { --cv: min(calc(100cqh - 2 * var(--pad)), 42cqw); --nt: 5; --tile-s: clamp(30px, min(calc(100cqh - 2 * var(--pad) - 16px - 54px - 2 * var(--gap)), calc((100cqw - 2 * var(--pad) - var(--cv) - 16px - (var(--nt) - 1) * var(--tg)) / var(--nt))), 60px);
-    grid-template-columns: var(--cv) minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) 16px var(--tile-s); grid-template-areas: "cov meta" "cov bar" "cov tiles"; column-gap: 16px; }
-  .px-cover { width: var(--cv); height: var(--cv); }
-  .px-time { margin: 10px 0 0 12px; font-size: 16px; }
-  .px-chips { grid-area: meta; z-index: 3; margin: 0; }
-  .px-meta { grid-area: meta; align-self: end; background: none; padding: 0 70px 0 0; }
-  .px-title { font-size: clamp(13px, 7cqh, 20px); } .px-artist { font-size: clamp(10px, 4.6cqh, 13px); color: var(--y2); margin-top: 3px; }
-  .px-chips button { background: var(--tile); }
-  .px-tiles { grid-template-columns: repeat(5, var(--tile-s)); grid-template-rows: var(--tile-s); grid-template-areas: "pv bk pl fw nx"; justify-self: start; }
-  .px-b.bk, .px-b.fw { display: grid; } .px-b.sp, .px-b.vl { display: none; }
-}
-@container (height >= 140px) and (width >= 600px) and (aspect-ratio > 21 / 10) { .px-wrap { --nt: 6; } .px-tiles { grid-template-columns: repeat(6, var(--tile-s)); grid-template-areas: "pv bk pl fw nx vl"; } .px-b.vl { display: grid; } }
-
-/* PORTADA: carátula protagonista, barra y cinco fichas en fila */
-@container (height >= 280px) and (aspect-ratio < 23 / 20) {
-  .px-wrap { --pad: 12px; --tile-s: min(62px, calc((100cqw - 2 * var(--pad) - 4 * var(--tg)) / 5)); grid-template-columns: 1fr; grid-template-rows: minmax(0, 1fr) 16px var(--tile-s); grid-template-areas: "cov" "bar" "tiles"; }
-  .px-cover { }
-  .px-time { margin: 12px 0 0 14px; font-size: 18px; }
-  .px-chips { margin: 10px 10px 0 0; } .px-chips button { width: 30px; height: 30px; }
-  .px-meta { padding: 40px 14px 12px; }
-  .px-title { font-size: clamp(13px, 5.2cqw, 18px); white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.3; } .px-artist { font-size: clamp(10px, 3.4cqw, 12px); }
-  .px-tiles { align-self: stretch; grid-template-columns: repeat(5, 1fr); grid-template-rows: var(--tile-s); grid-template-areas: "pv bk pl fw nx"; }
-  .px-b.bk, .px-b.fw { display: grid; }
-}
-@container (height >= 350px) and (aspect-ratio < 23 / 20) {
-  .px-wrap { grid-template-rows: minmax(0, 1fr) 16px calc(var(--tile-s) + 34px + var(--tg)); }
-  .px-tiles { grid-template-rows: var(--tile-s) 34px; grid-template-areas: "pv bk pl fw nx" ". . vl . ."; }
-  .px-b.vl { display: grid; }
-}
-@media (prefers-reduced-motion: reduce) { .live-badge .px-bar::before { animation: none; } .px-b { transition: none; } }
-
-/* Titulares góticos en pixel cuando hay sitio */
-@container (height >= 140px) and (width >= 400px) and (aspect-ratio > 21 / 10) { .px-title { font: 400 clamp(22px, 13cqh, 32px)/1 "Jacquard 12", serif; letter-spacing: 0; } .px-artist { font-size: clamp(10px, 4.6cqh, 13px); color: var(--g3); } }
-@container (height >= 280px) and (aspect-ratio < 23 / 20) { .px-viz { height: calc(100% - 100px); } .px-meta { background: var(--k); padding: 12px 12px 10px; min-height: 100px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; } .px-title { font: 400 clamp(24px, 9cqw, 34px)/1 "Jacquard 12", serif; letter-spacing: 0; -webkit-line-clamp: 2; } .px-artist { font-size: clamp(10px, 3.6cqw, 13px); } }
 </style>
 <style id="sk-crt-css">
 /* ============================================================
@@ -709,24 +583,6 @@ const pad2 = (n) => String(n).padStart(2, '0');
 const hash = (a, b) => { let x = (a * 374761393 + b * 668265263) >>> 0; x = (x ^ (x >>> 13)) * 1274126177 >>> 0; return ((x ^ (x >>> 16)) >>> 0) / 4294967295; };
 </script>
 <script>
-SKINS.pixel = { label: 'Pixel', tpl: () => `
-  <div class="px-wrap">
-    <div class="px-cover" aria-hidden="true"><canvas class="px-viz" data-viz="scene"></canvas></div>
-    <div class="px-time" aria-hidden="true"><span data-v="cur2">00:00</span><i data-v="dur2">00:00</i></div>
-    <div class="px-chips"><button data-act="mode" title="Pasar a Mini" aria-label="Pasar a Mini"><svg viewBox="0 0 11 8" shape-rendering="crispEdges" fill="currentColor" aria-hidden="true"><path d="M0 0h11v1h-11zM0 1h1v1h-1zM10 1h1v1h-1zM0 2h1v1h-1zM10 2h1v1h-1zM0 3h1v1h-1zM6 3h3v1h-3zM10 3h1v1h-1zM0 4h1v1h-1zM6 4h3v1h-3zM10 4h1v1h-1zM0 5h1v1h-1zM6 5h3v1h-3zM10 5h1v1h-1zM0 6h1v1h-1zM10 6h1v1h-1zM0 7h11v1h-11z"/></svg></button><button data-act="hide" title="Ocultar" aria-label="Ocultar"><svg viewBox="0 0 7 7" shape-rendering="crispEdges" fill="currentColor" aria-hidden="true"><path d="M0 0h2v1h-2zM5 0h2v1h-2zM0 1h3v1h-3zM4 1h3v1h-3zM1 2h5v1h-5zM2 3h3v1h-3zM1 4h5v1h-5zM0 5h3v1h-3zM4 5h3v1h-3zM0 6h2v1h-2zM5 6h2v1h-2z"/></svg></button></div>
-    <div class="px-meta"><div class="px-title" data-t="title"></div><div class="px-artist" data-t="artist"></div></div>
-    <div class="px-tiles">
-      <button class="px-b bk" data-act="back" title="Retroceder 10 s" aria-label="Retroceder 10 segundos">-10</button>
-      <button class="px-b pl" data-act="play" title="Pausar" aria-label="Pausar"><span class="ic ic-pause"><svg viewBox="0 0 9 9" shape-rendering="crispEdges" fill="currentColor" aria-hidden="true"><path d="M0 0h3v1h-3zM6 0h3v1h-3zM0 1h3v1h-3zM6 1h3v1h-3zM0 2h3v1h-3zM6 2h3v1h-3zM0 3h3v1h-3zM6 3h3v1h-3zM0 4h3v1h-3zM6 4h3v1h-3zM0 5h3v1h-3zM6 5h3v1h-3zM0 6h3v1h-3zM6 6h3v1h-3zM0 7h3v1h-3zM6 7h3v1h-3zM0 8h3v1h-3zM6 8h3v1h-3z"/></svg></span><span class="ic ic-play"><svg viewBox="0 0 9 9" shape-rendering="crispEdges" fill="currentColor" aria-hidden="true"><path d="M0 0h2v1h-2zM0 1h4v1h-4zM0 2h6v1h-6zM0 3h8v1h-8zM0 4h9v1h-9zM0 5h8v1h-8zM0 6h6v1h-6zM0 7h4v1h-4zM0 8h2v1h-2z"/></svg></span></button>
-      <button class="px-b fw" data-act="fwd" title="Avanzar 10 s" aria-label="Avanzar 10 segundos">+10</button>
-      <button class="px-b pv" data-act="prev" title="Anterior" aria-label="Anterior"><svg viewBox="0 0 9 9" shape-rendering="crispEdges" fill="currentColor" aria-hidden="true"><path d="M0 0h2v1h-2zM6 0h3v1h-3zM0 1h2v1h-2zM5 1h4v1h-4zM0 2h2v1h-2zM4 2h5v1h-5zM0 3h2v1h-2zM3 3h6v1h-6zM0 4h9v1h-9zM0 5h2v1h-2zM3 5h6v1h-6zM0 6h2v1h-2zM4 6h5v1h-5zM0 7h2v1h-2zM5 7h4v1h-4zM0 8h2v1h-2zM6 8h3v1h-3z"/></svg></button>
-      <button class="px-b nx" data-act="next" title="Siguiente" aria-label="Siguiente"><svg viewBox="0 0 9 9" shape-rendering="crispEdges" fill="currentColor" aria-hidden="true"><path d="M0 0h3v1h-3zM7 0h2v1h-2zM0 1h4v1h-4zM7 1h2v1h-2zM0 2h5v1h-5zM7 2h2v1h-2zM0 3h6v1h-6zM7 3h2v1h-2zM0 4h9v1h-9zM0 5h6v1h-6zM7 5h2v1h-2zM0 6h5v1h-5zM7 6h2v1h-2zM0 7h4v1h-4zM7 7h2v1h-2zM0 8h3v1h-3zM7 8h2v1h-2z"/></svg></button>
-      <button class="px-b vl" data-act="mute" title="Silenciar" aria-label="Silenciar o activar sonido"><span class="ic ic-vol"><svg viewBox="0 0 11 8" shape-rendering="crispEdges" fill="currentColor" aria-hidden="true"><path d="M4 0h1v1h-1zM3 1h2v1h-2zM7 1h1v1h-1zM0 2h5v1h-5zM8 2h1v1h-1zM0 3h5v1h-5zM6 3h1v1h-1zM9 3h1v1h-1zM0 4h5v1h-5zM6 4h1v1h-1zM9 4h1v1h-1zM0 5h5v1h-5zM8 5h1v1h-1zM3 6h2v1h-2zM7 6h1v1h-1zM4 7h1v1h-1z"/></svg></span><span class="ic ic-mute"><svg viewBox="0 0 13 8" shape-rendering="crispEdges" fill="currentColor" aria-hidden="true"><path d="M4 0h1v1h-1zM3 1h2v1h-2zM6 1h1v1h-1zM10 1h1v1h-1zM0 2h5v1h-5zM7 2h1v1h-1zM9 2h1v1h-1zM0 3h5v1h-5zM8 3h1v1h-1zM0 4h5v1h-5zM7 4h1v1h-1zM9 4h1v1h-1zM0 5h5v1h-5zM6 5h1v1h-1zM10 5h1v1h-1zM3 6h2v1h-2zM4 7h1v1h-1z"/></svg></span></button>
-    </div>
-    <div class="px-bar" role="slider" tabindex="0" data-bar aria-label="Progreso" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
-  </div>` };
-</script>
-<script>
 SKINS.crt = { label: 'Terminal CRT', tpl: () => `
   <div class="cr-wrap">
     <div class="cr-head"><span class="tag">NTT-7 MEDIA</span><span class="idx" data-t="idx">01/04</span><i class="rule"></i><span class="cr-state"></span>
@@ -780,64 +636,6 @@ SKINS.noir = { label: 'Noir', tpl: () => `
       </div>
     </div>
   </div>` };
-</script>
-<script>
-SKINS.pixel.viz = {
-  // Paisaje: cielo tramado (azul a crema), montañas con paralaje, nubes, luna con halo que respira y un pinar donde cada árbol es una banda
-  // del espectro (copa en tres tonos de verde, punta clara al subir, y una "luciérnaga" crema que marca el pico).
-  scene(g, w, h, V, card, cv) {
-    const P = h < 56 ? 1 : h < 130 ? 2 : 3, gw = Math.ceil(w / P), gh = Math.ceil(h / P); if (gw < 8 || gh < 8) return;
-    const C = { k: '#0f1a12', cr: '#eee8c6', cr2: '#bdb68f', g1: '#1d5a26', g2: '#3f9b2c', g3: '#8bd24a', b1: '#17305a', b2: '#2a62a8', b3: '#7fb2e5' };
-    const rgb = (c) => [parseInt(c.slice(1, 3), 16), parseInt(c.slice(3, 5), 16), parseInt(c.slice(5, 7), 16)];
-    const B = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5], hz = Math.round(gh * .74);
-    let o = cv._o; if (!o || o.width !== gw || o.height !== gh) { o = cv._o = document.createElement('canvas'); o.width = gw; o.height = gh; cv._key = ''; }
-    const og = o.getContext('2d'), key = gw + 'x' + gh;
-    if (cv._key !== key) {
-      cv._key = key; const ramp = [C.b2, C.b3, C.cr].map(rgb), sky = og.createImageData(gw, gh), d = sky.data, L = ramp.length - 1;
-      for (let y = 0; y < gh; y++) for (let x = 0; x < gw; x++) {
-        const p = (y * gw + x) * 4, tt = Math.min(1, y / hz) * L, i0 = Math.min(L - 1, Math.floor(tt)), fr = tt - i0, c = ramp[i0 + (fr > (B[(y & 3) * 4 + (x & 3)] + .5) / 16 ? 1 : 0)];
-        d[p] = c[0]; d[p + 1] = c[1]; d[p + 2] = c[2]; d[p + 3] = 255;
-      }
-      cv._sky = sky;
-      const f = cv._fg = document.createElement('canvas'); f.width = gw; f.height = gh; const fg = f.getContext('2d'), y0 = Math.floor(gh * .64);
-      fg.fillStyle = C.k; for (let y = y0; y < gh; y++) { const a = Math.pow((y - y0) / (gh - y0), 1.25) * .85; for (let x = 0; x < gw; x++) if (a > (B[(y & 3) * 4 + (x & 3)] + .5) / 16) fg.fillRect(x, y, 1, 1); }
-    }
-    og.putImageData(cv._sky, 0, 0);
-    const px = (x, y, c, wd, ht) => { og.fillStyle = c; og.fillRect(Math.round(x), Math.round(y), wd || 1, ht || 1); };
-    const t = V.t, lvl = V.lvl, kick = V.kick, N = V.N;
-    // luna con halo tramado
-    const rm = Math.max(3, Math.min(gw * .09, hz * .16)) * (1 + .08 * lvl + .06 * kick), mx = Math.round(gw * .2), my = Math.round(hz * .26), R2 = rm * 2.2;
-    og.fillStyle = 'rgba(238,232,198,.55)';
-    for (let y = Math.max(0, Math.floor(my - R2)); y < Math.min(hz, my + R2); y++) for (let x = Math.max(0, Math.floor(mx - R2)); x < Math.min(gw, mx + R2); x++) { const dd = Math.hypot(x - mx, y - my); if (dd > rm && dd < R2 && (1 - (dd - rm) / (R2 - rm)) * (.5 + .7 * lvl) > (B[(y & 3) * 4 + (x & 3)] + .5) / 16) og.fillRect(x, y, 1, 1); }
-    for (let y = Math.ceil(my - rm); y <= my + rm; y++) { const half = Math.sqrt(Math.max(0, rm * rm - (y - my) * (y - my))); px(mx - half, y, C.cr, Math.round(half * 2), 1); }
-    px(mx - rm * .35, my - rm * .3, C.cr2, Math.max(1, Math.round(rm * .45)), Math.max(1, Math.round(rm * .3)));
-    // nubes
-    for (let i = 0; i < 4; i++) { const cx = ((hash(i, 21) * (gw + 40) + t * (1.4 + i * .4)) % (gw + 40)) - 20, cy = hz * (.12 + hash(i, 5) * .34), cw = 8 + hash(i, 9) * 10; px(cx, cy, C.cr, cw, 2); px(cx + 2, cy - 1, C.cr, cw * .55, 1); px(cx + 1, cy + 2, C.cr2, cw * .7, 1); }
-    // montañas (dos capas, paralaje y trama de nieve)
-    for (let x = 0; x < gw; x++) {
-      const s1 = t * .22, yf = Math.round(hz - hz * (.28 + .12 * Math.sin(x * .05 + s1) + .07 * Math.sin(x * .13 + 2 + s1 * 1.2)));
-      px(x, yf, C.cr); for (let y = yf + 1; y < hz; y++) px(x, y, ((x + y) & 1) && y < yf + 3 ? C.b3 : ((x + y) & 1) ? C.b2 : C.b1);
-      const s2 = t * .55, yn = Math.round(hz - hz * (.1 + .07 * Math.sin(x * .08 + 4 + s2) + .05 * Math.sin(x * .21 + s2 * 1.3)));
-      px(x, yn, C.g2); px(x, yn + 1, C.g1, 1, hz - yn + 2);
-    }
-    // pinar = espectro
-    const tw = gw > 150 ? 8 : 7, stp = tw - 2, nb = Math.max(4, Math.floor((gw - 2) / stp)), x0 = Math.floor((gw - nb * stp) / 2) + 1, maxH = gh * .62;
-    px(0, hz, C.g2, gw, 1); px(0, hz + 1, C.g1, gw, gh - hz);
-    for (let x = 0; x < gw; x++) for (let y = hz + 1; y < gh; y += 2) if (((x + (y >> 1)) & 3) === 0) px(x, y, C.g2);
-    for (let i = 0; i < nb; i++) {
-      const bi = i / (nb - 1) * (N - 1) * .88, i0 = Math.floor(bi), i1 = Math.min(N - 1, i0 + 1), v = V.b[i0] + (V.b[i1] - V.b[i0]) * (bi - i0), pk = V.pk[Math.round(bi)];
-      const hgt = 10 + Math.round(v * maxH), cx = x0 + i * stp + (tw >> 1), top = gh - 2 - hgt, tiers = Math.max(2, Math.floor(hgt / 4));
-      px(cx, gh - 3, C.k, 1, 3);
-      for (let r = 0; r < hgt - 2; r++) {
-        const wi = r % 4, fr = r / Math.max(1, hgt - 3), y = top + r + 1, hw = Math.max(0, Math.min(tw >> 1, Math.round(1 + fr * ((tw >> 1) - 1) - (3 - wi) * .5)));
-        px(cx - hw, y, C.g1, hw * 2 + 1, 1); if (hw > 0) px(cx - hw, y, wi < 2 ? C.g2 : C.g1, Math.max(1, Math.ceil(hw * .7)), 1); if (wi === 3) px(cx + hw, y, C.k, 1, 1);
-      }
-      px(cx, top, v > .7 ? C.cr : C.g3, 1, 2);
-      const ph = 10 + Math.round(pk * maxH); if (ph > hgt + 3) px(cx - 1 + ((i * 7) & 1), gh - 2 - ph - 2, C.cr, 1, 1);
-    }
-    g.imageSmoothingEnabled = false; g.drawImage(o, 0, 0, gw * P, gh * P); if (h < w * 1.1) g.drawImage(cv._fg, 0, 0, gw * P, gh * P);
-  },
-};
 </script>
 <script>
 SKINS.noir.viz = {
@@ -1013,7 +811,7 @@ SKINS.metal.viz.mer.always = true;
     { title: 'Radio Nocturna FM', artist: 'En directo', dur: Infinity, art: 'radial-gradient(circle at 30% 30%,#fff3a8,#ff7a59 45%,#4b1d52)', pal: ['#fff3a8', '#ff7a59', '#c04fd0'], bpm: 96, kind: 'music' },
     { title: 'Diseñar con restricciones', artist: 'Episodio 42 · Cuaderno de bitácora', dur: 2710, art: 'linear-gradient(160deg,#a8ff9e,#1f9d8a 50%,#0d2b45)', pal: ['#a8ff9e', '#1f9d8a', '#4aa3ff'], bpm: 0, kind: 'voz' },
   ];
-    const S = { i: 0, t: 38, playing: true, muted: false, skin: 'pixel' };
+    const S = { i: 0, t: 38, playing: true, muted: false, skin: 'glass' };
   const cur = () => TRACKS[S.i], isLive = () => cur().dur === Infinity;
   const cards = [];
 
