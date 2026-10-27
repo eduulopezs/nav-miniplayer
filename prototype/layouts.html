@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Layouts responsive</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@500;700&family=Instrument+Serif:ital@1&family=Fraunces:wght@600&family=DM+Mono:wght@500&family=Outfit:wght@300;500&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@500;700&family=Instrument+Serif:ital@1&family=Fraunces:wght@600&family=DM+Mono:wght@500&family=Outfit:wght@300;500&family=JetBrains+Mono:wght@500;700&family=Silkscreen&family=VT323&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
 /* ============================================================
    Prototipo de la issue #12: el contenido se reorganiza según el tamaño (container queries), sin zoom.
@@ -412,6 +412,131 @@ code { font-family: "Cascadia Mono", Consolas, monospace; font-size: .92em; back
   .theme-vinyl .art::before, .theme-aurora .glow, .theme-hud .grain, .eq i { animation: none; }
 }
 
+/* ============================================================
+   DISEÑOS NUEVOS (ronda 2, a partir de referencias de Pinterest): Pixel, Terminal, Noir.
+   ============================================================ */
+@keyframes blink { 50% { opacity: 0; } }
+@keyframes glitch { 0%, 90%, 100% { transform: none; } 92% { transform: translateX(-3px); } 94% { transform: translateX(3px) skewX(5deg); } 96% { transform: translateX(-2px); } 98% { transform: translateX(2px); } }
+@keyframes flick { 0%, 100% { opacity: .5; } 50% { opacity: .62; } 70% { opacity: .46; } }
+
+/* ---------- 5. PIXEL: fichas cuadradas amarillas sobre negro, tipografía de píxel ---------- */
+.theme-pixel {
+  --font: "Silkscreen", "Press Start 2P", "Courier New", monospace;
+  --surface: #0d0d0b; --sheen-a: transparent; --sheen-b: transparent;
+  --edge-hi: #2b2a0c; --edge-lo: transparent; --shadow-1: rgba(0,0,0,.6); --shadow-2: transparent;
+  --text: #f6e90a; --text-2: #cfc50a; --text-3: #f6e90a; --btn: #f6e90a; --hover: #f6e90a;
+  --track: #2b2a0c; --fill: #f6e90a; --thumb: #fff; --glow-op: 0;
+  --play-bg: #f6e90a; --play-fg: #0d0d0b; --art-ring: #f6e90a; --chip-bg: #0d0d0b; --upper: uppercase; --radius-k: 0; --tk: .92;
+  --stair: polygon(0 4px, 4px 4px, 4px 0, calc(100% - 4px) 0, calc(100% - 4px) 4px, 100% 4px, 100% calc(100% - 4px), calc(100% - 4px) calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 4px calc(100% - 4px), 0 calc(100% - 4px));
+}
+.theme-pixel .card { -webkit-backdrop-filter: none; backdrop-filter: none; clip-path: var(--stair); box-shadow: inset 0 0 0 3px var(--edge-hi); -webkit-font-smoothing: none; text-rendering: optimizeSpeed; }
+.theme-pixel .b, .theme-pixel .b.speed, .theme-pixel .art, .theme-pixel .thumb, .theme-pixel .track, .theme-pixel .fill { border-radius: 0; }
+.theme-pixel .ctl .b, .theme-pixel .x-speed .b, .theme-pixel .x-vol .b { background: #1c1b07; box-shadow: inset 0 0 0 2px #2b2a0c; }
+.theme-pixel .ctl .b:hover, .theme-pixel .x-speed .b:hover, .theme-pixel .x-vol .b:hover, .theme-pixel .side .b:hover { background: #f6e90a; color: #0d0d0b; box-shadow: none; }
+.theme-pixel .ctl .b.play { background: #f6e90a; color: #0d0d0b; box-shadow: none; margin: 0 3px; }
+.theme-pixel .ctl .b.play:hover { background: #fff36b; transform: none; }
+.theme-pixel .b:active { transform: translate(2px, 2px); }
+.theme-pixel .b svg { shape-rendering: crispEdges; }
+.theme-pixel .art { position: relative; background: var(--art) center / cover, #f6e90a; background-blend-mode: luminosity; filter: contrast(1.6); box-shadow: inset 0 0 0 2px var(--art-ring); }
+.theme-pixel .art svg { display: none; }
+.theme-pixel .art::after { content: ""; position: absolute; inset: 0; background: radial-gradient(circle, rgba(0,0,0,.6) 0 1px, transparent 1.5px) 0 0 / 4px 4px; mix-blend-mode: multiply; pointer-events: none; }
+.theme-pixel .paused .art { filter: grayscale(1) contrast(1.2) brightness(.6); }
+.theme-pixel .title { font-weight: 400; letter-spacing: .04em; line-height: 1.3; text-shadow: none; }
+.theme-pixel .artist { font-size: 10.5px; letter-spacing: .06em; }
+.theme-pixel .t { font-size: 10px; letter-spacing: .08em; }
+.theme-pixel .track { height: 10px; background: repeating-linear-gradient(90deg, var(--track) 0 6px, transparent 6px 8px); }
+.theme-pixel .fill { -webkit-mask: repeating-linear-gradient(90deg, #000 0 6px, transparent 6px 8px); mask: repeating-linear-gradient(90deg, #000 0 6px, transparent 6px 8px); }
+.theme-pixel .bar:hover .track, .theme-pixel .bar:focus-visible .track { height: 12px; }
+.theme-pixel .thumb { width: 6px; height: 18px; margin: -9px 0 0 -3px; transform: scale(1); box-shadow: 0 0 0 2px #0d0d0b; }
+.theme-pixel .idx { display: inline-block; background: #f6e90a; color: #0d0d0b; padding: 3px 5px 2px; font: 400 9px/1 var(--font); letter-spacing: .08em; margin-bottom: 6px; }
+@container (height < 140px) { .theme-pixel .idx { display: none; } }
+.theme-pixel .side { background: transparent; }
+.theme-pixel .b.speed { font: 400 11px/1 var(--font); border-radius: 0; }
+
+/* ---------- 6. TERMINAL: fósforo ámbar, corchetes, cursor y CRT ---------- */
+.theme-term {
+  --font: "VT323", "IBM Plex Mono", "Courier New", monospace;
+  --surface: #130a03; --sheen-a: transparent; --sheen-b: transparent;
+  --edge-hi: rgba(255,157,46,.55); --edge-lo: transparent; --shadow-1: rgba(255,120,0,.16); --shadow-2: transparent;
+  --text: #ffb347; --text-2: #e68a1f; --text-3: #ff9d2e; --btn: #ffb347; --hover: rgba(255,157,46,.2);
+  --track: rgba(255,157,46,.24); --fill: #ff9d2e; --thumb: #ffe2b8; --glow-op: 0;
+  --play-bg: #ff9d2e; --play-fg: #130a03; --art-ring: rgba(255,157,46,.65); --chip-bg: #130a03; --upper: uppercase; --radius-k: .14; --tk: 1.18;
+}
+.theme-term .card { -webkit-backdrop-filter: none; backdrop-filter: none; box-shadow: inset 0 0 0 1px var(--edge-hi), inset 0 0 70px rgba(255,120,0,.18), 0 0 26px var(--shadow-1); }
+.theme-term .inner { text-shadow: 0 0 6px rgba(255,157,46,.55); }
+.theme-term .grain { display: block; position: absolute; inset: 0; z-index: 3; pointer-events: none; animation: flick 3s steps(6) infinite;
+  background: repeating-linear-gradient(0deg, rgba(0,0,0,.28) 0 1px, transparent 1px 3px), radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,.55) 100%); }
+.theme-term .b, .theme-term .b.speed, .theme-term .art, .theme-term .thumb, .theme-term .track { border-radius: 0; }
+.theme-term .ctl .b { box-shadow: inset 0 0 0 1px rgba(255,157,46,.4); }
+.theme-term .ctl .b.play { box-shadow: none; }
+.theme-term .b:hover { box-shadow: inset 0 0 0 1px #ff9d2e; }
+.theme-term .art { position: relative; background: var(--art) center / cover, #ff9d2e; background-blend-mode: luminosity; filter: contrast(1.4) brightness(1.05); box-shadow: inset 0 0 0 1px var(--art-ring); }
+.theme-term .art svg { display: none; }
+.theme-term .art::after { content: ""; position: absolute; inset: 0; background: radial-gradient(circle, rgba(0,0,0,.55) 0 .8px, transparent 1.3px) 0 0 / 3px 3px; mix-blend-mode: multiply; pointer-events: none; }
+.theme-term .paused .art { filter: grayscale(1) brightness(.55); }
+.theme-term .title { font-weight: 400; letter-spacing: .02em; line-height: 1.05; }
+.theme-term .title::before { content: "> "; color: #ff9d2e; }
+.theme-term .artist { font-size: 15px; letter-spacing: .03em; }
+.theme-term .artist::after { content: "\2588"; margin-left: 4px; color: #ff9d2e; animation: blink 1s steps(2) infinite; }
+.theme-term .t { font-size: 15px; letter-spacing: .04em; }
+.theme-term .bar::before, .theme-term .bar::after { color: #ff9d2e; font-size: 17px; line-height: 1; }
+.theme-term .bar::before { content: "["; margin-right: 3px; }
+.theme-term .bar::after { content: "]"; margin-left: 3px; }
+.theme-term .track { height: 10px; background: repeating-linear-gradient(90deg, var(--track) 0 7px, transparent 7px 9px); }
+.theme-term .fill { -webkit-mask: repeating-linear-gradient(90deg, #000 0 7px, transparent 7px 9px); mask: repeating-linear-gradient(90deg, #000 0 7px, transparent 7px 9px); filter: drop-shadow(0 0 4px rgba(255,157,46,.8)); }
+.theme-term .bar:hover .track, .theme-term .bar:focus-visible .track { height: 12px; }
+.theme-term .thumb { width: 7px; height: 16px; margin: -8px 0 0 -3px; transform: scale(1); background: #ffe2b8; box-shadow: 0 0 8px #ff9d2e; animation: blink 1.1s steps(2) infinite; }
+.theme-term .idx { display: block; font: 400 14px/1 var(--font); color: var(--text-2); letter-spacing: .05em; margin-bottom: 5px; }
+.theme-term .idx::before { content: "NOW_PLAYING // "; }
+.theme-term .paused .idx::before { content: "HALTED // "; }
+.theme-term .live-badge .idx::before { content: "STREAM_OPEN // "; }
+@container (height < 170px) { .theme-term .idx { display: none; } }
+@container (height >= 280px) and (aspect-ratio < 23 / 20) { .theme-term .idx { display: none; } }
+.theme-term .side { background: transparent; }
+.theme-term .b.speed { font: 400 15px/1 var(--font); }
+.theme-term .live-badge .t.dur { letter-spacing: .1em; }
+
+/* ---------- 7. NOIR: blanco y rojo, esquinas biseladas, rayas y aberración cromática ---------- */
+.theme-noir {
+  --font: "Space Mono", "IBM Plex Mono", "Courier New", monospace;
+  --surface: #0b0b0b; --sheen-a: transparent; --sheen-b: transparent;
+  --edge-hi: rgba(236,232,220,.6); --edge-lo: transparent; --shadow-1: rgba(0,0,0,.6); --shadow-2: transparent;
+  --text: #ece8dc; --text-2: #a7a396; --text-3: #a7a396; --btn: #ece8dc; --hover: rgba(255,42,42,.22);
+  --track: rgba(236,232,220,.4); --fill: #ff2a2a; --thumb: #ff2a2a; --glow-op: 0;
+  --play-bg: #ff2a2a; --play-fg: #0b0b0b; --art-ring: rgba(236,232,220,.6); --chip-bg: #0b0b0b; --upper: uppercase; --radius-k: 0; --tk: .95;
+  --chamfer: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px));
+}
+.theme-noir .card { -webkit-backdrop-filter: none; backdrop-filter: none; clip-path: var(--chamfer); box-shadow: inset 0 0 0 1px var(--edge-hi); }
+.theme-noir .grain { display: block; position: absolute; top: 0; left: 36%; width: 22%; height: 5px; z-index: 3; pointer-events: none; background: repeating-linear-gradient(135deg, #ece8dc 0 2px, transparent 2px 5px); }
+@container (height < 140px) { .theme-noir .grain { display: none; } }
+@container (height < 140px) { .theme-noir .idx { display: none; } }
+.theme-noir .screws { display: block; position: absolute; inset: 0; z-index: 3; pointer-events: none;
+  background:
+    linear-gradient(#ece8dc, #ece8dc) 9px 4px / 1px 11px no-repeat, linear-gradient(#ece8dc, #ece8dc) 4px 9px / 11px 1px no-repeat,
+    linear-gradient(#ece8dc, #ece8dc) right 9px bottom 4px / 1px 11px no-repeat, linear-gradient(#ece8dc, #ece8dc) right 4px bottom 9px / 11px 1px no-repeat; }
+@container (height < 140px) { .theme-noir .screws { display: none; } }
+.theme-noir .b, .theme-noir .b.speed, .theme-noir .art, .theme-noir .thumb, .theme-noir .track, .theme-noir .fill { border-radius: 0; }
+.theme-noir .ctl .b { box-shadow: inset 0 0 0 1px rgba(236,232,220,.3); }
+.theme-noir .ctl .b.play { box-shadow: none; clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px)); }
+.theme-noir .ctl .b.play:hover { background: #ff5a5a; transform: none; }
+.theme-noir .art { filter: grayscale(1) contrast(1.35); box-shadow: inset 0 0 0 1px var(--art-ring); animation: glitch 4s infinite; }
+.theme-noir .paused .art { filter: grayscale(1) brightness(.55); animation: none; }
+.theme-noir .art svg { opacity: .9; }
+.theme-noir .title, .theme-noir .t, .theme-noir .artist { text-shadow: -1px 0 rgba(255,40,40,.75), 1px 0 rgba(40,220,255,.4); }
+.theme-noir .title { font-weight: 700; letter-spacing: .02em; }
+.theme-noir .artist { font-size: 11px; letter-spacing: .06em; }
+.theme-noir .t { font-size: 10.5px; letter-spacing: .08em; }
+.theme-noir .track { height: 8px; background: repeating-linear-gradient(135deg, var(--track) 0 2px, transparent 2px 5px); box-shadow: inset 0 0 0 1px rgba(236,232,220,.5); }
+.theme-noir .fill { background: repeating-linear-gradient(135deg, #ff2a2a 0 3px, #8a0e0e 3px 6px); }
+.theme-noir .bar:hover .track, .theme-noir .bar:focus-visible .track { height: 10px; }
+.theme-noir .thumb { width: 8px; height: 16px; margin: -8px 0 0 -4px; transform: scale(1); background: #ff2a2a; box-shadow: 0 0 0 2px #0b0b0b, 0 0 10px rgba(255,42,42,.8); }
+.theme-noir .idx { display: block; font: 700 9.5px/1 var(--font); letter-spacing: .14em; color: #ff2a2a; margin-bottom: 5px; }
+.theme-noir .idx::after { content: " / SIGNAL OK"; color: var(--text-2); }
+.theme-noir .paused .idx::after { content: " / SIGNAL LOST"; color: #ff2a2a; animation: blink 1s steps(2) infinite; }
+@container (height < 140px) { .theme-noir .idx { display: none; } }
+.theme-noir .side { background: transparent; }
+@media (prefers-reduced-motion: reduce) { .theme-noir .art, .theme-term .grain, .theme-term .artist::after, .theme-term .thumb, .theme-noir .idx::after { animation: none; } }
+
 /* iconos pequeños en cualquier layout cuando falta ancho */
 @media (prefers-reduced-motion: reduce) {
   .scroll > span { animation: none; display: inline; }
@@ -446,6 +571,9 @@ code { font-family: "Cascadia Mono", Consolas, monospace; font-size: .92em; back
       <button class="chip" data-theme-btn="vinyl" aria-pressed="false">Vinilo</button>
       <button class="chip" data-theme-btn="aurora" aria-pressed="false">Aurora</button>
       <button class="chip" data-theme-btn="hud" aria-pressed="false">HUD</button>
+      <button class="chip" data-theme-btn="pixel" aria-pressed="false">Pixel</button>
+      <button class="chip" data-theme-btn="term" aria-pressed="false">Terminal</button>
+      <button class="chip" data-theme-btn="noir" aria-pressed="false">Noir</button>
     </span>
     <div class="readout" aria-live="polite"><b id="rdLayout">Compacto</b> · <span id="rdSize">320 × 150</span> px</div>
   </div>
@@ -694,7 +822,7 @@ code { font-family: "Cascadia Mono", Consolas, monospace; font-size: .92em; back
   // Diseño (los dos temas cambian solo variables)
   document.querySelectorAll('[data-theme-btn]').forEach((b) => b.addEventListener('click', () => {
     const t = b.dataset.themeBtn;
-    THEME_STAGES().forEach((el) => { el.classList.remove('theme-glass', 'theme-brutal', 'theme-editorial', 'theme-vinyl', 'theme-aurora', 'theme-hud'); el.classList.add('theme-' + t); });
+    THEME_STAGES().forEach((el) => { el.classList.remove('theme-glass', 'theme-brutal', 'theme-editorial', 'theme-vinyl', 'theme-aurora', 'theme-hud', 'theme-pixel', 'theme-term', 'theme-noir'); el.classList.add('theme-' + t); });
     document.querySelectorAll('[data-theme-btn]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
     requestAnimationFrame(() => cards.forEach(fit));
   }));
