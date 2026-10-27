@@ -1,0 +1,11 @@
+{
+  "name": "nav-miniplayer",
+  "private": true,
+  "description": "Extensión MV3 (Chrome/Edge): minirreproductor flotante para el audio/vídeo de la pestaña.",
+  "license": "MIT",
+  "scripts": {
+    "check": "node scripts/check.mjs",
+    "smoke": "node scripts/smoke.mjs",
+    "test": "npm run check && npm run smoke"
+  }
+}
