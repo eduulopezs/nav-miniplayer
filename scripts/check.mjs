@@ -1,6 +1,6 @@
 // Verificación sin dependencias: el manifest es válido, todos los archivos que
 // referencia existen y cada script JavaScript compila.
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
@@ -22,6 +22,22 @@ for (const f of files) {
   }
 }
 if (!/^\d+\.\d+\.\d+$/.test(manifest.version)) errors.push(`versión no válida: ${manifest.version}`);
+
+// Tokens: cada var(--x) de styles.js existe (en Glass o declarada en el propio CSS) y cada token se usa en algún sitio.
+{
+  const dir = join(root, 'src/content');
+  const ctx = vm.createContext({}); ctx.globalThis = ctx;
+  vm.runInContext(readFileSync(join(dir, 'tokens.js'), 'utf8'), ctx);
+  const { theme: K, css } = ctx.__NMP.tokens;
+  const styles = readFileSync(join(dir, 'styles.js'), 'utf8');
+  const sources = readdirSync(dir).filter((f) => f.endsWith('.js') && f !== 'tokens.js').map((f) => readFileSync(join(dir, f), 'utf8')).join('\n');
+  const names = (text) => [...text.matchAll(/--([\w-]+):/g)].map((m) => m[1]);
+  const defined = new Set([...Object.keys(K.glass), ...names(css), ...names(styles), ...[...sources.matchAll(/setProperty\('--([\w-]+)'/g)].map((m) => m[1])]);
+  for (const [, name, fallback] of styles.matchAll(/var\(--([\w-]+)(,)?/g)) if (!defined.has(name) && !fallback) errors.push(`styles.js usa var(--${name}) sin definir`);
+  for (const [theme, tokens] of Object.entries(K)) for (const k of Object.keys(tokens)) {
+    if (!new RegExp(`--${k}\\b|['".]${k}\\b`).test(sources)) errors.push(`token sin usar: ${theme}.${k}`);
+  }
+}
 
 if (errors.length) { console.error(errors.map((e) => '✗ ' + e).join('\n')); process.exit(1); }
 console.log(`✓ manifest ${manifest.version}: ${files.size} archivos comprobados`);

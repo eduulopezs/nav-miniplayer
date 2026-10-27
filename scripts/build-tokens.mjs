@@ -29,7 +29,7 @@ for (const [name, tokens] of Object.entries(src.themes)) {
 }
 
 const decl = (o) => Object.entries(o).filter(([k]) => !k.startsWith('mini-')).map(([k, v]) => `--${k}: ${v};`).join(' ');
-const shared = Object.fromEntries(Object.entries(src.shared).map(([k, v]) => [k, v]));
+const shared = Object.fromEntries(Object.entries(src.shared).map(([k, v]) => [k, resolve(v, `shared.${k}`)]));
 const css = [
   `.card { ${decl(shared)} ${decl(themes.glass)} }`,
   ...Object.keys(themes).filter((n) => n !== 'glass').map((n) => `.card[data-theme=${n}] { ${decl(themes[n])} }`),
