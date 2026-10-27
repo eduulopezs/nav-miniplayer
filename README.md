@@ -22,6 +22,20 @@ Elige la carpeta del repositorio (la que contiene `manifest.json`) y recarga las
 - Botón × (al pasar el ratón) o icono de la extensión en la barra: ocultar/mostrar.
 - Teclado: con Tab se enfoca el reproductor; **Espacio** o **K** play/pausa, **←/→** ±10 s, **Esc** lo oculta. El progreso y la pista se anuncian a lectores de pantalla, y con "reducir movimiento" activado los títulos largos se truncan en vez de desplazarse.
 
+## Compatibilidad
+
+✅ probado a mano (aparece la tarjeta, play/pausa y ±10 s actúan sobre el medio) · ☑️ asumido, sin probar todavía.
+
+| Sitio | Estado | Notas |
+|---|---|---|
+| YouTube | ✅ | Con un anuncio delante, la tarjeta sigue al medio que suena en ese momento. |
+| YouTube Music | ☑️ | Rechaza Chromium automatizado, hay que probarlo en un Chrome normal. |
+| Spotify Web | ☑️ | Necesita sesión y DRM. |
+| SoundCloud | ☑️ | |
+| Twitch | ☑️ | |
+| Vimeo incrustado | ☑️ | Iframe; cubierto por los tests e2e con iframes locales. |
+| Vídeo de noticias | ☑️ | |
+
 ## Diseños (desarrollo)
 Clic derecho en el icono → **Diseño (desarrollo)** para cambiar el aspecto en caliente (se aplica a Tarjeta, Ventana y Mini):
 - **Glass (original)**: cristal translúcido con carátula desenfocada y progreso en degradado.
