@@ -265,7 +265,7 @@ code { font-family: "Cascadia Mono", Consolas, monospace; font-size: .92em; back
 .theme-editorial .art { background: var(--art) center / cover, #ff4d2e; background-blend-mode: luminosity; box-shadow: none; }
 .theme-editorial .art svg { display: none; }
 .theme-editorial .paused .art { filter: grayscale(1) brightness(.7); }
-.theme-editorial .title { font-weight: 800; letter-spacing: -.015em; line-height: .98; text-shadow: none; }
+.theme-editorial .title { font-weight: 800; letter-spacing: -.015em; line-height: 1.12; text-shadow: none; }
 .theme-editorial .artist { font-family: "Instrument Serif", Georgia, "Times New Roman", serif; font-style: italic; text-transform: none; font-size: 14px; letter-spacing: .01em; }
 .theme-editorial .t { font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--text-2); }
 .theme-editorial .track { height: 2px; }
@@ -275,12 +275,14 @@ code { font-family: "Cascadia Mono", Consolas, monospace; font-size: .92em; back
 .theme-editorial .b.play:hover { background: #ff7a5e; }
 .theme-editorial .idx { display: block; font: 700 10.5px/1 var(--font); letter-spacing: .2em; color: #ff4d2e; margin-bottom: 5px; text-transform: uppercase; }
 .theme-editorial .side { background: transparent; }
-@container (height >= 280px) and (aspect-ratio <= 21 / 10) { .theme-editorial .title { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; } }
-@container (height >= 140px) and (width >= 400px) and (aspect-ratio > 21 / 10) { .theme-editorial .title { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; } .theme-editorial .meta { border-bottom: 1px solid var(--edge-hi); padding-bottom: 8px; } }
+@container (height >= 400px) and (width >= 300px) and (aspect-ratio <= 21 / 10) { .theme-editorial .title { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: .98; } .theme-editorial .title.scroll > span { display: inline; animation: none; transform: none; } }
+@container (height >= 260px) and (width >= 400px) and (aspect-ratio > 21 / 10) { .theme-editorial .title { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: .98; } .theme-editorial .title.scroll > span { display: inline; animation: none; transform: none; } .theme-editorial .meta { border-bottom: 1px solid var(--edge-hi); padding-bottom: 8px; } }
 @container (height < 140px) { .theme-editorial .idx { display: none; } .theme-editorial .artist { font-size: 12.5px; } }
 
-@container (height >= 280px) and (aspect-ratio < 23 / 20) { .theme-editorial .inner { --art-s: min(calc(100cqw - 32px), calc(100cqh - 246px)); } }
-@container (height >= 350px) and (aspect-ratio < 23 / 20) { .theme-editorial .inner { --art-s: min(calc(100cqw - 32px), calc(100cqh - 292px)); } }
+@container (height >= 280px) and (aspect-ratio < 23 / 20) and ((height < 400px) or (width < 300px)) { .theme-editorial .idx { display: none; } }
+@container (height >= 400px) and (width >= 300px) and (aspect-ratio < 23 / 20) { .theme-editorial .inner { --art-s: min(calc(100cqw - 32px), calc(100cqh - 304px)); } }
+
+@container (height < 260px) and (aspect-ratio > 21 / 10) { .theme-editorial .idx { display: none; } }
 
 /* ---------- 2. VINILO: disco que gira, latón y pantalla ámbar ---------- */
 .theme-vinyl {
