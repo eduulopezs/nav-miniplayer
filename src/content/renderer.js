@@ -40,7 +40,7 @@
       g.addColorStop(0, T.bg[0]); g.addColorStop(1, T.bg[1]);
       b.fillStyle = g; b.fillRect(0, 0, CW, CH);
       if (T.blur && r.img) { b.save(); b.globalAlpha = 0.45; b.filter = 'blur(14px) saturate(1.7)'; b.drawImage(r.img, -20, -20 - (CW - CH) / 2, CW + 40, CW + 40); b.restore(); }
-      if (T.veil) { b.fillStyle = 'rgba(255,255,255,.05)'; b.fillRect(0, 0, CW, CH); }
+      if (T.veil) { b.fillStyle = T.veil; b.fillRect(0, 0, CW, CH); }
       if (T.deco) T.deco(b);
       r.bgImg = r.img;
     }
@@ -80,11 +80,11 @@
         c.drawImage(src, 12, 12, 56, 56);
         c.filter = 'none';
         if (T.tint) { c.globalCompositeOperation = 'multiply'; c.fillStyle = T.tint; c.fillRect(12, 12, 56, 56); }
-      } else { const a = c.createLinearGradient(12, 12, 68, 68); a.addColorStop(0, T.artBorder || '#7c8cff'); a.addColorStop(1, T.artBorder ? T.bg[1] : '#c77dff'); c.fillStyle = a; c.fillRect(12, 12, 56, 56);
+      } else { const a = c.createLinearGradient(12, 12, 68, 68); a.addColorStop(0, T.artBorder || T.artA); a.addColorStop(1, T.artBorder ? T.bg[1] : T.artB); c.fillStyle = a; c.fillRect(12, 12, 56, 56);
         c.fillStyle = T.fg; c.textAlign = 'center'; c.textBaseline = 'alphabetic'; c.font = '700 28px ' + T.font; c.fillText('♪', 40, 51); // sin carátula
       }
       if (v.media && v.media.paused) { // en pausa: velo y símbolo sobre la carátula
-        c.fillStyle = 'rgba(0,0,0,.5)'; c.fillRect(12, 12, 56, 56);
+        c.fillStyle = T.artShade; c.fillRect(12, 12, 56, 56);
         c.fillStyle = T.fg; c.fillRect(32, 30, 5, 20); c.fillRect(43, 30, 5, 20);
       }
       c.restore();
