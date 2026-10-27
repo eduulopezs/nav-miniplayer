@@ -42,6 +42,7 @@ t('toggle ya no pasa por un evento del DOM', !/__mp_toggle/.test(player + sw));
 t('el service worker no envía cookies ni sigue redirecciones', /credentials: 'omit'/.test(sw) && /redirect: 'error'/.test(sw));
 t('el service worker exige pestaña emisora', /sender\.tab/.test(sw));
 t('el service worker valida la URL antes de descargar', /isAllowedArtworkUrl\(url\)/.test(sw));
+t('el estado PiP solo cambia si la extensión lo pidió', /pipAsked/.test(player) && /d === 'open' \? !pipAsked/.test(player));
 t('las acciones anunciadas por la página se filtran', /KNOWN_ACTIONS/.test(player));
 
 // Service worker con fetch simulado: camino positivo y negativos de la descarga de carátulas.

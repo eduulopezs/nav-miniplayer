@@ -45,7 +45,8 @@ src/
     themes.js                    paletas del lienzo de Mini, una por diseño, leídas de los tokens
     renderer.js                  dibuja Mini en un canvas
     player.js                    DOM, estado, ventanas flotantes, arrastre, tamaño y teclado
-scripts/                         build-tokens.mjs (genera tokens.js), contrast.mjs (auditoría WCAG), check.mjs (manifest y sintaxis), security.mjs (red y aislamiento) y smoke.mjs (carga con DOM falso)
+tests/e2e/                       pruebas e2e con Playwright (helpers, reproductor, seguridad y diseños)
+scripts/                         zip.mjs (empaquetado), build-tokens.mjs (genera tokens.js), contrast.mjs (auditoría WCAG), check.mjs (manifest y sintaxis), security.mjs (red y aislamiento) y smoke.mjs (carga con DOM falso)
 ```
 Los módulos de `content/` se cargan en el orden del manifest y comparten el espacio `__NMP`.
 
@@ -59,4 +60,9 @@ Los colores viven en `design/tokens.json` en tres capas: **primitivos** (`lavend
 Ver [SECURITY.md](SECURITY.md): modelo de amenazas, controles y límites conocidos.
 
 ## Desarrollo
+- `npm test`: verificación rápida sin navegador (manifest, sintaxis, tokens, contraste, seguridad y humo).
+- `npm run e2e`: pruebas en Chromium con la extensión cargada (Node 22+). La primera vez: `npm install` y `npx playwright install chromium`. Cubren mostrar/ocultar, play y pausa, ±10 s, progreso, scrub por el borde, teclado, redimensionado, aislamiento y los 4 diseños. Las capturas de los diseños quedan en `tests/e2e/__shots__/`.
+- `npm run zip`: genera `dist/nav-miniplayer-<versión>.zip` listo para subir a la tienda.
+- GitHub Actions ejecuta las tres cosas en cada PR (`.github/workflows/ci.yml`).
+
 `npm test` comprueba que el manifest referencia archivos existentes, que todos los scripts compilan y que los módulos cargan y dibujan cada diseño. Sube el `version` del manifest en cada cambio.
