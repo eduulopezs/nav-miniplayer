@@ -1,13 +1,22 @@
 {
   "name": "nav-miniplayer",
   "private": true,
-  "description": "Extensión MV3 (Chrome/Edge): minirreproductor flotante para el audio/vídeo de la pestaña.",
+  "description": "Extensi\u00f3n MV3 (Chrome/Edge): minirreproductor flotante para el audio/v\u00eddeo de la pesta\u00f1a.",
   "license": "MIT",
   "scripts": {
     "tokens": "node scripts/build-tokens.mjs",
     "contrast": "node scripts/contrast.mjs",
     "check": "node scripts/build-tokens.mjs --check && node scripts/check.mjs && node scripts/contrast.mjs --strict",
     "smoke": "node scripts/smoke.mjs",
-    "test": "npm run check && npm run smoke"
+    "security": "node scripts/security.mjs",
+    "test": "npm run check && npm run security && npm run smoke",
+    "e2e": "node --test --test-concurrency=1 \"tests/e2e/*.test.mjs\"",
+    "zip": "node scripts/zip.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.59.0"
+  },
+  "engines": {
+    "node": ">=22"
   }
 }

@@ -1,8 +1,7 @@
 // Se ejecuta en el mundo de la página (MAIN) para capturar los manejadores de
 // Media Session que registra el sitio (anterior/siguiente, etc.) y poder invocarlos.
 (() => {
-  if (window.__glassMiniPlayerHooked || typeof MediaSession === 'undefined') return;
-  window.__glassMiniPlayerHooked = true;
+  if (typeof MediaSession === 'undefined') return; // sin banderas globales: la página no puede detectar la extensión por una variable
 
   const handlers = new Map();
   const original = MediaSession.prototype.setActionHandler;
@@ -42,6 +41,7 @@
 
   document.addEventListener('__mp_cmd', (e) => {
     if (e.detail === '__pip') return togglePip();
+    if (typeof e.detail !== 'string') return;
     const fn = handlers.get(e.detail);
     if (fn) {
       try { fn({ action: e.detail }); } catch (_) { /* el sitio decide */ }
