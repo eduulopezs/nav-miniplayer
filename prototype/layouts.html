@@ -169,7 +169,7 @@ code { font-family: "Cascadia Mono", Consolas, monospace; font-size: .92em; back
 /* ---------- PASTILLA: alto < 60 ---------- */
 @container (height < 64px) {
   .probe::after { content: "Pastilla"; }
-  .inner { --btn-s: min(30px, calc(100cqh - 20px)); --play-s: min(34px, calc(100cqh - 20px)); }
+  .inner { --btn-s: min(28px, calc(100cqh - 20px)); --play-s: min(34px, calc(100cqh - 20px)); }
   .inner { --pad: 8px; padding: 4px 10px 14px; grid-template-columns: auto 1fr auto; grid-template-areas: "art meta ctl"; column-gap: 10px; row-gap: 0; align-content: center; }
   .art { width: min(calc(100cqh - 18px), 48px); height: min(calc(100cqh - 18px), 48px); border-radius: 8px; }
   .artist, .side, .x-speed, .x-vol, .back, .fwd, .t { display: none; }
@@ -180,9 +180,8 @@ code { font-family: "Cascadia Mono", Consolas, monospace; font-size: .92em; back
   .bar:hover .track, .bar:focus-visible .track, .bar.drag .track { height: 4px; }
   .thumb { width: 10px; height: 10px; margin: -5px 0 0 -5px; }
   .tip { bottom: 14px; }
-  .prev, .next { display: none; }
-}
-@container (height < 64px) and (width >= 364px) { .prev, .next { display: grid; } }
+  }
+@container (height < 64px) and (width < 264px) { .prev, .next { display: none; } }
 @container (height < 64px) and (width >= 480px) { .artist { display: block; } .meta { display: block; } .title { font-size: 13.5px; } }
 
 /* ---------- FILA: 60 <= alto < 132 ---------- */
@@ -286,7 +285,7 @@ code { font-family: "Cascadia Mono", Consolas, monospace; font-size: .92em; back
   <table>
     <thead><tr><th>Layout</th><th>Cuándo</th><th>Qué cambia</th></tr></thead>
     <tbody>
-      <tr><td>Pastilla</td><td><code>alto &lt; 64</code></td><td>Carátula pequeña, título y play. La barra es una línea de 2 px en el borde inferior. Anterior y siguiente aparecen desde 360 px de ancho; el artista, desde 480.</td></tr>
+      <tr><td>Pastilla</td><td><code>alto &lt; 64</code></td><td>Carátula pequeña, título y play. La barra es una línea de 2 px en el borde inferior. Anterior y siguiente siempre, salvo por debajo de 264 px de ancho; el artista, desde 480.</td></tr>
       <tr><td>Fila</td><td><code>64 ≤ alto &lt; 140</code></td><td>Carátula, título, artista y barra a la izquierda; controles a la derecha. Tiempos desde 460 px; ±10 s desde 540 px.</td></tr>
       <tr><td>Compacto</td><td><code>resto</code></td><td>Carátula y datos arriba, barra con tiempos y controles abajo. Desde 420 px de ancho se añaden velocidad y volumen. Por debajo de 300 px se ocultan ±10 s.</td></tr>
       <tr><td>Portada</td><td><code>alto ≥ 280 y ancho/alto &lt; 1,15</code></td><td>Carátula grande y cuadrada arriba, datos, barra y controles debajo. Desde 350 px de alto, fila de velocidad y volumen.</td></tr>
