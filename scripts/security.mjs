@@ -58,7 +58,7 @@ t('las acciones anunciadas por la página se filtran', /KNOWN_ACTIONS/.test(play
   const sctx = vm.createContext({
     URL, AbortController, setTimeout, clearTimeout, btoa: (s) => Buffer.from(s, 'binary').toString('base64'), console,
     importScripts() { vm.runInContext(read('src/background/net-guard.js'), sctx); },
-    chrome: { runtime: { id: 'me', onMessage: { addListener: (f) => { listener = f; } }, onInstalled: { addListener() {} } }, action: { onClicked: { addListener() {} } },
+    chrome: { runtime: { id: 'me', onMessage: { addListener: (f) => { listener = f; } }, onInstalled: { addListener() {} } }, action: { onClicked: { addListener() {} } }, commands: { onCommand: { addListener() {} } },
       scripting: {}, storage: { onChanged: { addListener() {} }, local: { get() {}, set() {} } }, contextMenus: { onClicked: { addListener() {} }, removeAll() {}, create() {}, update() {} } },
     fetch: async (u, o) => { calls.push([u, o]); return sctx.__next(u); },
   });

@@ -77,7 +77,7 @@ const hasClass = (n, c) => (attr(n, 'class') || '').split(/\s+/).includes(c);
 const match = (n, sel) => {
   const [k, v] = sel.split(':');
   if (v === undefined) return sel === 'bar' ? attr(n, 'data-bar') !== null : hasClass(n, sel);
-  return attr(n, { act: 'data-act', t: 'data-t', v: 'data-v' }[k]) === v;
+  return attr(n, { act: 'data-act', t: 'data-t', v: 'data-v', m: 'data-m' }[k]) === v;
 };
 const text = (n) => (n.children || []).map((c) => c.nodeValue || '').join('');
 
@@ -118,6 +118,7 @@ export async function openPage(env, server, { art, mode = 'card', theme, bare = 
       const st = card ? attr(card, 'style') || '' : '';
       return {
         shown: !!card && cls.includes('show'),
+        menuOpen: !!one('menu') && hasClass(one('menu'), 'open'),
         cur: cur ? text(cur) : null,
         valuenow: bar ? +attr(bar, 'aria-valuenow') : null,
         progress: +((st.match(/--p:\s*([\d.]+)/) || [])[1] || 0) * 100,
@@ -138,6 +139,8 @@ export async function openPage(env, server, { art, mode = 'card', theme, bare = 
       const r = await cdp.send('Runtime.callFunctionOn', { objectId: object.objectId, returnByValue: true, functionDeclaration: `function () { return getComputedStyle(this).getPropertyValue(${JSON.stringify(prop)}); }` });
       return r.result.value;
     },
+    // Atributo de un elemento del reproductor.
+    async attr(sel, name) { const n = await node(sel); return n ? attr(n, name) : null; },
     async focus(cls) { await cdp.send('DOM.focus', { backendNodeId: (await node(cls)).backendNodeId }); },
     // Igual que el clic izquierdo en el icono de la extensión.
     async toggle() {

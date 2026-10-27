@@ -22,6 +22,8 @@ La extensión se inyecta en todas las páginas (`<all_urls>`) y procesa datos qu
 
 - **Captura de audio (opt-in).** Con la opción del menú del icono activada, el clic en el icono (gesto que da `activeTab`) pide un id de flujo con `tabCapture` y lo consume un documento offscreen, que analiza el audio. El audio vuelve a los altavoces sin tocarse y al content script solo llegan bandas de frecuencia y forma de onda por un puerto de la extensión (la página no lo ve). El offscreen solo atiende a la extensión, corta la captura si el reproductor no se muestra o se oculta, y el navegador muestra su indicador de captura de pestaña.
 
+- **Atajos y menú.** Los atajos (`chrome.commands`) los ejecuta el service worker con un script en el mundo aislado y solo aceptan cinco nombres conocidos. El menú se construye con nodos creados por la extensión (nunca con `innerHTML` de datos de la página) y vive en el shadow DOM cerrado. Los ajustes y el volumen por sitio se guardan en `chrome.storage.local`, que la página no ve.
+
 ## Límites conocidos
 - **El mundo MAIN es de la página.** El puente de Media Session (`media-session-bridge.js`) comparte contexto con los scripts del sitio, así que no se puede autenticar ningún mensaje que pase por ahí. Por diseño solo transporta datos de bajo impacto (qué botones existen y órdenes que el propio sitio ya registró como manejadores). Una página hostil puede, como mucho, desactivar o descolocar la interfaz, igual que ya puede con cualquier elemento de su DOM.
 - **Detectabilidad.** La extensión sigue siendo detectable (el host del reproductor tiene un `id` que el puente necesita, y `MediaSession.prototype.setActionHandler` está envuelto). Ocultarlo del todo no es un objetivo.

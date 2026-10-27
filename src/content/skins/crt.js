@@ -16,9 +16,9 @@ SKINS.crt = { label: 'Terminal CRT', tpl: () => `
     <div class="cr-bar" role="slider" tabindex="0" data-bar aria-label="Progreso" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
     <div class="cr-ctl">
       <button class="cr-b pv" data-act="prev" title="Anterior" aria-label="Anterior"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="M6 5v14M19 5.5v13L9 12z"/></svg></button>
-      <button class="cr-b bk" data-act="back" title="Retroceder 10 s" aria-label="Retroceder 10 segundos">-10</button>
+      <button class="cr-b bk" data-act="back" title="Retroceder 10 s" aria-label="Retroceder 10 segundos"><span data-skn="-">-10</span></button>
       <button class="cr-b pl" data-act="play" title="Pausar" aria-label="Pausar"><span class="ic ic-pause"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="M8 5v14M16 5v14" stroke-width="3.4"/></svg></span><span class="ic ic-play"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="M7 4.5v15L20 12z" fill="currentColor"/></svg></span></button>
-      <button class="cr-b fw" data-act="fwd" title="Avanzar 10 s" aria-label="Avanzar 10 segundos">+10</button>
+      <button class="cr-b fw" data-act="fwd" title="Avanzar 10 s" aria-label="Avanzar 10 segundos"><span data-skn="+">+10</span></button>
       <button class="cr-b nx" data-act="next" title="Siguiente" aria-label="Siguiente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="M18 5v14M5 5.5v13L15 12z"/></svg></button>
     </div>
     <div class="cr-ext">
