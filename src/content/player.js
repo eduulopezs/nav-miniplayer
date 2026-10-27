@@ -294,6 +294,8 @@ ${NMP.css}
       const label = playing ? 'Pausar' : 'Reproducir';
       btn.play.title = label; btn.play.setAttribute('aria-label', label);
     }
+    card.classList.toggle('paused', !playing);
+    card.classList.toggle('loading', playing && media.readyState < 3); // reproduciendo pero sin datos suficientes
     btn.back.disabled = btn.fwd.disabled = live;
     btn.next.disabled = !(actions.has('nexttrack') || findSiteButton('next'));
   }
@@ -372,6 +374,8 @@ ${NMP.css}
     return Math.min(e.clientX - r.left, r.right - e.clientX, e.clientY - r.top, r.bottom - e.clientY) <= EDGE;
   };
 
+  const SNAP = 14;
+  const snap = (v, max) => Math.abs(v - MARGIN) < SNAP ? MARGIN : Math.abs(v - (max - MARGIN)) < SNAP ? max - MARGIN : v;
   let mode = null, offX = 0, offY = 0;
   card.addEventListener('pointerdown', (e) => {
     if (e.button !== 0 || e.target.closest('button')) return;
@@ -386,7 +390,10 @@ ${NMP.css}
     }
   });
   card.addEventListener('pointermove', (e) => {
-    if (mode === 'drag') place(e.clientX - offX, e.clientY - offY);
+    if (mode === 'drag') { // imán a los márgenes de la pantalla; Alt lo desactiva
+      const x = e.clientX - offX, y = e.clientY - offY;
+      place(e.altKey ? x : snap(x, window.innerWidth - card.offsetWidth), e.altKey ? y : snap(y, window.innerHeight - card.offsetHeight));
+    }
     else if (mode === 'scrub' && media && isFinite(media.duration)) { seekTo(edgeFraction(e) * media.duration); render(); }
     else card.classList.toggle('edge', nearEdge(e));
   });

@@ -8,8 +8,14 @@
     c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r);
     c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath();
   }
+  const reduceMotion = typeof matchMedia === 'function' ? matchMedia('(prefers-reduced-motion: reduce)') : null;
   function drawMarquee(c, text, x, y, maxW, size) {
-    const tw = c.measureText(text).width;
+    let tw = c.measureText(text).width;
+    if (tw > maxW && reduceMotion && reduceMotion.matches) { // sin desplazamiento: se recorta con «…»
+      let s = text;
+      while (s.length > 1 && c.measureText(s + '…').width > maxW) s = s.slice(0, -1);
+      text = s + '…'; tw = maxW;
+    }
     c.save(); c.beginPath(); c.rect(x, y - size, maxW, size * 1.4); c.clip();
     let off = 0;
     if (tw > maxW) {
@@ -74,7 +80,13 @@
         c.drawImage(src, 12, 12, 56, 56);
         c.filter = 'none';
         if (T.tint) { c.globalCompositeOperation = 'multiply'; c.fillStyle = T.tint; c.fillRect(12, 12, 56, 56); }
-      } else { const a = c.createLinearGradient(12, 12, 68, 68); a.addColorStop(0, T.artBorder || '#7c8cff'); a.addColorStop(1, T.artBorder ? T.bg[1] : '#c77dff'); c.fillStyle = a; c.fillRect(12, 12, 56, 56); }
+      } else { const a = c.createLinearGradient(12, 12, 68, 68); a.addColorStop(0, T.artBorder || '#7c8cff'); a.addColorStop(1, T.artBorder ? T.bg[1] : '#c77dff'); c.fillStyle = a; c.fillRect(12, 12, 56, 56);
+        c.fillStyle = T.fg; c.textAlign = 'center'; c.textBaseline = 'alphabetic'; c.font = '700 28px ' + T.font; c.fillText('♪', 40, 51); // sin carátula
+      }
+      if (v.media && v.media.paused) { // en pausa: velo y símbolo sobre la carátula
+        c.fillStyle = 'rgba(0,0,0,.5)'; c.fillRect(12, 12, 56, 56);
+        c.fillStyle = T.fg; c.fillRect(32, 30, 5, 20); c.fillRect(43, 30, 5, 20);
+      }
       c.restore();
       if (T.artBorder) { c.strokeStyle = T.artBorder; c.lineWidth = 2; c.strokeRect(12, 12, 56, 56); }
       c.textBaseline = 'alphabetic'; c.textAlign = 'left';
@@ -101,7 +113,7 @@
       }
       c.fillStyle = T.time; c.font = '11px ' + T.font;
       c.fillText(v.media ? fmt(v.media.currentTime) : '0:00', tx, 73);
-      c.textAlign = 'right'; c.fillText(live || !v.media ? '' : fmt(v.media.duration), tx + tw, 73); c.textAlign = 'left';
+      c.textAlign = 'right'; c.fillText(!v.media ? '' : live ? '● EN DIRECTO' : fmt(v.media.duration), tx + tw, 73); c.textAlign = 'left';
     }
     return {
       get dpr() { return r.dpr; },
