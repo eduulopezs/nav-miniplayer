@@ -32,3 +32,34 @@ for (const th of Object.keys(N.themes)) {
   }
 }
 console.log('✓ renderer dibuja todos los diseños');
+
+// Medios remotos y política de selección.
+{
+  const M = N.media, sent = [];
+  const m = (o) => ({ isConnected: true, readyState: 4, duration: 100, paused: true, ended: false, muted: false, loop: false, tagName: 'AUDIO', ...o });
+  const [a, b, c] = [m({ duration: 60 }), m({ duration: 300 }), m({ duration: 120, paused: false })];
+  const ok = (cond, msg) => { if (!cond) throw new Error('selección: ' + msg); };
+  ok(M.pick([], null) === null, 'lista vacía');
+  ok(M.pick([a, b, c], a) === c, 'el que suena gana al último que sonó');
+  ok(M.pick([a, b], a) === a, 'sin ninguno sonando, el último que sonó');
+  ok(M.pick([a, b], null) === b, 'sin último, el más largo');
+  const loud = m({ duration: 50, paused: false }), mute = m({ duration: 500, paused: false, muted: true });
+  ok(M.pick([mute, loud], null) === loud, 'el silenciado cede ante el que tiene sonido');
+  ok(M.pick([mute], null) === mute, 'un silenciado solo se usa si no hay otro');
+  ok(!M.usable(m({ tagName: 'VIDEO', muted: true, loop: true }), 30), 'ignora vídeos de fondo');
+  ok(!M.usable(m({ duration: 5 }), 30) && M.usable(m({ duration: Infinity }), 30), 'duración mínima y directos');
+
+  const played = [];
+  const feed = (list) => M.ingest(JSON.stringify(list), (s) => sent.push(s), (r) => played.push(r));
+  feed([{ i: 1, p: true, d: 90, r: 4 }, { i: 2, p: false, l: true, r: 4 }]);
+  let [r1, r2] = M.remotes();
+  ok(r1.duration === 90 && r2.duration === Infinity && played.length === 1 && played[0] === r2, 'estado remoto y aviso de inicio');
+  r1.play(); r1.pause(); r1.seek(12.5);
+  ok(sent.join('|') === 'm:1:play|m:1:pause|m:1:seek:12.5' && r1.currentTime === 12.5, 'órdenes al puente');
+  feed([{ i: 1, p: true, t: -5, d: 1e12, r: 99, k: 'x' }, { i: 'x' }, null, { i: 0 }]);
+  [r1] = M.remotes();
+  ok(M.remotes().length === 1 && r2.alive === false && r1.currentTime === 0 && !(r1.duration < 1e12) && r1.readyState === 0 && r1.playbackRate === 1, 'valida y descarta lo que la página falsea');
+  M.ingest('{no es json', () => {}); M.ingest('{"i":1}', () => {});
+  ok(M.remotes().length === 1, 'ignora basura');
+}
+console.log('✓ medios remotos y política de selección');

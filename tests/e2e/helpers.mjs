@@ -44,7 +44,7 @@ export async function startServer() {
     const artwork = url.searchParams.get('art');
     const meta = `navigator.mediaSession.metadata=new MediaMetadata({title:'Canción de prueba',artist:'Artista',artwork:${artwork ? `[{src:${JSON.stringify(artwork)},sizes:'512x512'}]` : '[]'}});`;
     r.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
-    r.end(`<!doctype html><meta charset=utf-8><title>Prueba</title><body style="margin:0;height:100vh;background:#336"><audio id=a src="/a.wav" loop></audio><script>${meta}</script>`);
+    r.end(`<!doctype html><meta charset=utf-8><title>Prueba</title><body style="margin:0;height:100vh;background:#336">${url.searchParams.has('bare') ? '' : '<audio id=a src="/a.wav" loop></audio>'}<script>${meta}</script>`);
   });
   await new Promise((ok) => server.listen(0, '127.0.0.1', ok));
   const base = `http://127.0.0.1:${server.address().port}`;
@@ -68,7 +68,8 @@ const hasClass = (n, c) => (attr(n, 'class') || '').split(/\s+/).includes(c);
 const text = (n) => (n.children || []).map((c) => c.nodeValue || '').join('');
 
 // Abre una página de pruebas y devuelve un inspector del reproductor.
-export async function openPage(env, server, { art, mode = 'card', theme } = {}) {
+// `bare`: página sin el <audio id=a> (cada prueba crea el medio a su manera).
+export async function openPage(env, server, { art, mode = 'card', theme, bare = false } = {}) {
   const { ctx, sw } = env;
   await sw.evaluate((v) => chrome.storage.local.set(v), { mp_mode: mode, ...(theme ? { mp_theme: theme } : {}) });
   const page = await ctx.newPage();

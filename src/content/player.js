@@ -5,7 +5,7 @@
   const NMP = globalThis.__NMP;
   const { SKIP, MIN_DURATION, MARGIN, EDGE, POS_KEY, SIZE_KEY, THEME_KEY, MODE_KEY, SLIM, SLIM_BELOW, DESIGN, MIN, MAX, CW, CH, DPR0, SITE_BUTTONS } = NMP.cfg;
   const { clamp, fmt } = NMP.util;
-  const { icons, themes: TH, tokens } = NMP;
+  const { icons, themes: TH, tokens, media: MEDIA } = NMP;
   const G = tokens.theme.glass; // degradado de la barra de progreso (Glass)
 
   // ---------- DOM ----------
@@ -93,6 +93,8 @@ ${NMP.css}
   // El puente corre en el mundo de la página, así que lo que anuncia puede estar falseado: solo se aceptan nombres conocidos.
   const KNOWN_ACTIONS = new Set(['play', 'pause', 'stop', 'seekbackward', 'seekforward', 'seekto', 'previoustrack', 'nexttrack', '@pip']);
   document.addEventListener('__mp_actions', (e) => { actions = new Set(String(e.detail).split(',').filter((n) => KNOWN_ACTIONS.has(n))); });
+  // Medios fuera del alcance del documento (sin insertar, en un shadow DOM): el puente manda su estado y recibe las órdenes.
+  document.addEventListener('__mp_media', (e) => MEDIA.ingest(e.detail, send, (m) => { lastPlayed = m; scanDirty = true; }));
   document.dispatchEvent(new CustomEvent('__mp_query'));
 
   // Registro de medios: se reescanea solo cuando un medio avisa (play, carga, fin...) o, como máximo, una vez por segundo.
@@ -105,13 +107,8 @@ ${NMP.css}
     return (picked = scanMedia());
   }
   function scanMedia() {
-    const list = [...document.querySelectorAll('video,audio')].filter((m) =>
-      m.isConnected && m.readyState > 0 && (m.duration >= MIN_DURATION || m.duration === Infinity) &&
-      !(m.tagName === 'VIDEO' && m.muted && m.loop));
-    const playing = list.filter((m) => !m.paused && !m.ended);
-    if (playing.length) return playing.includes(lastPlayed) ? lastPlayed : playing[0];
-    if (lastPlayed && list.includes(lastPlayed)) return lastPlayed;
-    return list[0] || null;
+    const list = [...document.querySelectorAll('video,audio'), ...MEDIA.remotes()].filter((m) => MEDIA.usable(m, MIN_DURATION));
+    return MEDIA.pick(list, lastPlayed);
   }
 
 
@@ -146,7 +143,11 @@ ${NMP.css}
   const send = (name) => { if (name === '__pip') pipAsked = true; document.dispatchEvent(new CustomEvent('__mp_cmd', { detail: name })); };
 
   // ---------- Acciones ----------
-  const seekTo = (t) => { if (media && isFinite(media.duration)) media.currentTime = Math.max(0, Math.min(media.duration, t)); };
+  const seekTo = (t) => {
+    if (!media || !isFinite(media.duration)) return;
+    t = Math.max(0, Math.min(media.duration, t));
+    if (media.seek) media.seek(t); else media.currentTime = t; // los remotos mandan la orden al puente
+  };
 
   btn.play.addEventListener('click', () => { if (!media) return; media.paused ? media.play().catch(() => {}) : media.pause(); });
   btn.back.addEventListener('click', () => media && seekTo(media.currentTime - SKIP));
