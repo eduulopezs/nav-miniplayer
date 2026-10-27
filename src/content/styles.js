@@ -6,18 +6,22 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   .card {
     --art: none;
+    /* Tokens del diseño Glass; los otros diseños los sustituyen con .card[data-theme]. */
+    --text: #fff; --text-2: rgba(255,255,255,.78); --text-3: rgba(255,255,255,.72);
+    --btn: rgba(255,255,255,.9); --hover-bg: rgba(255,255,255,.16); --focus: rgba(255,255,255,.9);
+    --ease-out: cubic-bezier(.22, 1, .36, 1); --dur-in: .32s; --dur-out: .18s;
     position: relative; width: 312px; height: 126px; padding: 0;
-    border-radius: var(--r, 22px); overflow: hidden; color: #fff;
+    border-radius: var(--r, 22px); overflow: hidden; color: var(--text);
     font-family: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
     background: linear-gradient(145deg, rgba(255,255,255,.20), rgba(255,255,255,.05)), rgba(22,22,28,.46);
     -webkit-backdrop-filter: blur(28px) saturate(185%); backdrop-filter: blur(28px) saturate(185%);
     box-shadow: 0 18px 48px rgba(0,0,0,.38), 0 2px 8px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.38), inset 0 -1px 0 rgba(255,255,255,.06);
     user-select: none; -webkit-user-select: none; touch-action: none; cursor: grab;
     opacity: 0; transform: translateY(8px) scale(.96); pointer-events: none;
-    transition: opacity .25s ease, transform .25s ease;
+    transition: opacity var(--dur-out) ease-in, transform var(--dur-out) ease-in; /* salir es más rápido que entrar */
   }
-  .card.show { opacity: 1; transform: none; pointer-events: auto; }
-  .card.dragging { cursor: grabbing; transition: opacity .25s ease; }
+  .card.show { opacity: 1; transform: none; pointer-events: auto; transition: opacity var(--dur-in) var(--ease-out), transform var(--dur-in) var(--ease-out); }
+  .card.dragging { cursor: grabbing; transition: opacity var(--dur-in) var(--ease-out); }
   .card.edge { cursor: pointer; }
   .glow {
     position: absolute; inset: -40px; z-index: 0; background: var(--art) center/cover;
@@ -41,29 +45,29 @@
   .scroll > span { display: inline-block; animation: marquee var(--t, 6s) ease-in-out infinite alternate; }
   @keyframes marquee { 0%, 15% { transform: translateX(0); } 85%, 100% { transform: translateX(var(--d)); } }
   .scroll { text-overflow: clip !important; }
-  .artist { font-size: 12px; opacity: .68; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .artist { font-size: 12px; color: var(--text-2); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .controls { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; }
-  .time { width: 38px; font-size: 11px; font-variant-numeric: tabular-nums; opacity: .62; }
+  .time { width: 38px; font-size: 11px; font-variant-numeric: tabular-nums; color: var(--text-3); }
   .time.end { text-align: right; }
   .buttons { display: flex; align-items: center; gap: 2px; }
   button {
     all: unset; box-sizing: border-box; display: grid; place-items: center; cursor: pointer;
-    width: 32px; height: 32px; border-radius: 50%; color: rgba(255,255,255,.88);
+    width: 32px; height: 32px; border-radius: 50%; color: var(--btn);
     transition: background .15s, transform .12s, opacity .15s;
   }
   button svg { width: 20px; height: 20px; }
-  button:hover { background: rgba(255,255,255,.16); color: #fff; }
+  button:hover { background: var(--hover-bg); color: var(--text); }
   button:active { transform: scale(.9); }
-  button:focus-visible { outline: 2px solid rgba(255,255,255,.8); outline-offset: 1px; }
+  button:focus-visible, .card:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
   button[disabled] { opacity: .32; pointer-events: none; }
   .play { width: 44px; height: 44px; margin: 0 4px; background: #fff; color: #15151b; box-shadow: 0 4px 16px rgba(0,0,0,.3); }
   .play:hover { background: #fff; transform: scale(1.06); color: #000; }
   .play:active { transform: scale(.95); }
   .play svg { width: 22px; height: 22px; }
   .side { flex: none; display: flex; flex-direction: column; gap: 2px; }
-  .side button { width: 22px; height: 22px; opacity: .7; }
+  .side button { width: 24px; height: 24px; opacity: .85; }
   .side button:hover { opacity: 1; }
-  .side .close { opacity: .45; }
+  .side .close { opacity: .7; }
   .close svg { width: 12px; height: 12px; }
   .mode svg { width: 14px; height: 14px; }
   .card.pip { width: 100% !important; height: 100% !important; cursor: default; box-shadow: none; border-radius: 0; background: linear-gradient(145deg, #3a3a52, #1b1b24); -webkit-backdrop-filter: none; backdrop-filter: none; }
@@ -165,6 +169,11 @@
   .card[data-theme=retro] button:hover { background: rgba(77,255,176,.2); }
   .card[data-theme=retro] .play { background: rgba(77,255,176,.85); color: #03100a; box-shadow: 0 0 12px rgba(77,255,176,.55); border-radius: 3px; }
   .card[data-theme=retro] .play:hover { background: #7dffc8; }
-  @media (prefers-reduced-motion: reduce) { .card, .ring .bar { transition: none; } }
+  @media (prefers-reduced-motion: reduce) {
+    .card, .card.show, .ring .bar, button { transition: none; }
+    .card { transform: none; }
+    .scroll > span { animation: none; display: inline; }
+    .scroll { text-overflow: ellipsis !important; }
+  }
 `;
 })();
