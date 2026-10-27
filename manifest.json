@@ -18,7 +18,15 @@
     },
     {
       "matches": ["<all_urls>"],
-      "js": ["src/content/player.js"],
+      "js": [
+        "src/content/config.js",
+        "src/content/util.js",
+        "src/content/icons.js",
+        "src/content/styles.js",
+        "src/content/themes.js",
+        "src/content/renderer.js",
+        "src/content/player.js"
+      ],
       "run_at": "document_idle"
     }
   ]
