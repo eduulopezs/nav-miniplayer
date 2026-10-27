@@ -32,7 +32,7 @@ ${NMP.css}
   <div class="inner">
   <div class="top">
     <div class="art">${icons.note}</div>
-    <div class="meta" aria-live="polite"><div class="title"></div><div class="artist"></div></div>
+    <div class="meta" aria-live="polite"><div class="title"></div><div class="artist"></div><div class="artist hint"></div></div>
     <div class="side">
     <button class="mode" title="Pasar a Mini" aria-label="Pasar a Mini"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><rect x="12" y="11" width="6" height="5" rx="1.5" fill="currentColor"/></svg></button>
     <button class="close" title="Ocultar" aria-label="Ocultar">${icons.close}</button>
@@ -56,7 +56,7 @@ ${NMP.css}
   const $ = (s) => root.querySelector(s);
   const inner = $('.inner'), grips = root.querySelectorAll('.grip');
   const card = $('.card'), ring = $('.ring'), bar = $('.bar'), art = $('.art');
-  const titleEl = $('.title'), artistEl = $('.artist'), curEl = $('.cur'), durEl = $('.dur');
+  const titleEl = $('.title'), artistEl = $('.artist'), hintEl = $('.hint'), curEl = $('.cur'), durEl = $('.dur');
   const btn = { prev: $('.prev'), back: $('.back'), play: $('.play'), fwd: $('.fwd'), next: $('.next'), close: $('.close'), mode: $('.mode') };
 
   // ---------- Estado ----------
@@ -66,7 +66,24 @@ ${NMP.css}
   let fm = 'pip';
   let theme = 'glass';
   const applyTheme = (t) => { theme = TH[t] ? t : 'glass'; if (theme === 'glass') delete card.dataset.theme; else card.dataset.theme = theme; renderer.invalidate(); };
-  const setMode = (v) => { fm = v; try { chrome.storage.local.set({ [MODE_KEY]: v }); } catch (_) { /* contexto invalidado */ } };
+  const setMode = (v) => { applyMode(v); try { chrome.storage.local.set({ [MODE_KEY]: v }); } catch (_) { /* contexto invalidado */ } };
+
+  // Cambio de modo: cierra la ventana anterior, espera a que se cierre de verdad y entonces muestra/abre la nueva.
+  let switchTimer = 0;
+  function applyMode(v) {
+    if (v === fm) return;
+    fm = v;
+    if (fm !== 'pip' && vp.active) document.exitPictureInPicture().catch(() => {});
+    if (fm !== 'win' && pip) send('__pip');
+    modeSwitch = true; dismissed = false; render();
+    const t0 = performance.now();
+    clearInterval(switchTimer);
+    switchTimer = setInterval(() => {
+      if ((vp.active || pip) && performance.now() - t0 < 2000) return;
+      clearInterval(switchTimer);
+      modeSwitch = false; dismissed = false; render(); startFloat();
+    }, 50);
+  }
 
 
   document.addEventListener('play', (e) => { if (e.target instanceof HTMLMediaElement) lastPlayed = e.target; }, true);
@@ -257,12 +274,25 @@ ${NMP.css}
     dismissed = !dismissed; render(); startFloat();
   });
 
+  // El navegador solo abre la ventana con un gesto en la página: mientras espera, la tarjeta lo dice (cualquier clic o tecla la abre).
+  const canOpenFloat = () => fm === 'win' ? actions.has('@pip') : fm === 'pip' && document.pictureInPictureEnabled && !!HTMLCanvasElement.prototype.captureStream;
+  let pending = null;
+  function setPending(on) {
+    if (on === pending) return;
+    pending = on;
+    card.classList.toggle('pending', on);
+    hintEl.textContent = on ? (fm === 'pip' ? 'Toca para abrir Mini' : 'Toca para abrir la ventana') : '';
+    const label = on && fm === 'pip' ? 'Abrir Mini' : 'Pasar a Mini';
+    btn.mode.title = label; btn.mode.setAttribute('aria-label', label);
+  }
+
   // ---------- Render ----------
   function render() {
     media = pickMedia();
     const fs = !!document.fullscreenElement;
     const visible = !!media && !dismissed && !fs && !vp.active;
     card.classList.toggle('show', visible || pip);
+    setPending(visible && !pip && !modeSwitch && !vp.starting && canOpenFloat());
     if (!media) return;
 
     const md = navigator.mediaSession && navigator.mediaSession.metadata;
@@ -438,14 +468,8 @@ ${NMP.css}
       savedPos = r && r[POS_KEY]; applyPos(savedPos);
     });
     chrome.storage.onChanged.addListener((c) => {
-      if (c[MODE_KEY] && c[MODE_KEY].newValue && c[MODE_KEY].newValue !== fm) {
-        fm = c[MODE_KEY].newValue;
-        if (fm !== 'pip' && vp.active) document.exitPictureInPicture().catch(() => {});
-        if (fm !== 'win' && pip) send('__pip');
-        modeSwitch = true; dismissed = false; render();
-        // Si el navegador no deja abrir la ventana sin un gesto, se ve la tarjeta y se abre con el siguiente clic en la página.
-        setTimeout(() => { modeSwitch = false; dismissed = false; render(); startFloat(); }, 400);
-      }
+      // Si el navegador no deja abrir la ventana sin un gesto, se ve la tarjeta y se abre con el siguiente clic en la página.
+      if (c[MODE_KEY] && c[MODE_KEY].newValue) applyMode(c[MODE_KEY].newValue);
       if (c[THEME_KEY] && c[THEME_KEY].newValue) applyTheme(c[THEME_KEY].newValue);
       if (c[SIZE_KEY] && !rs && c[SIZE_KEY].newValue) setSize(c[SIZE_KEY].newValue.w, c[SIZE_KEY].newValue.h);
       if (c[POS_KEY] && mode !== 'drag') { savedPos = c[POS_KEY].newValue; applyPos(savedPos); } });
