@@ -40,11 +40,19 @@ export async function startServer() {
       r.writeHead(200, { 'content-type': 'audio/wav', 'accept-ranges': 'bytes', 'content-length': audio.length });
       return r.end(audio);
     }
+    if (url.pathname === '/frame') { // página de iframe con un <audio> propio (id local `a`)
+      r.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
+      return r.end('<!doctype html><meta charset=utf-8><body><audio id=a src="/a.wav" loop></audio>');
+    }
+    if (url.pathname === '/frame-hidden') { // iframe cuyo medio no está en el DOM: sin insertar y con autoplay, sin llamar a play()
+      r.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
+      return r.end('<!doctype html><meta charset=utf-8><body><script>window.x=new Audio();window.x.loop=true;window.x.autoplay=true;window.x.src="/a.wav";</script>');
+    }
     if (url.pathname === '/leak.png') { r.writeHead(200, { 'content-type': 'image/png' }); return r.end(Buffer.from('89504e470d0a1a0a000000000000000000000000', 'hex')); }
     const artwork = url.searchParams.get('art');
     const meta = `navigator.mediaSession.metadata=new MediaMetadata({title:'Canción de prueba',artist:'Artista',artwork:${artwork ? `[{src:${JSON.stringify(artwork)},sizes:'512x512'}]` : '[]'}});`;
     r.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
-    r.end(`<!doctype html><meta charset=utf-8><title>Prueba</title><body style="margin:0;height:100vh;background:#336"><audio id=a src="/a.wav" loop></audio><script>${meta}</script>`);
+    r.end(`<!doctype html><meta charset=utf-8><title>Prueba</title><body style="margin:0;height:100vh;background:#336">${url.searchParams.has('bare') ? '' : '<audio id=a src="/a.wav" loop></audio>'}<script>${meta}</script>`);
   });
   await new Promise((ok) => server.listen(0, '127.0.0.1', ok));
   const base = `http://127.0.0.1:${server.address().port}`;
@@ -74,12 +82,13 @@ const match = (n, sel) => {
 const text = (n) => (n.children || []).map((c) => c.nodeValue || '').join('');
 
 // Abre una página de pruebas y devuelve un inspector del reproductor.
-export async function openPage(env, server, { art, mode = 'card', theme } = {}) {
+// `bare`: página sin el <audio id=a> (cada prueba crea el medio a su manera).
+export async function openPage(env, server, { art, mode = 'card', theme, bare = false } = {}) {
   const { ctx, sw } = env;
   await sw.evaluate((v) => chrome.storage.local.set(v), { mp_mode: mode, ...(theme ? { mp_theme: theme } : {}) });
   const page = await ctx.newPage();
-  await page.goto(`${server.base}/${art ? `?art=${encodeURIComponent(art)}` : ''}`);
-  await page.waitForFunction(() => document.getElementById('a').readyState > 0);
+  await page.goto(`${server.base}/${art ? `?art=${encodeURIComponent(art)}` : bare ? '?bare=1' : ''}`);
+  if (!bare) await page.waitForFunction(() => document.getElementById('a').readyState > 0);
   await sleep(300); // el content script lee su configuración de storage al arrancar
   const cdp = await ctx.newCDPSession(page);
   const tree = async () => (await cdp.send('DOM.getDocument', { depth: -1, pierce: true })).root;

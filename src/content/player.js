@@ -5,7 +5,7 @@
   const NMP = globalThis.__NMP;
   const { SKIP, MIN_DURATION, MARGIN, POS_KEY, SIZE_KEY, THEME_KEY, MODE_KEY, MIN, MAX, CW, CH, DPR0, SITE_BUTTONS } = NMP.cfg;
   const { clamp, fmt, fmt2, pad2, strSeed, barcode, palette, DEFAULT_PAL } = NMP.util;
-  const { themes: TH, skins: SK, viz } = NMP;
+  const { themes: TH, skins: SK, viz, media: MEDIA } = NMP;
 
   // ---------- DOM ----------
   const host = document.createElement('div');
@@ -80,6 +80,17 @@ ${NMP.css}
   // El puente corre en el mundo de la página, así que lo que anuncia puede estar falseado: solo se aceptan nombres conocidos.
   const KNOWN_ACTIONS = new Set(['play', 'pause', 'stop', 'seekbackward', 'seekforward', 'seekto', 'previoustrack', 'nexttrack', '@pip']);
   document.addEventListener('__mp_actions', (e) => { actions = new Set(String(e.detail).split(',').filter((n) => KNOWN_ACTIONS.has(n))); });
+  // Medios fuera del alcance del documento (sin insertar, en un shadow DOM): el puente manda su estado y recibe las órdenes.
+  const remotePlay = (m) => { lastPlayed = m; scanDirty = true; };
+  document.addEventListener('__mp_media', (e) => MEDIA.ingest('p', e.detail, send, remotePlay));
+  // Medios en iframes: los agentes de los subframes informan por el service worker, que también les lleva las órdenes.
+  try {
+    chrome.runtime.onMessage.addListener((m, sender) => {
+      if (sender.id !== chrome.runtime.id || !m || m.type !== 'mp-frame' || !Number.isInteger(m.frame) || m.frame < 1) return;
+      MEDIA.ingest('f' + m.frame, m.list, (cmd) => { try { chrome.runtime.sendMessage({ type: 'mp-cmd', frame: m.frame, cmd }); } catch (_) { /* contexto invalidado */ } }, remotePlay);
+      scanDirty = true;
+    });
+  } catch (_) { /* contexto invalidado */ }
   document.dispatchEvent(new CustomEvent('__mp_query'));
 
   // Registro de medios: se reescanea solo cuando un medio avisa (play, carga, fin...) o, como máximo, una vez por segundo.
@@ -92,13 +103,9 @@ ${NMP.css}
     return (picked = scanMedia());
   }
   function scanMedia() {
-    const list = [...document.querySelectorAll('video,audio')].filter((m) =>
-      m.isConnected && m.readyState > 0 && (m.duration >= MIN_DURATION || m.duration === Infinity) &&
-      !(m.tagName === 'VIDEO' && m.muted && m.loop));
-    const playing = list.filter((m) => !m.paused && !m.ended);
-    if (playing.length) return playing.includes(lastPlayed) ? lastPlayed : playing[0];
-    if (lastPlayed && list.includes(lastPlayed)) return lastPlayed;
-    return list[0] || null;
+    MEDIA.expire();
+    const list = [...document.querySelectorAll('video,audio'), ...MEDIA.remotes()].filter((m) => MEDIA.usable(m, MIN_DURATION));
+    return MEDIA.pick(list, lastPlayed);
   }
 
 
@@ -133,7 +140,11 @@ ${NMP.css}
   const send = (name) => { if (name === '__pip') pipAsked = true; document.dispatchEvent(new CustomEvent('__mp_cmd', { detail: name })); };
 
   // ---------- Acciones ----------
-  const seekTo = (t) => { if (media && isFinite(media.duration)) media.currentTime = Math.max(0, Math.min(media.duration, t)); };
+  const seekTo = (t) => {
+    if (!media || !isFinite(media.duration)) return;
+    t = Math.max(0, Math.min(media.duration, t));
+    if (media.seek) media.seek(t); else media.currentTime = t; // los remotos mandan la orden al puente
+  };
 
   // Todas las acciones salen de [data-act] (cada diseño pone sus botones donde quiere); el clic se resuelve aquí.
   const ACT = {

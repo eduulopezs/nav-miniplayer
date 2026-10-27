@@ -11,6 +11,7 @@ Elige la carpeta del repositorio (la que contiene `manifest.json`) y recarga las
 ## Uso
 - Arrastra la tarjeta a cualquier punto de la pantalla (la posición se recuerda).
 - Play/pausa, ±10 s, anterior/siguiente (usa Media Session del sitio; en YouTube/Spotify Web funcionan).
+- Detecta `<audio>`/`<video>` de la página, `new Audio()` sin insertar y medios dentro de shadow DOM (abierto o cerrado), tanto si se llama a `play()` como si arrancan solos con `autoplay`. Si suenan varios elige el que tiene sonido, después el último que sonó y después el más largo; ignora los vídeos de fondo silenciados y en bucle. También los de iframes (incluidos los sin insertar), con un agente sin interfaz en cada subframe. Fuera de alcance: Media Session dentro de un iframe, y medios creados en un documento ajeno (`createElement` de otro `document`).
 - El borde de la tarjeta es la barra de progreso: haz clic o arrastra sobre el borde para saltar.
 - Tamaño: arrastra cualquiera de las cuatro esquinas (aparecen al pasar el ratón) para cambiar ancho y alto; el contenido se adapta en tiempo real. Si lo aplastas verticalmente (menos de ~84 px de alto) pasa a un modo fino de una sola fila, hasta ~44 px de alto. En la ventana flotante, redimensiona la propia ventana desde cualquier borde o esquina.
 - Aparece solo al pulsar el icono de la extensión (clic izquierdo; otro clic lo oculta, sin cambiar de tipo). Clic derecho en el icono para elegir el tipo de ventana:
@@ -20,6 +21,20 @@ Elige la carpeta del repositorio (la que contiene `manifest.json`) y recarga las
   Si el navegador no permite el PiP de vídeo, usa una ventana flotante con marco como respaldo.
 - Botón × (al pasar el ratón) o icono de la extensión en la barra: ocultar/mostrar.
 - Teclado: con Tab se enfoca el reproductor; **Espacio** o **K** play/pausa, **←/→** ±10 s, **Esc** lo oculta. El progreso y la pista se anuncian a lectores de pantalla, y con "reducir movimiento" activado los títulos largos se truncan en vez de desplazarse.
+
+## Compatibilidad
+
+✅ probado a mano (aparece la tarjeta, play/pausa y ±10 s actúan sobre el medio) · ☑️ asumido, sin probar todavía.
+
+| Sitio | Estado | Notas |
+|---|---|---|
+| YouTube | ✅ | Con un anuncio delante, la tarjeta sigue al medio que suena en ese momento. |
+| YouTube Music | ☑️ | Rechaza Chromium automatizado, hay que probarlo en un Chrome normal. |
+| Spotify Web | ☑️ | Necesita sesión y DRM. |
+| SoundCloud | ☑️ | |
+| Twitch | ☑️ | |
+| Vimeo incrustado | ☑️ | Iframe; cubierto por los tests e2e con iframes locales. |
+| Vídeo de noticias | ☑️ | |
 
 ## Diseños
 Clic derecho en el icono → **Diseño** para cambiar el aspecto en caliente (Tarjeta, Ventana y Mini):
@@ -37,13 +52,14 @@ La tarjeta se adapta a su tamaño (pastilla, fila, compacto, portada, panorámic
 manifest.json
 design/tokens.json              fuente única de tokens (primitivos y semánticos por diseño)
 src/
-  background/service-worker.js   clic en el icono, menú contextual y descarga de carátulas
+  background/service-worker.js   clic en el icono, menú contextual, descarga de carátulas y relevo de mensajes de iframes
   background/net-guard.js        reglas de red para carátulas (URL permitidas y detección de imagen por bytes)
-  page/media-session-bridge.js   mundo de la página: captura los manejadores de Media Session
+  page/media-session-bridge.js   mundo de la página: captura los manejadores de Media Session y vigila los medios sin insertar o en shadow DOM
   content/
     config.js                    constantes y claves de almacenamiento
     util.js                      clamp y formato de tiempo
-    icons.js                     iconos SVG
+    media.js                     medios remotos (del puente y de iframes) y política de selección
+    frame-agent.js               agente sin interfaz en cada iframe: informa al marco superior y ejecuta sus órdenes
     tokens.js                    GENERADO desde design/tokens.json (variables CSS y colores del lienzo)
     styles.js                    CSS del reproductor; sólo usa var(--token)
     themes.js                    paletas del lienzo de Mini, una por diseño, leídas de los tokens

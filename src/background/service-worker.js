@@ -65,6 +65,16 @@ async function fetchArtwork(url) {
     return `data:${mime};base64,${toBase64(bytes)}`;
   } finally { clearTimeout(timer); }
 }
+// Medios en iframes: un agente sin interfaz en cada subframe informa al marco superior, y este le manda órdenes. Los content scripts
+// no se ven entre sí, así que el service worker solo reenvía (agente -> marco 0 y marco 0 -> agente), sin salir de la pestaña emisora.
+const MAX_FRAME_MSG = 20000;
+function relayFrame(m, sender, tabId) {
+  if (m.type === 'mp-frame' && sender.frameId > 0 && typeof m.list === 'string' && m.list.length <= MAX_FRAME_MSG) {
+    chrome.tabs.sendMessage(tabId, { type: 'mp-frame', frame: sender.frameId, list: m.list }, { frameId: 0 }).catch(() => {});
+  } else if (m.type === 'mp-cmd' && sender.frameId === 0 && Number.isInteger(m.frame) && m.frame > 0 && typeof m.cmd === 'string' && m.cmd.length < 40) {
+    chrome.tabs.sendMessage(tabId, { type: 'mp-cmd', cmd: m.cmd }, { frameId: m.frame }).catch(() => {});
+  }
+}
 // Fuentes de los diseños: se leen de la propia extensión y se entregan al content script en base64 (no son accesibles desde las páginas).
 const FONT_FILE = /^[a-z0-9]+(?:-[a-z0-9]+)*-latin-\d{3}$/;
 const fontCache = new Map();
@@ -83,6 +93,7 @@ const inflight = new Set(); // una descarga a la vez por pestaña
 chrome.runtime.onMessage.addListener((m, sender, reply) => {
   const tabId = sender.tab && sender.tab.id;
   if (sender.id !== chrome.runtime.id || tabId == null || !m) return;
+  if (m.type === 'mp-frame' || m.type === 'mp-cmd') return void relayFrame(m, sender, tabId);
   if (m.type === 'font') {
     if (typeof m.file !== 'string' || !FONT_FILE.test(m.file)) return;
     readFont(m.file).then((data) => reply({ data }), () => reply({}));
