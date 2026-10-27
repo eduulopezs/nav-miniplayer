@@ -8,7 +8,9 @@
   const original = MediaSession.prototype.setActionHandler;
 
   const announce = () => {
-    const actions = [...handlers].filter(([, fn]) => fn).map(([name]) => name).join(',');
+    const names = [...handlers].filter(([, fn]) => fn).map(([name]) => name);
+    if ('documentPictureInPicture' in window) names.push('@pip');
+    const actions = names.join(',');
     document.dispatchEvent(new CustomEvent('__mp_actions', { detail: actions }));
   };
 
@@ -19,7 +21,27 @@
   };
 
   document.addEventListener('__mp_query', announce);
+  let pipWin = null, pipPending = false;
+  const pipEvent = (detail) => document.dispatchEvent(new CustomEvent('__mp_pip', { detail }));
+  // Debe llamarse dentro del clic del usuario (activación transitoria).
+  function togglePip() {
+    if (pipWin) { pipWin.close(); return; }
+    if (pipPending) return;
+    const host = document.getElementById('glass-mini-player-host');
+    if (!host || !('documentPictureInPicture' in window)) return pipEvent('error:no soportado');
+    pipPending = true;
+    documentPictureInPicture.requestWindow({ width: 360, height: 72 }).then((w) => {
+      pipPending = false;
+      pipWin = w;
+      w.document.body.style.cssText = 'margin:0;overflow:hidden;background:#1b1b24;';
+      w.document.body.append(host);
+      pipEvent('open');
+      w.addEventListener('pagehide', () => { pipWin = null; pipEvent('closed'); });
+    }, (err) => { pipPending = false; pipEvent('error:' + (err && err.message || err)); });
+  }
+
   document.addEventListener('__mp_cmd', (e) => {
+    if (e.detail === '__pip') return togglePip();
     const fn = handlers.get(e.detail);
     if (fn) {
       try { fn({ action: e.detail }); } catch (_) { /* el sitio decide */ }

@@ -1,10 +1,11 @@
 {
   "manifest_version": 3,
   "name": "Glass Mini Player",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Minirreproductor flotante con estilo glass para controlar el audio/vídeo de la pestaña: play/pausa, ±10 s, anterior/siguiente y progreso en el borde.",
   "minimum_chrome_version": "111",
-  "permissions": ["storage"],
+  "permissions": ["storage", "contextMenus", "scripting"],
+  "host_permissions": ["<all_urls>"],
   "background": { "service_worker": "background.js" },
   "action": { "default_title": "Mostrar/ocultar minirreproductor" },
   "icons": { "16": "icons/16.png", "48": "icons/48.png", "128": "icons/128.png" },
