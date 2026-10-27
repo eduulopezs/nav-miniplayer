@@ -577,15 +577,16 @@ figcaption b { color: var(--ink); display: block; font-size: 15px; }
 .lm-wrap svg { width: 50%; height: 50%; display: block; }
 /* aro iridiscente: un anillo con degradado cónico enmascarado; gira despacio mientras suena */
 .lm-orb, .lm-b.pl, .lm-b:hover { --spin: 200deg; }
-.lm-orb { grid-area: orb; position: relative; width: var(--os); height: var(--os); align-self: center; border-radius: 50%; box-shadow: 0 10px 28px rgba(0,0,0,.6), 0 0 0 7px rgba(255,255,255,.035), 0 0 0 8px rgba(255,255,255,.06); }
+.lm-orb { grid-area: orb; position: relative; width: var(--os); height: var(--os); align-self: center; border-radius: 22%; box-shadow: 0 10px 28px rgba(0,0,0,.6), 0 0 0 7px rgba(255,255,255,.035), 0 0 0 8px rgba(255,255,255,.06); }
 .lm-orb::after, .lm-b.pl::after { content: ""; position: absolute; inset: 0; border-radius: 50%; padding: 2.5px; pointer-events: none; z-index: 3; background: var(--rim); filter: saturate(1.25) brightness(calc(1 + var(--lvl, 0) * .35));
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); animation: lmspin 22s linear infinite; }
+.lm-orb::after { border-radius: 22%; }
 .paused .lm-orb::after, .paused .lm-b.pl::after { animation-play-state: paused; filter: saturate(.9) brightness(.75); }
 @property --spin { syntax: "<angle>"; inherits: true; initial-value: 200deg; }
 @keyframes lmspin { to { --spin: 560deg; } }
-.lm-cov { position: absolute; inset: 3px; border-radius: 50%; overflow: hidden; background: var(--art) center / cover; box-shadow: inset 0 0 0 1px rgba(0,0,0,.6); }
-.lm-cov::before { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at 34% 28%, rgba(20,22,26,.2), rgba(8,9,11,.84) 70%), rgba(10,11,14,.55); }
-.lm-gl { position: absolute; inset: 3px; width: calc(100% - 6px); height: calc(100% - 6px); z-index: 1; border-radius: 50%; }
+.lm-cov { position: absolute; inset: 3px; border-radius: calc(22% - 3px); overflow: hidden; background: var(--art) center / cover; box-shadow: inset 0 0 0 1px rgba(0,0,0,.6); }
+.lm-cov::before { content: ""; position: absolute; inset: 0; background: linear-gradient(160deg, rgba(255,255,255,.1), transparent 40%, rgba(0,0,0,.35)); }
+.lm-mer { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; border-radius: inherit; pointer-events: none; }
 .paused .lm-cov { filter: grayscale(.7); }
 .lm-meta { grid-area: meta; align-self: start; padding-right: 54px; }
 .lm-title { font: 300 15px/1.2 "Montserrat", sans-serif; letter-spacing: .012em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--ink); text-shadow: 0 0 14px rgba(255,255,255,.12); }
@@ -884,8 +885,9 @@ SKINS.glass.viz = {
 <script>
 SKINS.metal = { label: 'Liquid Metal', tpl: () => `
   <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="lmg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".55" stop-color="#cfd3da"/><stop offset="1" stop-color="#8e949f"/></linearGradient></defs></svg>
+  <canvas class="lm-mer" data-viz="mer" aria-hidden="true"></canvas>
   <div class="lm-wrap">
-    <div class="lm-orb" aria-hidden="true"><div class="lm-cov"></div><canvas class="lm-gl" data-viz="lens"></canvas></div>
+    <div class="lm-orb" aria-hidden="true"><div class="lm-cov"></div></div>
     <div class="lm-meta"><div class="lm-title" data-t="title"></div><div class="lm-artist" data-t="artist"></div></div>
     <div class="lm-chips"><button data-act="mode" title="Pasar a Mini" aria-label="Pasar a Mini"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"/><rect x="12" y="11" width="6" height="5" rx="1.2" fill="currentColor" stroke="none"/></svg></button><button data-act="hide" title="Ocultar" aria-label="Ocultar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7l10 10M17 7L7 17"/></svg></button></div>
     <div class="lm-time"><span data-v="cur">0:00</span><i data-v="dur">0:00</i></div>
@@ -900,40 +902,33 @@ SKINS.metal = { label: 'Liquid Metal', tpl: () => `
     <div class="lm-ext"><button class="lm-b vl" data-act="mute" title="Silenciar" aria-label="Silenciar o activar sonido"><span class="ic ic-vol"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z" fill="currentColor"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></svg></span><span class="ic ic-mute"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z" fill="currentColor"/><path d="M16 9.5l5 5M21 9.5l-5 5"/></svg></span></button></div>
   </div>` };
 SKINS.metal.viz = {
-  // Lente de cristal: un líquido chapotea (menisco partido en rojo, verde y azul, con banda irisada) y una burbuja se deforma con el espectro,
-  // con el contorno dibujado tres veces desplazado para imitar la dispersión del prisma, más el reflejo de ventana arriba a la izquierda.
-  lens(g, w, h, V) {
-    const R = Math.min(w, h) / 2, cx = w / 2, cy = h / 2; if (R < 6) return;
-    g.save(); g.beginPath(); g.arc(cx, cy, R, 0, 6.2832); g.clip();
-    // líquido
-    const lvl = .5 + R * 0 + .0, base = cy + R * (.38 - .1 * V.lvl - .05 * V.kick), amp = R * .07, pts = 28, surf = [];
-    for (let i = 0; i <= pts; i++) { const x = cx - R + (2 * R * i) / pts, k = Math.round((i / pts) * 95); surf.push([x, base + V.w[k] * amp + Math.sin(V.t * 1.4 + i * .55) * R * .012]); }
-    g.beginPath(); g.moveTo(surf[0][0], surf[0][1]); for (let i = 1; i < surf.length; i++) { const m = [(surf[i - 1][0] + surf[i][0]) / 2, (surf[i - 1][1] + surf[i][1]) / 2]; g.quadraticCurveTo(surf[i - 1][0], surf[i - 1][1], m[0], m[1]); }
-    g.lineTo(surf[pts][0], surf[pts][1]); const path = new Path2D(); g.lineTo(cx + R, cy + R); g.lineTo(cx - R, cy + R); g.closePath();
-    const lg = g.createLinearGradient(0, base - amp, 0, cy + R); lg.addColorStop(0, 'rgba(214,218,226,.5)'); lg.addColorStop(.35, 'rgba(120,124,134,.45)'); lg.addColorStop(1, 'rgba(36,38,44,.7)'); g.fillStyle = lg; g.fill();
-    // menisco con dispersión
-    const stroke = (dy, col, lw) => { g.beginPath(); g.moveTo(surf[0][0], surf[0][1] + dy); for (let i = 1; i < surf.length; i++) { const m = [(surf[i - 1][0] + surf[i][0]) / 2, (surf[i - 1][1] + surf[i][1]) / 2 + dy]; g.quadraticCurveTo(surf[i - 1][0], surf[i - 1][1] + dy, m[0], m[1]); } g.strokeStyle = col; g.lineWidth = lw; g.stroke(); };
-    g.globalCompositeOperation = 'lighter';
-    stroke(-R * .028, 'rgba(255,70,50,.75)', Math.max(1, R * .03)); stroke(0, 'rgba(70,255,150,.55)', Math.max(1, R * .03)); stroke(R * .028, 'rgba(60,120,255,.8)', Math.max(1, R * .03));
-    const ir = g.createLinearGradient(cx - R, 0, cx + R, 0); ['#ff4ca8', '#7a5cff', '#33d6ff', '#4cf0a0', '#ffe36a', '#ff7a2f'].forEach((c, i, a) => ir.addColorStop(i / (a.length - 1), c));
-    g.globalAlpha = .38; stroke(R * .05, ir, Math.max(2, R * .09)); g.globalAlpha = 1;
-    g.globalCompositeOperation = 'source-over'; stroke(0, 'rgba(255,255,255,.9)', Math.max(.8, R * .016));
-    // burbuja
-    const bx = cx + Math.sin(V.t * .5) * R * .04, by = cy - R * .2 + Math.cos(V.t * .6) * R * .03, r0 = R * .4, M = 72, bp = [], rw = [];
-    for (let i = 0; i < M; i++) { const th = i / M * 6.2832, u = ((th + 1.5708) / 6.2832) % 1, f = u < .5 ? u * 2 : (1 - u) * 2, v = V.b[Math.round(f * (V.N - 1) * .62)]; rw.push(1 + .42 * v + .05 * Math.sin(3 * th + V.t * 1.1) + .03 * V.kick); }
-    for (let i = 0; i < M; i++) { const th = i / M * 6.2832, rr = r0 * (rw[(i + M - 3) % M] + 2 * rw[(i + M - 2) % M] + 3 * rw[(i + M - 1) % M] + 4 * rw[i] + 3 * rw[(i + 1) % M] + 2 * rw[(i + 2) % M] + rw[(i + 3) % M]) / 16; bp.push([bx + Math.cos(th) * rr, by + Math.sin(th) * rr]); }
-    const poly = (dx, dy) => { g.beginPath(); bp.forEach((p, i) => { const x = bx + (p[0] - bx) * dx, y = by + (p[1] - by) * dx; i ? g.lineTo(x + dy, y) : g.moveTo(x + dy, y); }); g.closePath(); };
-    poly(1, 0); const bg = g.createRadialGradient(bx - r0 * .3, by - r0 * .35, r0 * .1, bx, by, r0 * 1.5); bg.addColorStop(0, 'rgba(255,255,255,.05)'); bg.addColorStop(1, 'rgba(255,255,255,.2)'); g.fillStyle = bg; g.fill();
-    g.globalCompositeOperation = 'lighter';
-    [[1, 'rgba(255,70,60,.8)'], [1.016, 'rgba(70,255,150,.55)'], [1.034, 'rgba(70,120,255,.85)']].forEach(([k, col]) => { poly(k, 0); g.strokeStyle = col; g.lineWidth = Math.max(1, R * .028); g.stroke(); });
-    g.globalCompositeOperation = 'source-over';
-    // reflejo de ventana
-    g.shadowColor = '#fff'; g.shadowBlur = R * .08; g.lineCap = 'round'; g.strokeStyle = 'rgba(255,255,255,.85)'; g.lineWidth = Math.max(1.4, R * .05);
-    g.beginPath(); g.arc(cx, cy, R * .8, 3.55, 4.25); g.stroke(); g.lineWidth = Math.max(1, R * .03); g.beginPath(); g.arc(cx, cy, R * .8, 4.4, 4.52); g.stroke(); g.shadowBlur = 0;
-    g.restore();
+  // Mercurio de fondo: campo de metaballs a baja resolución que se mueve despacio; el audio solo hincha un poco las gotas.
+  mer(g, w, h, V, card, cv) {
+    const C = 4, gw = Math.min(180, Math.ceil(w / C)), gh = Math.min(180, Math.ceil(h / C)); if (gw < 4 || gh < 4) return;
+    let o = cv._o; if (!o || o.width !== gw || o.height !== gh) { o = cv._o = document.createElement('canvas'); o.width = gw; o.height = gh; cv._im = o.getContext('2d').createImageData(gw, gh); cv._F = new Float32Array(gw * gh); }
+    const im = cv._im, d = im.data, F = cv._F, t = V.t, asp = gw / gh, boost = 1 + V.lvl * .22 + V.kick * .06;
+    const B = [];
+    for (let k = 0; k < 6; k++) B.push([.5 + .46 * Math.sin(t * (.05 + k * .013) + k * 2.1) , .5 + .44 * Math.cos(t * (.043 + k * .011) + k * 1.3), (.2 + .05 * (k % 3)) * boost]);
+    for (let y = 0; y < gh; y++) for (let x = 0; x < gw; x++) {
+      const px = x / gw, py = y / gh; let f = 0;
+      for (let k = 0; k < 6; k++) { const dx = (px - B[k][0]) * asp, dy = py - B[k][1], r = B[k][2]; f += r * r / (dx * dx + dy * dy + 1e-4); }
+      F[y * gw + x] = f;
+    }
+    for (let y = 0; y < gh; y++) for (let x = 0; x < gw; x++) {
+      const i = y * gw + x, f = F[i], p = i * 4;
+      if (f < .9) { d[p + 3] = 0; continue; }
+      const fx = (F[y * gw + Math.min(gw - 1, x + 1)] - F[y * gw + Math.max(0, x - 1)]), fy = (F[Math.min(gh - 1, y + 1) * gw + x] - F[Math.max(0, y - 1) * gw + x]);
+      let nx = -fx * .6, ny = -fy * .6, nz = 1; const L = Math.hypot(nx, ny, nz); nx /= L; ny /= L; nz /= L;
+      const key = Math.max(0, nx * -.45 + ny * -.65 + nz * .6), hl = Math.pow(key, 7), fr = Math.pow(1 - nz, 1.6), sky = .5 - ny * .5;
+      const base = .07 + .16 * Math.pow(sky, 2) + .55 * hl + .3 * fr + .12 * Math.pow(Math.max(0, ny * .9 + .1), 3);
+      d[p] = Math.min(255, 255 * base * .95); d[p + 1] = Math.min(255, 255 * base); d[p + 2] = Math.min(255, 255 * base * 1.1 + 6);
+      const e = Math.min(1, (f - .9) / .06); d[p + 3] = 255 * e * .5;
+    }
+    const og = cv._o.getContext('2d'); og.putImageData(im, 0, 0);
+    g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high'; g.drawImage(cv._o, 0, 0, w, h);
   },
 };
-SKINS.metal.viz.lens.always = false;
+SKINS.metal.viz.mer.always = true;
 </script>
 <script>
 // Curvatura de pantalla: un filtro SVG con mapa de desplazamiento de barril (el centro se abomba y los bordes se comprimen).
