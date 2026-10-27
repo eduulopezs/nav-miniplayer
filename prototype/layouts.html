@@ -317,8 +317,7 @@ code { font-family: "Cascadia Mono", Consolas, monospace; font-size: .92em; back
     { title: 'Radio Nocturna FM', artist: 'En directo', dur: Infinity, art: 'radial-gradient(circle at 30% 30%,#fff3a8,#ff7a59 45%,#4b1d52)' },
     { title: 'Diseñar con restricciones', artist: 'Episodio 42 · Cuaderno de bitácora', dur: 2710, art: 'linear-gradient(160deg,#a8ff9e,#1f9d8a 50%,#0d2b45)' },
   ];
-  const S = { i: 0, t: 38, playing: true, muted: false, vol: .7, speedI: 0 };
-  const SPEEDS = [1, 1.25, 1.5, 2];
+  const S = { i: 0, t: 38, playing: true, muted: false, vol: .7 };
   const fmt = (s) => { s = Math.max(0, Math.floor(s)); const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = s % 60; return (h ? h + ':' + String(m).padStart(2, '0') : m) + ':' + String(x).padStart(2, '0'); };
   const cur = () => TRACKS[S.i];
   const isLive = () => cur().dur === Infinity;
@@ -351,7 +350,6 @@ code { font-family: "Cascadia Mono", Consolas, monospace; font-size: .92em; back
           <button class="b fwd" title="Avanzar 10 s" aria-label="Avanzar 10 segundos">${ICON.fwd}</button>
           <button class="b next" title="Siguiente" aria-label="Siguiente">${ICON.next}</button>
         </div>
-        <div class="x-speed"><button class="b speed" title="Velocidad" aria-label="Velocidad de reproducción">1×</button></div>
         <div class="x-vol"><button class="b small mute" title="Silenciar" aria-label="Silenciar">${ICON.vol}</button></div>
       </div>
       <div class="probe" aria-hidden="true"></div>
@@ -368,7 +366,6 @@ code { font-family: "Cascadia Mono", Consolas, monospace; font-size: .92em; back
     q('.next').addEventListener('click', () => { go(1); render(); });
     q('.back').addEventListener('click', () => { S.t = Math.max(0, S.t - 10); render(); });
     q('.fwd').addEventListener('click', () => { S.t = Math.min(cur().dur, S.t + 10); render(); });
-    q('.speed').addEventListener('click', () => { S.speedI = (S.speedI + 1) % SPEEDS.length; render(); });
     q('.mute').addEventListener('click', () => { S.muted = !S.muted; render(); });
 
     // Barra: clic y arrastre, tooltip con el tiempo, teclado.
@@ -424,12 +421,11 @@ code { font-family: "Cascadia Mono", Consolas, monospace; font-size: .92em; back
       k.classList.toggle('paused', !S.playing);
       k.classList.toggle('live-badge', live);
       q('.back').disabled = q('.fwd').disabled = live;
-      q('.speed').textContent = SPEEDS[S.speedI] + '×';
       q('.mute').innerHTML = S.muted ? ICON.mute : ICON.vol;
       q('.mute').setAttribute('aria-label', S.muted ? 'Activar sonido' : 'Silenciar');
     }
   }
-  setInterval(() => { if (S.playing && !isLive()) { S.t += 0.25 * SPEEDS[S.speedI]; if (S.t >= cur().dur) go(1); } else if (S.playing) S.t += .25; render(); }, 250);
+  setInterval(() => { if (S.playing && !isLive()) { S.t += 0.25; if (S.t >= cur().dur) go(1); } else if (S.playing) S.t += .25; render(); }, 250);
 
   // ---------- Presets, galería y escenario ----------
   const PRESETS = [
