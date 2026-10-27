@@ -473,10 +473,10 @@ figcaption b { color: var(--ink); display: block; font-size: 15px; }
 .gl-wrap { position: absolute; inset: 0; z-index: 2; display: grid; --pad: 14px; --bs: 34px; padding: var(--pad); gap: 8px 12px; min-width: 0; min-height: 0; align-content: space-between; }
 .gl-wrap > * { min-width: 0; min-height: 0; }
 .gl-wrap svg { width: 56%; height: 56%; display: block; }
-.gl-cov { grid-area: cov; position: relative; width: var(--cv); height: var(--cv); border-radius: 24%; background: var(--art) center / cover; align-self: start;
-  box-shadow: 0 10px 24px rgba(0,0,0,.38), inset 0 0 0 1px rgba(255,255,255,.4); transform: scale(calc(1 + var(--kick, 0) * .03)); transition: filter .3s; }
-.gl-cov::after { content: ""; position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(135deg, rgba(255,255,255,.5), rgba(255,255,255,0) 42%), linear-gradient(0deg, rgba(0,0,0,.18), transparent 40%); }
-.paused .gl-cov { filter: saturate(.6) brightness(.85); }
+.gl-cov { position: absolute; left: 0; top: 0; width: var(--cw); height: 100%; z-index: 0; background: var(--art) center / cover; transform-origin: left center; transform: scale(calc(1 + var(--kick, 0) * .015));
+  -webkit-mask-image: linear-gradient(90deg, #000 58%, rgba(0,0,0,.55) 82%, transparent 100%); mask-image: linear-gradient(90deg, #000 58%, rgba(0,0,0,.55) 82%, transparent 100%); transition: filter .3s; }
+.gl-cov::after { content: ""; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255,255,255,.34), rgba(255,255,255,0) 40%), linear-gradient(0deg, rgba(0,0,0,.16), transparent 45%); }
+.paused .gl-cov { filter: saturate(.55) brightness(.85); }
 .gl-meta { grid-area: meta; align-self: center; padding-right: 58px; }
 .gl-title { font: 700 15px/1.2 "Figtree", sans-serif; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 1px 8px rgba(0,0,0,.3); letter-spacing: -.005em; }
 .gl-artist { font: 500 12px/1.3 "Figtree", sans-serif; color: var(--w2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -505,17 +505,19 @@ figcaption b { color: var(--ink); display: block; font-size: 15px; }
 .gl-t10 { font: 700 8.2px "Figtree", sans-serif; fill: currentColor; }
 .gl-ext { grid-area: ext; display: none; align-items: center; justify-content: center; }
 
-/* COMPACTO (base) */
-.gl-wrap { --cv: clamp(44px, calc(100cqh - 2 * var(--pad) - 18px - 42px - 16px), 120px); --bs: min(36px, calc((100cqw - 2 * var(--pad) - 4 * 6px) / 5.2));
-  grid-template-columns: var(--cv) minmax(0, 1fr); grid-template-rows: var(--cv) 18px 44px; grid-template-areas: "cov meta" "prog prog" "ctl ctl"; }
+/* COMPACTO (base): la portada va a sangre en el borde izquierdo y se funde con el cristal */
+.gl-wrap { --cw: min(100cqh, 34cqw); --bs: min(36px, calc((100cqw - var(--cw) - 2 * var(--pad) - 4 * 6px) / 5.2));
+  grid-template-columns: calc(var(--cw) - var(--pad)) minmax(0, 1fr); grid-template-rows: auto 18px 44px; grid-template-areas: "cov meta" "cov prog" "cov ctl"; }
+.gl-ctl { justify-content: flex-start; }
 @container (width < 300px) { .gl-b.bk, .gl-b.fw { display: none; } }
 @container (width < 270px) { .gl-t.r { display: none; } }
 
 /* PASTILLA */
 @container (height < 64px) {
-  .gl-wrap { --pad: 5px; --cv: calc(100cqh - 2 * var(--pad) - 6px); --bs: 28px; padding: var(--pad) 8px 0 var(--pad); gap: 0 8px; align-content: stretch; grid-template-columns: var(--cv) minmax(0, 1fr) auto; grid-template-rows: minmax(0, 1fr) 8px; grid-template-areas: "cov meta ctl" "prog prog prog"; }
-  .gl-cov { align-self: center; border-radius: 28%; } .gl-meta { padding: 0; } .gl-title { font-size: 13px; } .gl-artist, .gl-chips, .gl-t { display: none; }
-  .gl-ctl { gap: 1px; } .gl-bar { height: 8px; margin: 0 -8px 0 -5px; } .gl-bar::before, .gl-bar i { height: 3px; margin-top: -1.5px; border-radius: 0; } .gl-bar::after { display: none; }
+  .gl-wrap { --pad: 5px; --cw: 100cqh; --bs: 28px; padding: 0 8px 0 var(--pad); gap: 0 8px; align-content: stretch; grid-template-columns: calc(var(--cw) - var(--pad)) minmax(0, 1fr) auto; grid-template-rows: minmax(0, 1fr) 8px; grid-template-areas: "cov meta ctl" "prog prog prog"; }
+  .gl-cov { -webkit-mask-image: linear-gradient(90deg, #000 55%, transparent); mask-image: linear-gradient(90deg, #000 55%, transparent); }
+  .gl-meta { padding: 0; } .gl-title { font-size: 13px; } .gl-artist, .gl-chips, .gl-t { display: none; }
+  .gl-ctl { gap: 1px; justify-content: center; } .gl-bar { height: 8px; margin: 0 -8px 0 -5px; } .gl-bar::before, .gl-bar i { height: 3px; margin-top: -1.5px; border-radius: 0; } .gl-bar::after { display: none; }
   .gl-rib { height: 100%; opacity: .7; }
 }
 @container (height < 64px) and (width < 340px) { .gl-b.bk, .gl-b.fw { display: none; } }
@@ -523,8 +525,8 @@ figcaption b { color: var(--ink); display: block; font-size: 15px; }
 
 /* FILA */
 @container (64px <= height < 140px) {
-  .gl-wrap { --pad: 10px; --cv: min(calc(100cqh - 2 * var(--pad)), 72px); --bs: min(38px, calc(100cqh - 2 * var(--pad) - 4px)); gap: 4px 12px; align-content: stretch; grid-template-columns: var(--cv) minmax(0, 1fr) auto; grid-template-rows: minmax(0, 1fr) 18px; grid-template-areas: "cov meta ctl" "cov prog ctl"; }
-  .gl-cov { align-self: center; grid-row: 1 / 3; } .gl-chips { display: none; } .gl-meta { padding: 0; align-self: end; }
+  .gl-wrap { --pad: 10px; --cw: min(100cqh, 104px); --bs: min(38px, calc(100cqh - 2 * var(--pad) - 4px)); padding-left: var(--pad); gap: 4px 12px; align-content: stretch; grid-template-columns: calc(var(--cw) - var(--pad)) minmax(0, 1fr) auto; grid-template-rows: minmax(0, 1fr) 18px; grid-template-areas: "cov meta ctl" "cov prog ctl"; }
+  .gl-chips { display: none; } .gl-meta { padding: 0; align-self: end; }
   .gl-prog { align-self: start; } .gl-b.bk, .gl-b.fw { display: none; } .gl-rib { height: 42%; }
 }
 @container (64px <= height < 140px) and (width >= 540px) { .gl-b.bk, .gl-b.fw { display: grid; } }
@@ -534,25 +536,24 @@ figcaption b { color: var(--ink); display: block; font-size: 15px; }
 
 /* PANORÁMICO */
 @container (height >= 140px) and (width >= 400px) and (aspect-ratio > 21 / 10) {
-  .gl-wrap { --pad: 16px; --cv: min(calc(100cqh - 2 * var(--pad)), 36cqw); --bs: clamp(32px, min(calc(100cqh - 2 * var(--pad) - 44px - 18px - 36px), 42px), 42px); grid-template-columns: var(--cv) minmax(0, 1fr) auto; grid-template-rows: auto 18px auto; align-content: space-between; column-gap: 18px; grid-template-areas: "cov meta meta" "cov prog prog" "cov ctl ext"; }
-  .gl-cov { grid-row: 1 / 4; align-self: center; border-radius: 22%; }
+  .gl-wrap { --pad: 16px; --cw: min(100cqh * 1.18, 38cqw); --bs: clamp(32px, min(calc(100cqh - 2 * var(--pad) - 44px - 18px - 36px), 42px), 42px); grid-template-columns: calc(var(--cw) - var(--pad)) minmax(0, 1fr) auto; grid-template-rows: auto 18px auto; align-content: space-between; column-gap: 18px; grid-template-areas: "cov meta meta" "cov prog prog" "cov ctl ext"; }
   .gl-title { font-size: clamp(16px, 8cqh, 24px); } .gl-artist { font-size: 13px; }
   .gl-ctl { justify-content: flex-start; } .gl-meta { align-self: start; }
 }
 @container (height >= 140px) and (width >= 600px) and (aspect-ratio > 21 / 10) { .gl-ext { display: flex; } }
 @container (height >= 140px) and (width >= 400px) and (width < 480px) and (aspect-ratio > 21 / 10) { .gl-b.bk, .gl-b.fw { display: none; } }
 
-/* PORTADA */
+/* PORTADA: la portada ocupa todo el ancho y el borde superior, y se funde hacia abajo */
 @container (height >= 280px) and (aspect-ratio < 23 / 20) {
-  .gl-wrap { --pad: 16px; --bs: min(46px, calc((100cqw - 2 * var(--pad) - 4 * 6px) / 5.3)); gap: 10px; align-content: stretch; grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto 18px auto; grid-template-areas: "cov" "meta" "prog" "ctl"; }
-  .gl-cov { width: 100%; height: 100%; align-self: stretch; border-radius: 24px; }
-  .gl-chips { grid-area: cov; margin: 8px 8px 0 0; } .gl-chips button { background: rgba(10,12,30,.42); color: #fff; -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
-  .gl-meta { padding: 2px 0 0; } .gl-title { font-size: clamp(18px, 7.2cqw, 24px); } .gl-artist { font-size: 14px; margin-top: 2px; }
+  .gl-wrap { --pad: 16px; --ch: calc(100cqh - 166px); --bs: min(46px, calc((100cqw - 2 * var(--pad) - 4 * 6px) / 5.3)); padding-top: 0; gap: 8px; align-content: start; grid-template-columns: minmax(0, 1fr); grid-template-rows: var(--ch) auto 18px auto; grid-template-areas: "cov" "meta" "prog" "ctl"; }
+  .gl-cov { width: 100%; height: var(--ch); transform-origin: center top; -webkit-mask-image: linear-gradient(180deg, #000 55%, rgba(0,0,0,.5) 82%, transparent 100%); mask-image: linear-gradient(180deg, #000 55%, rgba(0,0,0,.5) 82%, transparent 100%); }
+  .gl-chips { grid-area: cov; margin: 12px 12px 0 0; } .gl-chips button { background: rgba(10,12,30,.42); color: #fff; -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+  .gl-meta { padding: 0; margin-top: -18px; position: relative; } .gl-title { font-size: clamp(18px, 7.2cqw, 24px); } .gl-artist { font-size: 14px; margin-top: 2px; }
   .gl-ctl { justify-content: space-between; } .gl-b.bk, .gl-b.fw { display: grid; }
-  .gl-rib { height: 46%; }
+  .gl-rib { height: 40%; }
 }
-@container (height >= 380px) and (aspect-ratio < 23 / 20) {
-  .gl-wrap { grid-template-rows: minmax(0, 1fr) auto 18px auto auto; grid-template-areas: "cov" "meta" "prog" "ctl" "ext"; }
+@container (height >= 400px) and (aspect-ratio < 23 / 20) {
+  .gl-wrap { --ch: calc(100cqh - 208px); grid-template-rows: var(--ch) auto 18px auto auto; grid-template-areas: "cov" "meta" "prog" "ctl" "ext"; }
   .gl-ext { display: flex; justify-content: center; margin-top: -2px; }
 }
 @media (prefers-reduced-motion: reduce) { .gl-glow { transition: none; } .live-badge .gl-bar i { animation: none; } .gl-cov, .gl-b { transition: none; } }
@@ -785,17 +786,22 @@ SKINS.pixel.viz = {
 </script>
 <script>
 SKINS.noir.viz = {
-  // Cresta de señal (ridgeline): historial del espectro apilado, la línea frontal en rojo con fantasma cian al golpe de bombo.
+  // Cresta de señal (ridgeline) afinada: curvas suaves, perspectiva (las líneas lejanas más bajas y tenues), pico central marcado,
+  // línea frontal roja con halo y fantasma cian al golpe de bombo, y lectura de nivel en la esquina.
   ridge(g, w, h, V) {
-    const rows = h < 60 ? 4 : h < 140 ? 8 : 14, hist = V.hist, x0 = w * .08, x1 = w * .92, pts = Math.min(44, Math.max(14, Math.floor((x1 - x0) / 3.2)));
-    const top = h >= 140 ? h * .3 : h * .12, gap = (h * .84 - top) / rows, amp = gap * 3.4, N = V.N;
+    const big = h >= 140, rows = h < 60 ? 5 : h < 140 ? 9 : 12, hist = V.hist, x0 = w * .07, x1 = w * .93, pts = Math.min(34, Math.max(12, Math.floor((x1 - x0) / 4.5)));
+    const top = big ? h * .24 : h * .1, bot = h * (big ? .9 : .88), gap = (bot - top) / rows, N = V.N;
+    const samp = (d, f) => { const bi = Math.max(0, Math.min(1, f)) * (N - 1) * .7, i0 = Math.floor(bi), i1 = Math.min(N - 1, i0 + 1); return d[i0] + (d[i1] - d[i0]) * (bi - i0); };
+    const curve = (P, dx) => { g.beginPath(); g.moveTo(P[0][0] + dx, P[0][1]); for (let i = 1; i < P.length - 1; i++) g.quadraticCurveTo(P[i][0] + dx, P[i][1], (P[i][0] + P[i + 1][0]) / 2 + dx, (P[i][1] + P[i + 1][1]) / 2); g.lineTo(P[P.length - 1][0] + dx, P[P.length - 1][1]); };
     for (let k = 0; k < rows; k++) {
-      const d = hist[rows - 1 - k] || V.b, base = top + (k + 1) * gap, front = k === rows - 1;
-      const path = (dx, dy) => { g.beginPath(); for (let i = 0; i < pts; i++) { const f = i / (pts - 1), bi = Math.round(f * (N - 1) * .72), env = Math.pow(Math.sin(Math.PI * f), .9), jt = (hash(i, k) - .5) * .06; const x = x0 + f * (x1 - x0) + dx, y = base - amp * env * Math.max(0, d[bi] + jt * d[bi]) + dy; i ? g.lineTo(x, y) : g.moveTo(x, y); } };
-      path(0, 0); g.lineTo(x1, h); g.lineTo(x0, h); g.closePath(); g.fillStyle = 'rgba(8,8,8,.82)'; g.fill();
-      if (front && V.kick > .35) { path(-3 * V.kick, 0); g.strokeStyle = 'rgba(40,220,255,' + (.7 * V.kick) + ')'; g.lineWidth = 1; g.stroke(); }
-      path(0, 0); g.lineWidth = front ? 1.6 : 1; g.strokeStyle = front ? '#ff2a2a' : 'rgba(236,232,220,' + (.35 + .5 * (k / rows)) + ')'; g.stroke();
+      const d = hist[rows - 1 - k] || V.b, base = top + (k + 1) * gap, front = k === rows - 1, persp = .6 + .4 * (k + 1) / rows, amp = gap * 7.2 * persp, P = [];
+      for (let i = 0; i < pts; i++) { const f = i / (pts - 1), env = Math.pow(Math.sin(Math.PI * f), 1.15), v = (samp(d, f - .02) + samp(d, f) * 4 + samp(d, f + .02)) / 6; P.push([x0 + f * (x1 - x0), Math.max(3, base - amp * env * Math.pow(v, .85))]); }
+      curve(P, 0); g.lineTo(x1, h); g.lineTo(x0, h); g.closePath(); g.fillStyle = 'rgba(8,8,8,.9)'; g.fill();
+      if (front && V.kick > .3) { curve(P, -3 * V.kick); g.strokeStyle = 'rgba(40,220,255,' + (.75 * V.kick) + ')'; g.lineWidth = 1.1; g.stroke(); }
+      curve(P, 0); g.lineWidth = front ? 1.8 : .9 + .4 * (k / rows); g.strokeStyle = front ? '#ff2a2a' : 'rgba(236,232,220,' + (.28 + .6 * (k / rows)) + ')';
+      if (front) { g.shadowColor = '#ff2a2a'; g.shadowBlur = 7; } g.stroke(); g.shadowBlur = 0;
     }
+    if (w >= 100 && h >= 100) { g.font = '700 7px "Space Mono", monospace'; g.fillStyle = '#ff2a2a'; g.textAlign = 'left'; g.fillText('SIG ' + (V.lvl * 99 | 0).toString().padStart(2, '0'), 8, 12); g.fillStyle = 'rgba(236,232,220,.7)'; g.textAlign = 'right'; g.fillText((-40 + V.lvl * 38).toFixed(1) + ' dB', w - 8, 12); g.textAlign = 'left'; }
   },
 };
 </script>
