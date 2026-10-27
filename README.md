@@ -1,4 +1,4 @@
-# Glass Mini Player (Edge y Chrome, Manifest V3)
+# Nav Miniplayer (Edge y Chrome, Manifest V3)
 
 ## Instalar
 Mismo código para ambos navegadores (requiere Chrome/Edge 111 o superior).
