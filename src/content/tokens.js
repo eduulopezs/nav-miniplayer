@@ -61,7 +61,7 @@
         "bar": "#cfc4fa",
         "play-bg": "#b8aaf0",
         "play-hover-bg": "#e4dcff",
-        "mini-fg-2": "rgba(184,170,240,.65)",
+        "mini-fg-2": "rgba(184,170,240,.7)",
         "mini-track": "rgba(184,170,240,.25)",
         "mini-tint": "#b8aaf0"
       },
