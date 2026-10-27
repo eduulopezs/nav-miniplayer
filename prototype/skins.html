@@ -22,6 +22,8 @@
 @font-face { font-family: "Figtree"; src: url(fonts/figtree-latin-700-normal.woff2) format("woff2"); font-weight: 700; font-display: swap; }
 @font-face { font-family: "Syne"; src: url(fonts/syne-latin-700-normal.woff2) format("woff2"); font-weight: 700; font-display: swap; }
 @font-face { font-family: "Syne"; src: url(fonts/syne-latin-800-normal.woff2) format("woff2"); font-weight: 800; font-display: swap; }
+@font-face { font-family: "Montserrat"; src: url(fonts/montserrat-latin-300-normal.woff2) format("woff2"); font-weight: 300; font-display: swap; }
+@font-face { font-family: "Montserrat"; src: url(fonts/montserrat-latin-400-normal.woff2) format("woff2"); font-weight: 400; font-display: swap; }
 @font-face { font-family: "VT323"; src: url(fonts/vt323-latin-400-normal.woff2) format("woff2"); font-weight: 400; font-display: swap; }
 
 :root { color-scheme: dark; --page: #0e0f15; --panel: #161823; --ink: #eceef6; --ink-2: #b6b9cb; --line: rgba(255,255,255,.14); --focus: #8ec5ff; font-family: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif; }
@@ -194,9 +196,9 @@ figcaption b { color: var(--ink); display: block; font-size: 15px; }
 .sk-crt { --m: #ffae2c; --m2: #b9791a; --mdim: rgba(255,174,44,.4); --txt: #ffd9a0; --pk: #ff5a1f; --bg: #0b0603;
   font-family: "JetBrains Mono", ui-monospace, Consolas, monospace; color: var(--txt); background: var(--bg);
   border-radius: calc(var(--r, 14px) * .55);
-  box-shadow: 0 20px 44px rgba(0,0,0,.6), inset 0 0 0 3px #17100a, inset 0 0 0 4px rgba(255,174,44,.28), inset 0 0 80px rgba(255,130,0,.16); }
+  box-shadow: 0 22px 46px rgba(0,0,0,.65), 0 1px 0 rgba(255,255,255,.08), inset 0 0 0 2px #2d1f10, inset 0 0 0 5px #0e0803, inset 0 0 0 6px rgba(255,174,44,.3), inset 0 12px 26px rgba(0,0,0,.9), inset 0 -5px 16px rgba(0,0,0,.65), inset 8px 0 18px rgba(0,0,0,.45), inset -8px 0 18px rgba(0,0,0,.45), inset 0 0 90px rgba(255,130,0,.15); }
 .sk-crt::before { content: ""; position: absolute; inset: 0; z-index: 4; pointer-events: none; border-radius: inherit;
-  background: radial-gradient(ellipse at 50% 50%, transparent 52%, rgba(0,0,0,.62) 100%), linear-gradient(118deg, rgba(255,255,255,.085), transparent 26%), repeating-linear-gradient(0deg, rgba(0,0,0,.3) 0 1px, transparent 1px 3px), repeating-linear-gradient(90deg, rgba(255,60,0,.05) 0 1px, rgba(0,255,120,.03) 1px 2px, rgba(0,120,255,.05) 2px 3px); }
+  background: radial-gradient(ellipse 60% 34% at 20% 7%, rgba(255,255,255,.14), transparent 72%), radial-gradient(ellipse 120% 105% at 50% 46%, transparent 50%, rgba(0,0,0,.36) 78%, rgba(0,0,0,.85) 100%), linear-gradient(118deg, rgba(255,255,255,.07), transparent 24%), linear-gradient(0deg, rgba(0,0,0,.28), transparent 18%), repeating-linear-gradient(0deg, rgba(0,0,0,.3) 0 1px, transparent 1px 3px), repeating-linear-gradient(90deg, rgba(255,60,0,.05) 0 1px, rgba(0,255,120,.03) 1px 2px, rgba(0,120,255,.05) 2px 3px); }
 .sk-crt::after { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 36%; z-index: 4; pointer-events: none; background: linear-gradient(180deg, transparent, rgba(255,174,44,.07) 60%, transparent); animation: crscan 6s linear infinite; }
 @keyframes crscan { from { transform: translateY(-100%); } to { transform: translateY(290%); } }
 .cr-wrap { text-shadow: 0 0 5px rgba(255,160,30,.5), -.5px 0 rgba(255,60,0,.35), .5px 0 rgba(0,180,255,.16); animation: crflick 5.3s steps(1) infinite; position: absolute; inset: 0; display: grid; --pad: 10px; padding: var(--pad); gap: 6px 10px; min-width: 0; min-height: 0; font-size: 11px; line-height: 1.35; z-index: 1; }
@@ -509,7 +511,7 @@ figcaption b { color: var(--ink); display: block; font-size: 15px; }
 .gl-wrap { --cw: min(100cqh, 34cqw); --bs: min(36px, calc((100cqw - var(--cw) - 2 * var(--pad) - 4 * 6px) / 5.2));
   grid-template-columns: calc(var(--cw) - var(--pad)) minmax(0, 1fr); grid-template-rows: auto 18px 44px; grid-template-areas: "cov meta" "cov prog" "cov ctl"; }
 .gl-ctl { justify-content: flex-start; }
-@container (width < 300px) { .gl-b.bk, .gl-b.fw { display: none; } }
+@container (width < 300px) { .gl-b.bk, .gl-b.fw { display: none; } .gl-wrap { --bs: min(36px, calc((100cqw - var(--cw) - 2 * var(--pad) - 2 * 6px) / 3.4)); } }
 @container (width < 270px) { .gl-t.r { display: none; } }
 
 /* PASTILLA */
@@ -525,7 +527,7 @@ figcaption b { color: var(--ink); display: block; font-size: 15px; }
 
 /* FILA */
 @container (64px <= height < 140px) {
-  .gl-wrap { --pad: 10px; --cw: min(100cqh, 104px); --bs: min(38px, calc(100cqh - 2 * var(--pad) - 4px)); padding-left: var(--pad); gap: 4px 12px; align-content: stretch; grid-template-columns: calc(var(--cw) - var(--pad)) minmax(0, 1fr) auto; grid-template-rows: minmax(0, 1fr) 18px; grid-template-areas: "cov meta ctl" "cov prog ctl"; }
+  .gl-wrap { --pad: 10px; --cw: min(100cqh, 104px, 30cqw); --bs: min(38px, calc(100cqh - 2 * var(--pad) - 4px)); padding-left: var(--pad); gap: 4px 12px; align-content: stretch; grid-template-columns: calc(var(--cw) - var(--pad)) minmax(0, 1fr) auto; grid-template-rows: minmax(0, 1fr) 18px; grid-template-areas: "cov meta ctl" "cov prog ctl"; }
   .gl-chips { display: none; } .gl-meta { padding: 0; align-self: end; }
   .gl-prog { align-self: start; } .gl-b.bk, .gl-b.fw { display: none; } .gl-rib { height: 42%; }
 }
@@ -560,58 +562,61 @@ figcaption b { color: var(--ink); display: block; font-size: 15px; }
 </style>
 <style id="sk-metal-css">
 /* ============================================================
-   LIQUID METAL. Placa de grafito con bisel cromado, botones de cromo con línea de horizonte, play de mercurio y un
-   anillo de gotas que se funden (metaballs) y se sombrean con un mapa de entorno según su relieve. Tipografía Syne.
+   LIQUID METAL (referencias: botones de "cristal líquido" con aro de dispersión, burbujas con reflejos prismáticos, Y2K cromado).
+   Superficie negra de grafito en capas, aros iridiscentes (el color solo aparece en el borde, como en un prisma), botones de vidrio
+   y una lente de cristal con un líquido que chapotea: el menisco se parte en RGB y la burbuja se deforma con el audio.
    ============================================================ */
-.sk-metal { --ch: linear-gradient(180deg, #f6f9fd 0%, #c3ccd9 52%, #2a2f38 58%, #5d6674 61%, #cdd5e1 100%); --ink: #dfe5ee; --ink2: #8f9aab;
-  font-family: "Figtree", system-ui, sans-serif; color: var(--ink); border-radius: calc(var(--r, 22px) * .9);
-  background: radial-gradient(120% 90% at 18% 0%, #2d333e 0%, #15181e 52%, #0a0c10 100%);
-  box-shadow: 0 26px 54px rgba(0,0,0,.62), 0 2px 5px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.4), inset 0 -1px 0 rgba(255,255,255,.06); }
-.sk-metal::before { content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1.5px; z-index: 5; pointer-events: none;
-  background: linear-gradient(135deg, #f4f7fb, #6a7381 18%, #1c2027 36%, #aab4c3 54%, #2a2f38 72%, #e8edf5);
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); }
-.sk-metal::after { content: ""; position: absolute; inset: 0; z-index: 4; pointer-events: none; border-radius: inherit;
-  background: linear-gradient(115deg, transparent 38%, rgba(255,255,255,.1) 50%, transparent 62%) 0 0 / 260% 100% no-repeat, repeating-linear-gradient(90deg, rgba(255,255,255,.028) 0 1px, transparent 1px 3px);
-  animation: lmsweep 8s ease-in-out infinite; }
-@keyframes lmsweep { 0%, 100% { background-position: 120% 0, 0 0; } 50% { background-position: -20% 0, 0 0; } }
-.paused.sk-metal::after { animation-play-state: paused; }
+.sk-metal { --ink: #f2f4f7; --ink2: #9aa0ab; --rim: conic-gradient(from var(--spin, 200deg), #eef0f3 0 7%, #4aa3ff 11%, #ff7a2f 15%, #ffe36a 18%, #eef0f3 24% 50%, #ff4ca8 55%, #7a5cff 59%, #33d6ff 63%, #eef0f3 68% 86%, #ffb24a 90%, #ff4a3a 94%, #eef0f3 100%);
+  font-family: "Montserrat", "Figtree", system-ui, sans-serif; color: var(--ink); border-radius: calc(var(--r, 22px) * .95);
+  background: radial-gradient(90% 120% at 12% 0%, #2a2c2d 0%, transparent 55%), radial-gradient(70% 90% at 100% 100%, rgba(110,86,255,.14), transparent 60%), linear-gradient(180deg, #131417, #08090b);
+  box-shadow: 0 28px 56px rgba(0,0,0,.65), 0 2px 6px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.2), inset 0 0 0 1px rgba(255,255,255,.07); }
+.sk-metal::before { content: ""; position: absolute; inset: 5px; z-index: 0; border-radius: calc(var(--r, 22px) * .95 - 5px); pointer-events: none; box-shadow: inset 0 0 0 1px rgba(255,255,255,.07), inset 0 1px 0 rgba(255,255,255,.12), inset 0 -14px 26px rgba(0,0,0,.35); background: linear-gradient(180deg, rgba(255,255,255,.035), transparent 40%); }
+.sk-metal::after { content: ""; position: absolute; inset: 0; z-index: 4; pointer-events: none; border-radius: inherit; background: radial-gradient(60% 40% at 18% -4%, rgba(255,255,255,.14), transparent 70%); }
 .lm-wrap { position: absolute; inset: 0; z-index: 2; display: grid; --pad: 14px; --bs: 30px; padding: var(--pad); gap: 6px 12px; min-width: 0; min-height: 0; align-content: space-between; }
 .lm-wrap > * { min-width: 0; min-height: 0; }
-.lm-wrap svg { width: 54%; height: 54%; display: block; }
-.lm-orb { grid-area: orb; position: relative; width: var(--os); height: var(--os); align-self: center; }
-.lm-gl { position: absolute; inset: 0; width: 100%; height: 100%; }
-.lm-cov { position: absolute; inset: 21%; border-radius: 50%; background: var(--art) center / cover; box-shadow: 0 0 0 2px #05060a, 0 0 0 3.5px #aab4c3, 0 6px 16px rgba(0,0,0,.6), inset 0 0 14px rgba(0,0,0,.45); transform: scale(calc(1 + var(--kick, 0) * .035)); }
-.lm-cov::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: linear-gradient(140deg, rgba(255,255,255,.5), rgba(255,255,255,0) 40%); }
-.paused .lm-cov { filter: grayscale(.8) brightness(.7); }
+.lm-wrap svg { width: 50%; height: 50%; display: block; }
+/* aro iridiscente: un anillo con degradado cónico enmascarado; gira despacio mientras suena */
+.lm-orb, .lm-b.pl, .lm-b:hover { --spin: 200deg; }
+.lm-orb { grid-area: orb; position: relative; width: var(--os); height: var(--os); align-self: center; border-radius: 50%; box-shadow: 0 10px 28px rgba(0,0,0,.6), 0 0 0 7px rgba(255,255,255,.035), 0 0 0 8px rgba(255,255,255,.06); }
+.lm-orb::after, .lm-b.pl::after { content: ""; position: absolute; inset: 0; border-radius: 50%; padding: 2.5px; pointer-events: none; z-index: 3; background: var(--rim); filter: saturate(1.25) brightness(calc(1 + var(--lvl, 0) * .35));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); animation: lmspin 22s linear infinite; }
+.paused .lm-orb::after, .paused .lm-b.pl::after { animation-play-state: paused; filter: saturate(.9) brightness(.75); }
+@property --spin { syntax: "<angle>"; inherits: true; initial-value: 200deg; }
+@keyframes lmspin { to { --spin: 560deg; } }
+.lm-cov { position: absolute; inset: 3px; border-radius: 50%; overflow: hidden; background: var(--art) center / cover; box-shadow: inset 0 0 0 1px rgba(0,0,0,.6); }
+.lm-cov::before { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at 34% 28%, rgba(20,22,26,.2), rgba(8,9,11,.84) 70%), rgba(10,11,14,.55); }
+.lm-gl { position: absolute; inset: 3px; width: calc(100% - 6px); height: calc(100% - 6px); z-index: 1; border-radius: 50%; }
+.paused .lm-cov { filter: grayscale(.7); }
 .lm-meta { grid-area: meta; align-self: start; padding-right: 54px; }
-.lm-title, .lm-big { font: 800 13px/1.15 "Syne", "Figtree", sans-serif; letter-spacing: .01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: transparent; background: linear-gradient(180deg, #fff 0%, #b4bdcc 48%, #f2f5fa 52%, #7e8899 100%); -webkit-background-clip: text; background-clip: text; filter: drop-shadow(0 1px 0 rgba(0,0,0,.6)); }
-.lm-artist { font: 500 11.5px/1.3 "Figtree", sans-serif; color: var(--ink2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lm-title { font: 300 15px/1.2 "Montserrat", sans-serif; letter-spacing: .012em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--ink); text-shadow: 0 0 14px rgba(255,255,255,.12); }
+.lm-artist { font: 400 11px/1.35 "Montserrat", sans-serif; letter-spacing: .02em; color: var(--ink2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .lm-chips { grid-area: meta; justify-self: end; align-self: start; display: flex; gap: 3px; margin: -5px -5px 0 0; z-index: 3; }
-.lm-chips button { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; color: #c5ccd8; box-shadow: inset 0 0 0 1px rgba(255,255,255,.22); }
-.lm-chips button:hover { background: rgba(255,255,255,.14); color: #fff; }
+.lm-chips button { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; color: #c9ced6; box-shadow: inset 0 0 0 1px rgba(255,255,255,.14); }
+.lm-chips button:hover { background: rgba(255,255,255,.1); color: #fff; }
 .lm-chips svg { width: 12px; height: 12px; }
-.lm-time { grid-area: time; display: flex; gap: 6px; align-items: baseline; font: 700 11px/1 "JetBrains Mono", monospace; color: #e6ebf3; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.lm-time i { font-style: normal; font-weight: 400; color: var(--ink2); }
+.lm-time { grid-area: time; display: flex; gap: 6px; align-items: baseline; font: 400 11px/1 "Montserrat", sans-serif; letter-spacing: .04em; color: #e6e9ee; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.lm-time i { font-style: normal; color: var(--ink2); }
 .live-badge .lm-time i { display: none; }
 .lm-bar { grid-area: bar; position: relative; height: 16px; cursor: pointer; touch-action: none; }
-.lm-bar::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 6px; margin-top: -3px; border-radius: 6px; background: #05060a; box-shadow: inset 0 1px 3px #000, 0 1px 0 rgba(255,255,255,.14); }
-.lm-bar i { position: absolute; left: 1px; top: 50%; height: 4px; margin-top: -2px; width: max(4px, calc(var(--p, 0) * (100% - 2px))); border-radius: 4px; background: var(--ch); box-shadow: 0 0 8px rgba(190,215,255,.35); }
-.lm-bar::after { content: ""; position: absolute; top: 50%; left: calc(var(--p, 0) * (100% - 14px)); width: 14px; height: 14px; margin-top: -7px; border-radius: 50%;
-  background: radial-gradient(circle at 34% 28%, #fff 0 9%, transparent 34%), conic-gradient(from 200deg, #dfe5ee, #343a46, #f6f9fd, #5a6372, #e8edf5, #2a2f38, #dfe5ee); box-shadow: 0 2px 5px rgba(0,0,0,.6); }
-.live-badge .lm-bar { pointer-events: none; } .live-badge .lm-bar::after { display: none; } .live-badge .lm-bar i { width: calc(100% - 2px); animation: lmblink 1.4s ease-in-out infinite; }
+.lm-bar::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 3px; margin-top: -1.5px; border-radius: 3px; background: rgba(255,255,255,.12); box-shadow: inset 0 1px 1px rgba(0,0,0,.6); }
+.lm-bar i { position: absolute; left: 0; top: 50%; height: 3px; margin-top: -1.5px; width: calc(var(--p, 0) * 100%); border-radius: 3px; background: linear-gradient(90deg, rgba(238,240,243,.55), #eef0f3 82%, #ffe36a 90%, #ff7a2f); box-shadow: 0 0 10px rgba(255,255,255,.28); }
+.lm-bar::after { content: ""; position: absolute; top: 50%; left: calc(var(--p, 0) * (100% - 13px)); width: 13px; height: 13px; margin-top: -6.5px; border-radius: 50%; background: radial-gradient(circle at 50% 40%, #2a2d31, #0c0d10 70%); box-shadow: 0 2px 5px rgba(0,0,0,.6), 0 0 0 1.5px #e9ecf0, 0 0 0 2.5px rgba(74,163,255,.5), 0 0 6px rgba(255,122,47,.45); transform: scale(.85); transition: transform .15s; }
+.lm-bar:hover::after, .lm-bar:focus-visible::after, .lm-bar.drag::after { transform: scale(1.12); }
+.live-badge .lm-bar { pointer-events: none; } .live-badge .lm-bar::after { display: none; } .live-badge .lm-bar i { width: 100%; animation: lmblink 1.4s ease-in-out infinite; }
 @keyframes lmblink { 50% { opacity: .35; } }
 .lm-ctl { grid-area: ctl; display: flex; align-items: center; gap: 5px; }
-.lm-b { width: var(--bs); height: var(--bs); flex: none; border-radius: 50%; display: grid; place-items: center; color: #12151b; background: var(--ch);
-  box-shadow: 0 3px 8px rgba(0,0,0,.55), inset 0 1px 0 #fff, inset 0 0 0 1px rgba(0,0,0,.45); font: 800 9.5px/1 "Syne", sans-serif; letter-spacing: .01em; transition: filter .12s, transform .1s; }
-.lm-b:hover { filter: brightness(1.15); }
-.lm-b:active { transform: translateY(1px); filter: brightness(.9); }
-.lm-b.bk, .lm-b.fw { text-shadow: 0 1px 0 rgba(255,255,255,.55); }
+.lm-b { position: relative; width: var(--bs); height: var(--bs); flex: none; border-radius: 50%; display: grid; place-items: center; color: #f1f3f6;
+  background: linear-gradient(180deg, rgba(255,255,255,.1), rgba(255,255,255,.025)); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.2), inset 0 1px 0 rgba(255,255,255,.38), inset 0 -6px 10px rgba(0,0,0,.28), 0 6px 14px rgba(0,0,0,.5); font: 700 9px/1 "Syne", sans-serif; letter-spacing: .03em; transition: transform .1s, background .15s; }
+.lm-b:hover { background: linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,.05)); }
+.lm-b:hover::after { content: ""; position: absolute; inset: 0; border-radius: 50%; padding: 1.5px; pointer-events: none; background: var(--rim); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); }
+.lm-b:active { transform: scale(.93); }
 .lm-b[disabled] { opacity: .35; pointer-events: none; }
-.lm-b.pl { width: calc(var(--bs) * 1.3); height: calc(var(--bs) * 1.3);
-  background: radial-gradient(circle at 31% 24%, #fff 0 7%, rgba(255,255,255,0) 30%), radial-gradient(circle at 72% 88%, rgba(120,200,255,.6), transparent 48%), conic-gradient(from 215deg, #d3dae6, #3a414e, #f6f9fd, #596272, #e8edf5, #2b313c, #d3dae6);
-  box-shadow: 0 5px 14px rgba(0,0,0,.6), 0 0 calc(10px + var(--lvl, 0) * 26px) rgba(150,200,255,calc(.18 + var(--lvl, 0) * .5)), inset 0 -2px 5px rgba(0,0,0,.45), inset 0 0 0 1px rgba(0,0,0,.5);
-  transform: scale(calc(1 + var(--kick, 0) * .05)); }
-.lm-b.pl svg { width: 44%; height: 44%; filter: drop-shadow(0 1px 0 rgba(255,255,255,.55)); }
+.lm-b svg { filter: drop-shadow(0 1px 1px rgba(0,0,0,.5)); }
+.lm-b.pl { width: calc(var(--bs) * 1.32); height: calc(var(--bs) * 1.32); background: radial-gradient(circle at 36% 26%, #3a3d42, #0d0e11 72%); box-shadow: inset 0 0 0 1px rgba(0,0,0,.7), 0 8px 18px rgba(0,0,0,.6), 0 0 calc(8px + var(--lvl, 0) * 24px) rgba(140,170,255,calc(.1 + var(--lvl, 0) * .35)); transform: scale(calc(1 + var(--kick, 0) * .04)); -webkit-backdrop-filter: none; backdrop-filter: none; }
+.lm-b.pl svg { width: 40%; height: 40%; filter: none; color: transparent; }
+.lm-b.pl svg path, .lm-b.pl svg rect { fill: url(#lmg); }
+.lm-b.pl:hover::after { content: ""; padding: 2.5px; background: var(--rim); }
 .lm-ext { grid-area: ext; display: none; align-items: center; justify-content: flex-end; }
 .lm-b.vl svg { width: 52%; height: 52%; }
 
@@ -625,7 +630,7 @@ figcaption b { color: var(--ink); display: block; font-size: 15px; }
 /* PASTILLA */
 @container (height < 64px) {
   .lm-wrap { --pad: 5px; --os: calc(100cqh - 2 * var(--pad)); --bs: 28px; padding: var(--pad) 8px 0 var(--pad); gap: 0 8px; align-content: stretch; grid-template-columns: var(--os) minmax(0, 1fr) auto; grid-template-rows: minmax(0, 1fr) 8px; grid-template-areas: "orb meta ctl" "bar bar bar"; }
-  .lm-orb { grid-row: 1; } .lm-cov { inset: 24%; box-shadow: 0 0 0 1px #05060a, 0 0 0 2px #aab4c3; }
+  .lm-orb { grid-row: 1; } 
   .lm-meta { padding: 0; align-self: center; } .lm-title { font-size: 12px; } .lm-artist, .lm-chips, .lm-time { display: none; }
   .lm-ctl { gap: 2px; } .lm-b.pl { width: var(--bs); height: var(--bs); }
   .lm-bar { height: 8px; margin: 0 -8px 0 -5px; } .lm-bar::before { height: 4px; margin-top: -2px; border-radius: 0; } .lm-bar i { height: 2px; margin-top: -1px; border-radius: 0; left: 0; } .lm-bar::after { display: none; }
@@ -663,7 +668,7 @@ figcaption b { color: var(--ink); display: block; font-size: 15px; }
   .lm-wrap { grid-template-rows: minmax(0, 1fr) auto 16px auto auto auto; grid-template-areas: "orb" "meta" "bar" "time" "ctl" "ext"; }
   .lm-ext { display: flex; justify-content: center; }
 }
-@media (prefers-reduced-motion: reduce) { .sk-metal::after, .live-badge .lm-bar i { animation: none; } .lm-b { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .lm-orb::after, .lm-b.pl::after, .live-badge .lm-bar i { animation: none; } .lm-b { transition: none; } }
 </style>
 <!--SKIN-STYLES-->
 </head>
@@ -878,50 +883,75 @@ SKINS.glass.viz = {
 </script>
 <script>
 SKINS.metal = { label: 'Liquid Metal', tpl: () => `
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="lmg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".55" stop-color="#cfd3da"/><stop offset="1" stop-color="#8e949f"/></linearGradient></defs></svg>
   <div class="lm-wrap">
-    <div class="lm-orb" aria-hidden="true"><canvas class="lm-gl" data-viz="mercury"></canvas><div class="lm-cov"></div></div>
+    <div class="lm-orb" aria-hidden="true"><div class="lm-cov"></div><canvas class="lm-gl" data-viz="lens"></canvas></div>
     <div class="lm-meta"><div class="lm-title" data-t="title"></div><div class="lm-artist" data-t="artist"></div></div>
-    <div class="lm-chips"><button data-act="mode" title="Pasar a Mini" aria-label="Pasar a Mini"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><rect x="12" y="11" width="6" height="5" fill="currentColor" stroke="none"/></svg></button><button data-act="hide" title="Ocultar" aria-label="Ocultar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7l10 10M17 7L7 17"/></svg></button></div>
+    <div class="lm-chips"><button data-act="mode" title="Pasar a Mini" aria-label="Pasar a Mini"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"/><rect x="12" y="11" width="6" height="5" rx="1.2" fill="currentColor" stroke="none"/></svg></button><button data-act="hide" title="Ocultar" aria-label="Ocultar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7l10 10M17 7L7 17"/></svg></button></div>
     <div class="lm-time"><span data-v="cur">0:00</span><i data-v="dur">0:00</i></div>
     <div class="lm-bar" role="slider" tabindex="0" data-bar aria-label="Progreso" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i></i></div>
     <div class="lm-ctl">
-      <button class="lm-b pv" data-act="prev" title="Anterior" aria-label="Anterior"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 5.5v13"/><path d="M19 6v12l-9.5-6z" fill="currentColor"/></svg></button>
+      <button class="lm-b pv" data-act="prev" title="Anterior" aria-label="Anterior"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 5.5v13"/><path d="M19 6.2v11.6L9.8 12z" fill="currentColor"/></svg></button>
       <button class="lm-b bk" data-act="back" title="Retroceder 10 s" aria-label="Retroceder 10 segundos">-10</button>
-      <button class="lm-b pl" data-act="play" title="Pausar" aria-label="Pausar"><span class="ic ic-pause"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6.5" y="5" width="4" height="14" rx="1.2" fill="currentColor" stroke="none"/><rect x="13.5" y="5" width="4" height="14" rx="1.2" fill="currentColor" stroke="none"/></svg></span><span class="ic ic-play"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg></span></button>
+      <button class="lm-b pl" data-act="play" title="Pausar" aria-label="Pausar"><span class="ic ic-pause"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6.2" y="5" width="4.2" height="14" rx="1.6" fill="currentColor" stroke="none"/><rect x="13.6" y="5" width="4.2" height="14" rx="1.6" fill="currentColor" stroke="none"/></svg></span><span class="ic ic-play"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.2 5.6v12.8a.8.8 0 0 0 1.2.7l10.2-6.4a.8.8 0 0 0 0-1.4L9.4 4.9a.8.8 0 0 0-1.2.7z" fill="currentColor" stroke="none"/></svg></span></button>
       <button class="lm-b fw" data-act="fwd" title="Avanzar 10 s" aria-label="Avanzar 10 segundos">+10</button>
-      <button class="lm-b nx" data-act="next" title="Siguiente" aria-label="Siguiente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 5.5v13"/><path d="M5 6v12l9.5-6z" fill="currentColor"/></svg></button>
+      <button class="lm-b nx" data-act="next" title="Siguiente" aria-label="Siguiente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 5.5v13"/><path d="M5 6.2v11.6L14.2 12z" fill="currentColor"/></svg></button>
     </div>
-    <div class="lm-ext"><button class="lm-b vl" data-act="mute" title="Silenciar" aria-label="Silenciar o activar sonido"><span class="ic ic-vol"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z" fill="currentColor"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></svg></span><span class="ic ic-mute"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z" fill="currentColor"/><path d="M16 9.5l5 5M21 9.5l-5 5"/></svg></span></button></div>
+    <div class="lm-ext"><button class="lm-b vl" data-act="mute" title="Silenciar" aria-label="Silenciar o activar sonido"><span class="ic ic-vol"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z" fill="currentColor"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></svg></span><span class="ic ic-mute"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z" fill="currentColor"/><path d="M16 9.5l5 5M21 9.5l-5 5"/></svg></span></button></div>
   </div>` };
+SKINS.metal.viz = {
+  // Lente de cristal: un líquido chapotea (menisco partido en rojo, verde y azul, con banda irisada) y una burbuja se deforma con el espectro,
+  // con el contorno dibujado tres veces desplazado para imitar la dispersión del prisma, más el reflejo de ventana arriba a la izquierda.
+  lens(g, w, h, V) {
+    const R = Math.min(w, h) / 2, cx = w / 2, cy = h / 2; if (R < 6) return;
+    g.save(); g.beginPath(); g.arc(cx, cy, R, 0, 6.2832); g.clip();
+    // líquido
+    const lvl = .5 + R * 0 + .0, base = cy + R * (.38 - .1 * V.lvl - .05 * V.kick), amp = R * .07, pts = 28, surf = [];
+    for (let i = 0; i <= pts; i++) { const x = cx - R + (2 * R * i) / pts, k = Math.round((i / pts) * 95); surf.push([x, base + V.w[k] * amp + Math.sin(V.t * 1.4 + i * .55) * R * .012]); }
+    g.beginPath(); g.moveTo(surf[0][0], surf[0][1]); for (let i = 1; i < surf.length; i++) { const m = [(surf[i - 1][0] + surf[i][0]) / 2, (surf[i - 1][1] + surf[i][1]) / 2]; g.quadraticCurveTo(surf[i - 1][0], surf[i - 1][1], m[0], m[1]); }
+    g.lineTo(surf[pts][0], surf[pts][1]); const path = new Path2D(); g.lineTo(cx + R, cy + R); g.lineTo(cx - R, cy + R); g.closePath();
+    const lg = g.createLinearGradient(0, base - amp, 0, cy + R); lg.addColorStop(0, 'rgba(214,218,226,.5)'); lg.addColorStop(.35, 'rgba(120,124,134,.45)'); lg.addColorStop(1, 'rgba(36,38,44,.7)'); g.fillStyle = lg; g.fill();
+    // menisco con dispersión
+    const stroke = (dy, col, lw) => { g.beginPath(); g.moveTo(surf[0][0], surf[0][1] + dy); for (let i = 1; i < surf.length; i++) { const m = [(surf[i - 1][0] + surf[i][0]) / 2, (surf[i - 1][1] + surf[i][1]) / 2 + dy]; g.quadraticCurveTo(surf[i - 1][0], surf[i - 1][1] + dy, m[0], m[1]); } g.strokeStyle = col; g.lineWidth = lw; g.stroke(); };
+    g.globalCompositeOperation = 'lighter';
+    stroke(-R * .028, 'rgba(255,70,50,.75)', Math.max(1, R * .03)); stroke(0, 'rgba(70,255,150,.55)', Math.max(1, R * .03)); stroke(R * .028, 'rgba(60,120,255,.8)', Math.max(1, R * .03));
+    const ir = g.createLinearGradient(cx - R, 0, cx + R, 0); ['#ff4ca8', '#7a5cff', '#33d6ff', '#4cf0a0', '#ffe36a', '#ff7a2f'].forEach((c, i, a) => ir.addColorStop(i / (a.length - 1), c));
+    g.globalAlpha = .38; stroke(R * .05, ir, Math.max(2, R * .09)); g.globalAlpha = 1;
+    g.globalCompositeOperation = 'source-over'; stroke(0, 'rgba(255,255,255,.9)', Math.max(.8, R * .016));
+    // burbuja
+    const bx = cx + Math.sin(V.t * .5) * R * .04, by = cy - R * .2 + Math.cos(V.t * .6) * R * .03, r0 = R * .4, M = 72, bp = [], rw = [];
+    for (let i = 0; i < M; i++) { const th = i / M * 6.2832, u = ((th + 1.5708) / 6.2832) % 1, f = u < .5 ? u * 2 : (1 - u) * 2, v = V.b[Math.round(f * (V.N - 1) * .62)]; rw.push(1 + .42 * v + .05 * Math.sin(3 * th + V.t * 1.1) + .03 * V.kick); }
+    for (let i = 0; i < M; i++) { const th = i / M * 6.2832, rr = r0 * (rw[(i + M - 3) % M] + 2 * rw[(i + M - 2) % M] + 3 * rw[(i + M - 1) % M] + 4 * rw[i] + 3 * rw[(i + 1) % M] + 2 * rw[(i + 2) % M] + rw[(i + 3) % M]) / 16; bp.push([bx + Math.cos(th) * rr, by + Math.sin(th) * rr]); }
+    const poly = (dx, dy) => { g.beginPath(); bp.forEach((p, i) => { const x = bx + (p[0] - bx) * dx, y = by + (p[1] - by) * dx; i ? g.lineTo(x + dy, y) : g.moveTo(x + dy, y); }); g.closePath(); };
+    poly(1, 0); const bg = g.createRadialGradient(bx - r0 * .3, by - r0 * .35, r0 * .1, bx, by, r0 * 1.5); bg.addColorStop(0, 'rgba(255,255,255,.05)'); bg.addColorStop(1, 'rgba(255,255,255,.2)'); g.fillStyle = bg; g.fill();
+    g.globalCompositeOperation = 'lighter';
+    [[1, 'rgba(255,70,60,.8)'], [1.016, 'rgba(70,255,150,.55)'], [1.034, 'rgba(70,120,255,.85)']].forEach(([k, col]) => { poly(k, 0); g.strokeStyle = col; g.lineWidth = Math.max(1, R * .028); g.stroke(); });
+    g.globalCompositeOperation = 'source-over';
+    // reflejo de ventana
+    g.shadowColor = '#fff'; g.shadowBlur = R * .08; g.lineCap = 'round'; g.strokeStyle = 'rgba(255,255,255,.85)'; g.lineWidth = Math.max(1.4, R * .05);
+    g.beginPath(); g.arc(cx, cy, R * .8, 3.55, 4.25); g.stroke(); g.lineWidth = Math.max(1, R * .03); g.beginPath(); g.arc(cx, cy, R * .8, 4.4, 4.52); g.stroke(); g.shadowBlur = 0;
+    g.restore();
+  },
+};
+SKINS.metal.viz.lens.always = false;
+</script>
+<script>
+// Curvatura de pantalla: un filtro SVG con mapa de desplazamiento de barril (el centro se abomba y los bordes se comprimen).
 (() => {
-  // Tabla de cromo: banda oscura/clara según la normal del relieve (mapa de entorno de horizonte).
-  const STOPS = [[0, 12, 14, 20], [.14, 70, 80, 98], [.3, 244, 248, 255], [.42, 120, 132, 152], [.5, 24, 28, 38], [.6, 150, 164, 188], [.78, 255, 255, 255], [.9, 96, 108, 130], [1, 20, 24, 32]];
-  const LUT = new Uint8ClampedArray(256 * 3);
-  for (let i = 0; i < 256; i++) { const t = i / 255; let k = 0; while (k < STOPS.length - 2 && t > STOPS[k + 1][0]) k++; const a = STOPS[k], b = STOPS[k + 1], u = Math.max(0, Math.min(1, (t - a[0]) / (b[0] - a[0]))); for (let c = 0; c < 3; c++) LUT[i * 3 + c] = a[c + 1] + (b[c + 1] - a[c + 1]) * u * u * (3 - 2 * u); }
-  SKINS.metal.viz = {
-    // Anillo de gotas de mercurio: se dibujan círculos, se difuminan, se umbraliza (se funden) y el relieve se sombrea con el cromo.
-    mercury(g, w, h, V, card, cv) {
-      const R = Math.min(w, h), res = Math.max(40, Math.min(128, Math.round(R * .75)));
-      if (!cv._o || cv._o.width !== res) { const o = document.createElement('canvas'); o.width = o.height = res; cv._o = o; cv._og = o.getContext('2d', { willReadFrequently: true }); const q = document.createElement('canvas'); q.width = q.height = res; cv._q = q; cv._qg = q.getContext('2d'); cv._img = cv._qg.createImageData(res, res); }
-      const og = cv._og, M = 30, c = res / 2; og.clearRect(0, 0, res, res); og.filter = `blur(${(res * .032).toFixed(1)}px)`; og.fillStyle = '#fff';
-      for (let i = 0; i < M; i++) {
-        const ang = i / M * 6.2832 - 1.5708 + Math.sin(V.t * .35) * .2, j = i < M / 2 ? i : M - 1 - i, v = V.b[Math.min(V.N - 1, Math.round(j / (M / 2) * (V.N - 1) * .7))];
-        const rad = res * (.385 + .035 * v + .008 * Math.sin(V.t * 1.3 + i)), rr = res * (.046 + .085 * v);
-        og.beginPath(); og.arc(c + Math.cos(ang) * rad, c + Math.sin(ang) * rad, rr, 0, 6.2832); og.fill();
-      }
-      og.filter = 'none';
-      const src = og.getImageData(0, 0, res, res).data, out = cv._img.data, A = (x, y) => src[((y < 0 ? 0 : y >= res ? res - 1 : y) * res + (x < 0 ? 0 : x >= res ? res - 1 : x)) * 4 + 3] / 255;
-      for (let y = 0; y < res; y++) for (let x = 0; x < res; x++) {
-        const i = (y * res + x) * 4, a = A(x, y), m = Math.max(0, Math.min(1, (a - .4) / .12));
-        if (m <= 0) { out[i + 3] = 0; continue; }
-        const nx = A(x - 2, y) - A(x + 2, y), ny = A(x, y - 2) - A(x, y + 2), t = Math.max(0, Math.min(1, .5 + (nx * .8 + ny * 1.2) * 1.6 + (a - .7) * .5)), li = Math.round(t * 255) * 3;
-        out[i] = LUT[li]; out[i + 1] = LUT[li + 1]; out[i + 2] = LUT[li + 2]; out[i + 3] = m * 255;
-      }
-      cv._qg.putImageData(cv._img, 0, 0); g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high';
-      const ox = (w - R) / 2, oy = (h - R) / 2; g.drawImage(cv._q, ox, oy, R, R);
-    },
+  let MAP = null, N = 0;
+  const map = () => { if (MAP) return MAP; const z = 96, cv = document.createElement('canvas'); cv.width = cv.height = z; const g = cv.getContext('2d'), im = g.createImageData(z, z);
+    for (let y = 0; y < z; y++) for (let x = 0; x < z; x++) { const nx = (x + .5) / z * 2 - 1, ny = (y + .5) / z * 2 - 1, r2 = nx * nx + ny * ny, i = (y * z + x) * 4; im.data[i] = 128 + 127 * nx * r2 / 2; im.data[i + 1] = 128 + 127 * ny * r2 / 2; im.data[i + 2] = 128; im.data[i + 3] = 255; }
+    g.putImageData(im, 0, 0); return (MAP = cv.toDataURL()); };
+  SKINS.crt.setup = (c) => {
+    const NS = 'http://www.w3.org/2000/svg', id = 'crtb' + (++N), svg = document.createElementNS(NS, 'svg');
+    svg.setAttribute('width', '0'); svg.setAttribute('height', '0'); svg.setAttribute('aria-hidden', 'true'); svg.style.cssText = 'position:absolute;pointer-events:none';
+    svg.innerHTML = `<filter id="${id}" filterUnits="userSpaceOnUse" x="0" y="0" width="300" height="150" color-interpolation-filters="sRGB"><feImage href="${map()}" x="0" y="0" width="300" height="150" preserveAspectRatio="none" result="m"/><feDisplacementMap in="SourceGraphic" in2="m" scale="8" xChannelSelector="R" yChannelSelector="G"/></filter>`;
+    c.card.appendChild(svg);
+    const f = svg.firstChild, im = f.querySelector('feImage'), dm = f.querySelector('feDisplacementMap'), wrap = c.card.querySelector('.cr-wrap');
+    const upd = () => { const w = c.card.clientWidth, h = c.card.clientHeight; if (!w || !h) return; [f, im].forEach((e) => { e.setAttribute('width', w); e.setAttribute('height', h); }); dm.setAttribute('scale', (Math.min(w, h) * .075).toFixed(1)); };
+    wrap.style.filter = `url(#${id})`; upd();
+    c._ro = new ResizeObserver(upd); c._ro.observe(c.card);
   };
-  SKINS.metal.viz.mercury.always = false;
 })();
 </script>
 <!--SKIN-SCRIPTS-->
@@ -1023,6 +1053,8 @@ SKINS.metal = { label: 'Liquid Metal', tpl: () => `
     c.skin = id; c.card.className = 'card sk-' + id;
     c.card.innerHTML = SKINS[id].tpl() + '<i class="probe" aria-hidden="true"></i>';
     c.q = (s) => c.card.querySelector(s);
+    if (c._ro) { c._ro.disconnect(); c._ro = null; }
+    if (SKINS[id].setup) SKINS[id].setup(c);
     paintTrack(c); paint(c);
   }
   function paintTrack(c) {
