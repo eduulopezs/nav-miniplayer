@@ -7,7 +7,23 @@ const { isAllowedArtworkUrl, sniffImage, MAX_URL } = self.NMPNet;
 chrome.action.onClicked.addListener((tab) => {
   if (tab.id == null) return;
   chrome.scripting.executeScript({ target: { tabId: tab.id }, func: () => { const n = globalThis.__NMP; if (n && typeof n.toggle === 'function') n.toggle(); } }).catch(() => {});
+  startCapture(tab.id); // el clic en el icono es el gesto que autoriza la captura (activeTab)
 });
+
+// Audio real de la pestaña para el visualizador (opt-in desde el menú del icono). tabCapture da un id de flujo que consume el documento
+// offscreen (src/offscreen), que analiza el audio y manda el espectro al content script por un puerto. Sin captura, el visualizador es simulado.
+const CAPTURE_KEY = 'mp_capture';
+async function startCapture(tabId) {
+  try {
+    if (!(await chrome.storage.local.get(CAPTURE_KEY))[CAPTURE_KEY]) return;
+    const streamId = await chrome.tabCapture.getMediaStreamId({ targetTabId: tabId });
+    try { // solo puede haber un documento offscreen: si ya existe, createDocument falla y se reutiliza
+      await chrome.offscreen.createDocument({ url: 'src/offscreen/offscreen.html', reasons: ['USER_MEDIA'], justification: 'Analizar el audio de la pestaña para el visualizador' });
+    } catch (e) { if (!/single offscreen/i.test(String(e && e.message))) throw e; }
+    const r = await chrome.runtime.sendMessage({ target: 'offscreen', type: 'cap-start', tabId, streamId });
+    if (r && r.ok) chrome.tabs.sendMessage(tabId, { type: 'viz-connect' }).catch(() => {});
+  } catch (_) { /* pestaña no capturable (chrome://, ya capturada...): sigue el visualizador simulado */ }
+}
 
 // Descarga una carátula y la devuelve como data URL: así el canvas del PiP no queda "contaminado" por CORS.
 // La URL la elige la página, por lo que se restringe a http(s) público (net-guard.js), sin cookies, sin redirecciones,
@@ -60,6 +76,9 @@ async function readFont(file) {
   fontCache.set(file, data);
   return data;
 }
+chrome.runtime.onMessage.addListener((m, sender) => {
+  if (sender.id === chrome.runtime.id && !sender.tab && m && m.type === 'cap-idle') chrome.offscreen.closeDocument().catch(() => {});
+});
 const inflight = new Set(); // una descarga a la vez por pestaña
 chrome.runtime.onMessage.addListener((m, sender, reply) => {
   const tabId = sender.tab && sender.tab.id;
@@ -90,6 +109,7 @@ chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.removeAll(() => {
     for (const [id, title] of Object.entries(MODES)) chrome.contextMenus.create({ id, type: 'radio', title, contexts: ['action'], checked: id === 'pip' });
     chrome.contextMenus.create({ id: 'sep', type: 'separator', contexts: ['action'] });
+    chrome.contextMenus.create({ id: 'cap', type: 'checkbox', title: 'Visualizador con el audio real de la pestaña', contexts: ['action'], checked: false });
     chrome.contextMenus.create({ id: 'themes', title: 'Diseño', contexts: ['action'] });
     for (const [id, title] of Object.entries(THEMES)) chrome.contextMenus.create({ id: 'th:' + id, parentId: 'themes', type: 'radio', title, contexts: ['action'], checked: id === 'glass' });
     chrome.storage.local.get([MODE_KEY, THEME_KEY], (r) => syncMenu((r && r[MODE_KEY]) || 'pip', (r && r[THEME_KEY]) || 'glass'));
@@ -97,6 +117,7 @@ chrome.runtime.onInstalled.addListener(() => {
 });
 chrome.contextMenus.onClicked.addListener((info) => {
   const id = String(info.menuItemId);
+  if (id === 'cap') { chrome.storage.local.set({ [CAPTURE_KEY]: !!info.checked }); return; }
   if (MODES[id]) chrome.storage.local.set({ [MODE_KEY]: id });
   else if (id.startsWith('th:') && THEMES[id.slice(3)]) chrome.storage.local.set({ [THEME_KEY]: id.slice(3) });
 });

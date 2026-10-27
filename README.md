@@ -1,7 +1,7 @@
 # Nav Miniplayer (Edge y Chrome, Manifest V3)
 
 ## Instalar
-Mismo código para ambos navegadores (requiere Chrome/Edge 111 o superior).
+Mismo código para ambos navegadores (requiere Chrome/Edge 116 o superior).
 
 - **Edge:** abre `edge://extensions`, activa **Modo de desarrollador** y pulsa **Cargar desempaquetada**.
 - **Chrome:** abre `chrome://extensions`, activa **Modo de desarrollador** (arriba a la derecha) y pulsa **Cargar descomprimida**.
@@ -28,7 +28,9 @@ Clic derecho en el icono → **Diseño** para cambiar el aspecto en caliente (Ta
 - **Terminal CRT**: fósforo ámbar con curvatura de tubo, líneas de escaneo y ecualizador de texto.
 - **Liquid Metal**: metal cromado con mercurio en movimiento y anillo de color.
 
-La tarjeta se adapta a su tamaño (pastilla, fila, compacto, portada, panorámico) con container queries. El visualizador es simulado a partir de la pista; las fuentes se cargan desde la propia extensión.
+Para que el visualizador siga el audio real de la pestaña, marca **Visualizador con el audio real de la pestaña** en el menú del icono; la captura empieza con el clic en el icono y el navegador muestra su indicador. Sin ella, el visualizador es simulado.
+
+La tarjeta se adapta a su tamaño (pastilla, fila, compacto, portada, panorámico) con container queries. Las fuentes se cargan desde la propia extensión.
 
 ## Estructura
 ```

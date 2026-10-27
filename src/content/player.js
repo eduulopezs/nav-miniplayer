@@ -305,8 +305,22 @@ ${NMP.css}
     const dt = Math.min(.05, (n - vizLast) / 1000); vizLast = n;
     viz.step(dt); viz.draw(vizCtx);
   }
+  // Audio real: si el service worker ha activado la captura de esta pestaña, el espectro llega por un puerto mientras el reproductor se ve.
+  let vizPort = null;
+  function vizConnect() {
+    if (vizPort) return;
+    try {
+      const port = chrome.runtime.connect({ name: 'viz' });
+      port.onMessage.addListener((m) => { if (m && Array.isArray(m.f) && Array.isArray(m.t)) viz.feed(Uint8Array.from(m.f), Uint8Array.from(m.t), +m.r || 48000); });
+      port.onDisconnect.addListener(() => { void chrome.runtime.lastError; if (vizPort === port) vizPort = null; });
+      vizPort = port;
+    } catch (_) { /* sin background */ }
+  }
+  const vizDisconnect = () => { if (vizPort) { try { vizPort.disconnect(); } catch (_) { /* ya cerrado */ } vizPort = null; } };
+  let wantViz = false;
+  try { chrome.runtime.onMessage.addListener((m, sender) => { if (sender.id === chrome.runtime.id && !sender.tab && m && m.type === 'viz-connect' && wantViz) vizConnect(); }); } catch (_) { /* sin background */ }
   const vizStart = () => { if (!vizT) { vizLast = performance.now(); vizT = setInterval(vizTick, 33); } };
-  function vizStop() { if (vizT) { clearInterval(vizT); vizT = 0; } }
+  function vizStop() { wantViz = false; vizDisconnect(); if (vizT) { clearInterval(vizT); vizT = 0; } }
 
   // Paleta de la carátula: tiñe los diseños (--c1..--c3). Sin carátula, o si no se puede leer, la de por defecto.
   const setPalette = (p) => p.forEach((c, i) => card.style.setProperty('--c' + (i + 1), c));
@@ -330,7 +344,7 @@ ${NMP.css}
     const visible = !!media && !dismissed && !fs && !vp.active;
     card.classList.toggle('show', visible || pip);
     if (visible || pip) {
-      vizStart();
+      wantViz = true; vizStart();
       if (fontSkin !== theme) { const t = fontSkin = theme; NMP.loadFonts(t, () => { if (theme === t) requestAnimationFrame(layout); }); }
       if (host.ownerDocument !== document) NMP.syncFonts(host.ownerDocument);
     } else vizStop();
