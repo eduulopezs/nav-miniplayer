@@ -6,7 +6,7 @@ Mismo código para ambos navegadores (requiere Chrome/Edge 111 o superior).
 - **Edge:** abre `edge://extensions`, activa **Modo de desarrollador** y pulsa **Cargar desempaquetada**.
 - **Chrome:** abre `chrome://extensions`, activa **Modo de desarrollador** (arriba a la derecha) y pulsa **Cargar descomprimida**.
 
-Elige esta carpeta (`C:\dev\glass-mini-player`) y recarga las pestañas ya abiertas. Al reproducir audio/vídeo aparece el minirreproductor.
+Elige la carpeta del repositorio (la que contiene `manifest.json`) y recarga las pestañas ya abiertas. Al reproducir audio/vídeo aparece el minirreproductor.
 
 ## Uso
 - Arrastra la tarjeta a cualquier punto de la pantalla (la posición se recuerda).
@@ -19,10 +19,32 @@ Elige esta carpeta (`C:\dev\glass-mini-player`) y recarga las pestañas ya abier
   - **Tarjeta**: la tarjeta en la página, con esquinas muy redondeadas. El botón de la tarjeta pasa a Mini. La elección se recuerda.
   Si el navegador no permite el PiP de vídeo, usa una ventana flotante con marco como respaldo.
 - Botón × (al pasar el ratón) o icono de la extensión en la barra: ocultar/mostrar.
+- Teclado: con Tab se enfoca el reproductor; **Espacio** o **K** play/pausa, **←/→** ±10 s, **Esc** lo oculta. El progreso y la pista se anuncian a lectores de pantalla, y con "reducir movimiento" activado los títulos largos se truncan en vez de desplazarse.
 
 ## Diseños (desarrollo)
 Clic derecho en el icono → **Diseño (desarrollo)** para cambiar el aspecto en caliente (se aplica a Tarjeta, Ventana y Mini):
-- **Glass (original)**
-- **Cyber Brutalismo / Micrographics**: negro y amarillo ácido, sombra dura, tipografía mono y marcas de micrográfica.
-- **Pixel art**: paleta de 16 bits, esquinas escalonadas, carátula pixelada y barra por bloques.
-- **Retro Cyber**: synthwave con neón cian/magenta, rejilla, líneas de escaneo y esquinas biseladas.
+- **Glass (original)**: cristal translúcido con carátula desenfocada y progreso en degradado.
+- **Cyber Brutalismo / Micrographics**: lavanda sobre violeta casi negro, trama de puntos, tipografía mono y micrográficas.
+- **Pixel art**: paleta de dos verdes y crema, esquinas escalonadas, carátula pixelada y barra por bloques.
+- **Retro Cyber**: terminal de fósforo verde con efecto CRT, líneas de escaneo y brillo.
+
+## Estructura
+```
+manifest.json
+src/
+  background/service-worker.js   clic en el icono, menú contextual y descarga de carátulas
+  page/media-session-bridge.js   mundo de la página: captura los manejadores de Media Session
+  content/
+    config.js                    constantes y claves de almacenamiento
+    util.js                      clamp y formato de tiempo
+    icons.js                     iconos SVG
+    styles.js                    CSS del reproductor (tokens + diseños)
+    themes.js                    paletas del lienzo de Mini, una por diseño
+    renderer.js                  dibuja Mini en un canvas
+    player.js                    DOM, estado, ventanas flotantes, arrastre, tamaño y teclado
+scripts/                         check.mjs (manifest y sintaxis) y smoke.mjs (carga con DOM falso)
+```
+Los módulos de `content/` se cargan en el orden del manifest y comparten el espacio `__NMP`.
+
+## Desarrollo
+`npm test` comprueba que el manifest referencia archivos existentes, que todos los scripts compilan y que los módulos cargan y dibujan cada diseño. Sube el `version` del manifest en cada cambio.
