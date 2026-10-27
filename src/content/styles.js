@@ -46,6 +46,10 @@
   .art.has-img svg { display: none; }
   .meta { flex: 1; min-width: 0; }
   .title { color: var(--title); font-size: 13.5px; font-weight: 600; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 1px 6px var(--text-shadow); }
+  .hint { display: none; }
+  .card.pending .hint { display: block; }
+  .card.pending .artist:not(.hint) { display: none; }
+  .card.pending .mode { animation: pulse 1.4s ease-in-out infinite; }
   .scroll > span { display: inline-block; animation: marquee var(--t, 6s) ease-in-out infinite alternate; }
   @keyframes marquee { 0%, 15% { transform: translateX(0); } 85%, 100% { transform: translateX(var(--d)); } }
   .scroll { text-overflow: clip !important; }
@@ -174,7 +178,7 @@
   @media (prefers-reduced-motion: reduce) {
     .card, .card.show, .ring .bar, button { transition: none; }
     .card { transform: none; }
-    .card.loading .play { animation: none; }
+    .card.loading .play, .card.pending .mode { animation: none; }
     .scroll > span { animation: none; display: inline; }
     .scroll { text-overflow: ellipsis !important; }
   }

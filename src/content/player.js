@@ -32,7 +32,7 @@ ${NMP.css}
   <div class="inner">
   <div class="top">
     <div class="art">${icons.note}</div>
-    <div class="meta" aria-live="polite"><div class="title"></div><div class="artist"></div></div>
+    <div class="meta" aria-live="polite"><div class="title"></div><div class="artist"></div><div class="artist hint"></div></div>
     <div class="side">
     <button class="mode" title="Pasar a Mini" aria-label="Pasar a Mini"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><rect x="12" y="11" width="6" height="5" rx="1.5" fill="currentColor"/></svg></button>
     <button class="close" title="Ocultar" aria-label="Ocultar">${icons.close}</button>
@@ -56,17 +56,37 @@ ${NMP.css}
   const $ = (s) => root.querySelector(s);
   const inner = $('.inner'), grips = root.querySelectorAll('.grip');
   const card = $('.card'), ring = $('.ring'), bar = $('.bar'), art = $('.art');
-  const titleEl = $('.title'), artistEl = $('.artist'), curEl = $('.cur'), durEl = $('.dur');
+  const titleEl = $('.title'), artistEl = $('.artist'), hintEl = $('.hint'), curEl = $('.cur'), durEl = $('.dur');
   const btn = { prev: $('.prev'), back: $('.back'), play: $('.play'), fwd: $('.fwd'), next: $('.next'), close: $('.close'), mode: $('.mode') };
 
   // ---------- Estado ----------
-  let modeSwitch = false; // cambiando de tipo de ventana: cerrar la anterior no debe ocultar el reproductor
+  let modeSwitch = false; // cambiando de tipo de ventana, esperando a que se cierre la anterior
   let media = null, lastPlayed = null, dismissed = true, actions = new Set();
   let lastKey = '', lastPlaying = null, pip = false, curTitle = '', curArtist = '', curImg = '';
   let fm = 'pip';
   let theme = 'glass';
   const applyTheme = (t) => { theme = TH[t] ? t : 'glass'; if (theme === 'glass') delete card.dataset.theme; else card.dataset.theme = theme; renderer.invalidate(); };
-  const setMode = (v) => { fm = v; try { chrome.storage.local.set({ [MODE_KEY]: v }); } catch (_) { /* contexto invalidado */ } };
+  const setMode = (v) => { applyMode(v); try { chrome.storage.local.set({ [MODE_KEY]: v }); } catch (_) { /* contexto invalidado */ } };
+
+  // Cambio de modo: cierra la ventana anterior, espera a su evento de cierre y entonces muestra/abre la nueva.
+  // Un cierre provocado por el cambio (exiting / pipClosing) no es un "ocultar" del usuario, llegue cuando llegue.
+  let switchTimer = 0, pipClosing = false, openFailed = false;
+  function finishSwitch() {
+    clearTimeout(switchTimer);
+    modeSwitch = false; render(); startFloat();
+  }
+  function settleSwitch() { if (modeSwitch && !vp.active && !pip) finishSwitch(); }
+  function applyMode(v) {
+    if (v === fm) return;
+    fm = v; openFailed = false;
+    if (!document.hidden) dismissed = false; // las pestañas en segundo plano conservan lo que se cerró
+    if (fm !== 'pip' && vp.active) { vp.exiting = true; document.exitPictureInPicture().catch(() => { vp.exiting = false; }); }
+    if (fm !== 'win' && pip) { pipClosing = true; send('__pip'); }
+    modeSwitch = true; render();
+    clearTimeout(switchTimer);
+    switchTimer = setTimeout(finishSwitch, 2000); // respaldo si el cierre no llega
+    settleSwitch();
+  }
 
 
   document.addEventListener('play', (e) => { if (e.target instanceof HTMLMediaElement) lastPlayed = e.target; }, true);
@@ -166,13 +186,15 @@ ${NMP.css}
       card.classList.add('pip');
     } else if (d === 'closed') {
       pip = false;
-      if (!modeSwitch) dismissed = true;
+      if (!pipClosing) dismissed = true;
+      pipClosing = false;
       card.classList.remove('pip');
       host.style.cssText = 'all:initial;position:fixed;left:0;top:0;z-index:2147483647;';
       (document.body || document.documentElement).append(host);
       applyPos(savedPos);
     }
     render();
+    settleSwitch();
   });
 
   // Texto largo: en vez de "…", se desplaza de lado a lado mostrando todo el nombre.
@@ -194,7 +216,7 @@ ${NMP.css}
 
 
   // ---------- Ventana flotante sin marco: el reproductor se dibuja en un canvas y se saca con el PiP de vídeo ----------
-  const vp = { active: false, starting: false, switching: false, video: null, stop: null, pausing: 0 };
+  const vp = { active: false, starting: false, exiting: false, video: null, stop: null, pausing: 0 };
   const renderer = NMP.createRenderer(() => ({ theme, title: curTitle, artist: curArtist, art: curImg, media }));
 
   function vpTick() {
@@ -239,14 +261,14 @@ ${NMP.css}
     await v.play();
     if (v.readyState < 1) await new Promise((r) => v.addEventListener('loadedmetadata', r, { once: true }));
     const pw = await v.requestPictureInPicture();
-    vp.active = true;
+    vp.active = true; openFailed = false;
     // La ventana ya está abierta a tamaño pequeño: ahora se dibuja a 4x para que se vea nítida.
     const w0 = pw.width;
     renderer.setDpr(4); cv.width = CW * renderer.dpr; cv.height = CH * renderer.dpr;
     setTimeout(() => {
       if (vp.active && pw.width > w0 * 1.5) { renderer.setDpr(DPR0); cv.width = CW * renderer.dpr; cv.height = CH * renderer.dpr; } // el navegador la agrandó: deshacer
     }, 600);
-    v.addEventListener('leavepictureinpicture', () => { releaseVideo(); if (!modeSwitch) dismissed = true; render(); });
+    v.addEventListener('leavepictureinpicture', () => { releaseVideo(); if (!vp.exiting) dismissed = true; vp.exiting = false; render(); settleSwitch(); });
     setHandler('play', () => media && media.play().catch(() => {}));
     setHandler('pause', () => media && media.pause());
     setHandler('seekbackward', () => media && seekTo(media.currentTime - SKIP));
@@ -257,27 +279,40 @@ ${NMP.css}
     vp.stop = startTicker(vpTick);
     render();
   }
+  const canVideoPip = () => document.pictureInPictureEnabled && !!HTMLCanvasElement.prototype.captureStream;
   async function startFloat() {
     if (fm === 'card' || pip || vp.active || vp.starting || dismissed || !media) return;
     const docFallback = () => { if (actions.has('@pip')) send('__pip'); };
-    if (fm === 'win') return docFallback();
-    if (!document.pictureInPictureEnabled || !HTMLCanvasElement.prototype.captureStream) return docFallback();
+    if (fm === 'win' || !canVideoPip()) return docFallback();
     vp.starting = true;
     try { await openVideoPip(); } catch (err) {
       releaseVideo();
-      if (!(err && err.name === 'NotAllowedError')) docFallback();
-    } finally { vp.starting = false; }
+      if (!(err && err.name === 'NotAllowedError')) { openFailed = !actions.has('@pip'); docFallback(); } // sin gesto no es un fallo: se reintenta con el siguiente clic
+    } finally { vp.starting = false; render(); }
   }
   // La API exige un gesto del usuario: se abre con el primer clic o tecla en la página.
   ['pointerdown', 'keydown'].forEach((t) => document.addEventListener(t, startFloat, true));
   // Alternar entre ventana flotante (PiP) y tarjeta dentro de la página.
-  btn.mode.addEventListener('click', () => { setMode('pip'); startFloat(); });
+  btn.mode.addEventListener('click', () => { if (fm === 'pip') startFloat(); else setMode('pip'); });
   // Clic izquierdo en el icono: mostrar u ocultar en el modo elegido (la ventana se abre ya, o con el siguiente clic en la página).
   NMP.toggle = () => { // lo invoca el service worker desde el mundo aislado; la página no puede alcanzarlo
     if (vp.active) { document.exitPictureInPicture().catch(() => {}); return; }
     if (pip) { send('__pip'); return; }
     dismissed = !dismissed; render(); startFloat();
   };
+
+  // El navegador solo abre la ventana con un gesto en la página: mientras espera, la tarjeta lo dice (cualquier clic o tecla la abre).
+  const canOpenFloat = () => !openFailed && (fm === 'win' ? actions.has('@pip') : fm === 'pip' && (canVideoPip() || actions.has('@pip')));
+  let pending = null;
+  function setPending(on) {
+    if (on === pending) return;
+    pending = on;
+    card.classList.toggle('pending', on);
+    if (!on) requestAnimationFrame(() => fitMarquee(artistEl)); // el artista estaba oculto: recalcular su desplazamiento
+    hintEl.textContent = on ? (fm === 'pip' ? 'Toca para abrir Mini' : 'Toca para abrir la ventana') : '';
+    const label = on && fm === 'pip' ? 'Abrir Mini' : 'Pasar a Mini';
+    btn.mode.title = label; btn.mode.setAttribute('aria-label', label);
+  }
 
   // ---------- Render ----------
   // Solo hay trabajo (y temporizador) mientras algo se ve: tarjeta visible en una pestaña visible, ventana flotante o Mini.
@@ -293,6 +328,7 @@ ${NMP.css}
     const fs = !!document.fullscreenElement;
     const visible = !!media && !dismissed && !fs && !vp.active;
     card.classList.toggle('show', visible || pip);
+    setPending(visible && !pip && !modeSwitch && !vp.starting && canOpenFloat());
     if (!media) return;
 
     const md = navigator.mediaSession && navigator.mediaSession.metadata;
@@ -470,14 +506,8 @@ ${NMP.css}
       savedPos = r && r[POS_KEY]; applyPos(savedPos);
     });
     chrome.storage.onChanged.addListener((c) => {
-      if (c[MODE_KEY] && c[MODE_KEY].newValue && c[MODE_KEY].newValue !== fm) {
-        fm = c[MODE_KEY].newValue;
-        if (fm !== 'pip' && vp.active) document.exitPictureInPicture().catch(() => {});
-        if (fm !== 'win' && pip) send('__pip');
-        modeSwitch = true; dismissed = false; render();
-        // Si el navegador no deja abrir la ventana sin un gesto, se ve la tarjeta y se abre con el siguiente clic en la página.
-        setTimeout(() => { modeSwitch = false; dismissed = false; render(); startFloat(); }, 400);
-      }
+      // Si el navegador no deja abrir la ventana sin un gesto, se ve la tarjeta y se abre con el siguiente clic en la página.
+      if (c[MODE_KEY] && c[MODE_KEY].newValue) applyMode(c[MODE_KEY].newValue);
       if (c[THEME_KEY] && c[THEME_KEY].newValue) applyTheme(c[THEME_KEY].newValue);
       if (c[SIZE_KEY] && !rs && c[SIZE_KEY].newValue) setSize(c[SIZE_KEY].newValue.w, c[SIZE_KEY].newValue.h);
       if (c[POS_KEY] && mode !== 'drag') { savedPos = c[POS_KEY].newValue; applyPos(savedPos); } });
