@@ -122,7 +122,7 @@
   .card[data-theme=brutal] .ring .bar { stroke: var(--bar); stroke-linecap: butt; filter: none; stroke-width: 2; }
   .card[data-theme=brutal] .ring .track { stroke-width: 1; }
   .card[data-theme=brutal] .title { font-weight: 700; letter-spacing: .05em; text-shadow: none; }
-  .card[data-theme=brutal] .artist { opacity: .65; color: var(--ac); letter-spacing: .08em; }
+  .card[data-theme=brutal] .artist { opacity: .7; color: var(--ac); letter-spacing: .08em; }
   .card[data-theme=brutal] .time { font-size: 10px; letter-spacing: .04em; }
   .card[data-theme=brutal] .art { background: var(--art) center/cover, var(--art-bg); outline: 1px solid var(--ac); outline-offset: 2px; filter: grayscale(1) sepia(1) hue-rotate(205deg) saturate(1.6) brightness(.95); }
   .card[data-theme=brutal] .art svg { color: var(--ac); }
