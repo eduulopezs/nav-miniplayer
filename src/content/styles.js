@@ -34,7 +34,7 @@
   .ring { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 3; pointer-events: none; overflow: visible; }
   .ring rect { x: 1.25px; y: 1.25px; width: calc(100% - 2.5px); height: calc(100% - 2.5px); rx: calc(var(--r, 22px) - 1.25px); fill: none; stroke-width: 2.5; }
   .ring .track { stroke: var(--track); }
-  .ring .bar { stroke: url(#g); stroke-linecap: round; stroke-dasharray: 0 100; transition: stroke-dasharray .3s linear; filter: drop-shadow(0 0 4px var(--bar-glow)); }
+  .ring .bar { stroke: url(#g); stroke-linecap: round; stroke-dasharray: 0 100; transition: stroke-dasharray .25s linear; filter: drop-shadow(0 0 4px var(--bar-glow)); }
   .top, .controls { position: relative; z-index: 2; }
   .top { display: flex; align-items: center; gap: 12px; }
   .art {

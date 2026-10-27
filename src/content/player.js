@@ -75,7 +75,16 @@ ${NMP.css}
   document.addEventListener('__mp_actions', (e) => { actions = new Set(String(e.detail).split(',').filter((n) => KNOWN_ACTIONS.has(n))); });
   document.dispatchEvent(new CustomEvent('__mp_query'));
 
+  // Registro de medios: se reescanea solo cuando un medio avisa (play, carga, fin...) o, como máximo, una vez por segundo.
+  let scanAt = 0, scanDirty = true, picked = null;
+  ['play', 'pause', 'ended', 'loadedmetadata', 'loadeddata', 'durationchange', 'emptied'].forEach((ev) => document.addEventListener(ev, () => { scanDirty = true; }, true));
   function pickMedia() {
+    const now = performance.now();
+    if (!scanDirty && now - scanAt < 1000 && (!picked || picked.isConnected)) return picked;
+    scanDirty = false; scanAt = now;
+    return (picked = scanMedia());
+  }
+  function scanMedia() {
     const list = [...document.querySelectorAll('video,audio')].filter((m) =>
       m.isConnected && m.readyState > 0 && (m.duration >= MIN_DURATION || m.duration === Infinity) &&
       !(m.tagName === 'VIDEO' && m.muted && m.loop));
@@ -99,12 +108,18 @@ ${NMP.css}
     return '';
   }
 
+  const siteBtn = {}; // kind -> { el, at }: se busca como mucho una vez por segundo
+  const shown = (el) => !!el && el.isConnected && el.offsetParent !== null;
   function findSiteButton(kind) {
+    const c = siteBtn[kind], now = performance.now();
+    if (c && now - c.at < 1000 && (!c.el || shown(c.el))) return c.el;
+    let found = null;
     for (const sel of SITE_BUTTONS[kind]) {
       const el = document.querySelector(sel);
-      if (el && el.offsetParent !== null) return el;
+      if (shown(el)) { found = el; break; }
     }
-    return null;
+    siteBtn[kind] = { el: found, at: now };
+    return found;
   }
 
   const send = (name) => document.dispatchEvent(new CustomEvent('__mp_cmd', { detail: name }));
@@ -263,7 +278,15 @@ ${NMP.css}
   };
 
   // ---------- Render ----------
+  // Solo hay trabajo (y temporizador) mientras algo se ve: tarjeta visible en una pestaña visible, ventana flotante o Mini.
+  const isActive = () => pip || vp.active || (!dismissed && !document.hidden);
+  let loop = 0;
+  const sleep = () => { if (loop) { clearInterval(loop); loop = 0; } };
+  const setTxt = (el, v) => { if (el._t !== v) { el._t = v; el.textContent = v; } };
+  let lastDash = '', lastNow = -1;
   function render() {
+    if (!isActive()) { sleep(); if (dismissed) card.classList.remove('show'); return; }
+    if (!loop) loop = setInterval(render, 250);
     media = pickMedia();
     const fs = !!document.fullscreenElement;
     const visible = !!media && !dismissed && !fs && !vp.active;
@@ -288,10 +311,11 @@ ${NMP.css}
     card.classList.toggle('live', live);
     const dur = media.duration;
     const p = live ? 100 : dur > 0 ? Math.min(100, (media.currentTime / dur) * 100) : 0;
-    bar.style.strokeDasharray = p > 0 ? `${p} 100` : '0 100';
-    ring.setAttribute('aria-valuenow', Math.round(p));
-    curEl.textContent = fmt(media.currentTime);
-    durEl.textContent = live ? '' : fmt(dur);
+    const dash = p > 0 ? `${p.toFixed(2)} 100` : '0 100';
+    if (dash !== lastDash) { lastDash = dash; bar.style.strokeDasharray = dash; }
+    if (Math.round(p) !== lastNow) { lastNow = Math.round(p); ring.setAttribute('aria-valuenow', lastNow); }
+    setTxt(curEl, fmt(media.currentTime));
+    setTxt(durEl, live ? '' : fmt(dur));
 
     const playing = !media.paused && !media.ended;
     if (playing !== lastPlaying) {
@@ -306,8 +330,9 @@ ${NMP.css}
     btn.next.disabled = !(actions.has('nexttrack') || findSiteButton('next'));
   }
 
-  ['timeupdate', 'play', 'pause', 'ended', 'loadedmetadata', 'durationchange'].forEach((ev) => document.addEventListener(ev, render, true));
-  setInterval(render, 250);
+  // El bucle de 250 ms ya cubre el progreso; los eventos solo sirven para reaccionar al instante a play, pausa y cambios de pista.
+  ['play', 'pause', 'ended', 'loadedmetadata', 'durationchange'].forEach((ev) => document.addEventListener(ev, render, true));
+  document.addEventListener('visibilitychange', render);
   render();
 
   // ---------- Tamaño ----------
