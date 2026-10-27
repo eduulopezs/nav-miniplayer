@@ -6,14 +6,11 @@
     SKIP: 10, // s que saltan los botones ±10
     MIN_DURATION: 30, // s; ignora sonidos/clips cortos
     MARGIN: 24,
-    EDGE: 8, // px de borde que actúan como barra de progreso arrastrable
     POS_KEY: 'mp_pos',
     SIZE_KEY: 'mp_size',
-    THEME_KEY: 'mp_theme', // desarrollo: 'glass' | 'brutal' | 'pixel' | 'retro'
+    THEME_KEY: 'mp_theme', // desarrollo: 'glass' | 'noir' | 'crt' | 'metal'
     MODE_KEY: 'mp_mode', // 'pip' (vídeo, sin marco) | 'win' (ventana con controles propios) | 'card' (en la página)
-    SLIM: { w: 380, h: 56 }, SLIM_BELOW: 84,
-    DESIGN: { w: 312, h: 126 }, // tamaño base; el contenido se reescala a partir de él
-    MIN: { w: 240, h: 44 }, MAX: { w: 800, h: 420 },
+    MIN: { w: 240, h: 48 }, MAX: { w: 800, h: 480 },
     CW: 320, CH: 80, // lienzo de la ventana Mini
     DPR0: 0.5, // el PiP se abre con el tamaño real del vídeo (160x40, el navegador lo ajusta a su mínimo); ya abierto, se sube la resolución sin cambiar la proporción
     FONT: '"Segoe UI Variable Text","Segoe UI",system-ui,sans-serif',

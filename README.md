@@ -1,7 +1,7 @@
 # Nav Miniplayer (Edge y Chrome, Manifest V3)
 
 ## Instalar
-Mismo código para ambos navegadores (requiere Chrome/Edge 111 o superior).
+Mismo código para ambos navegadores (requiere Chrome/Edge 116 o superior).
 
 - **Edge:** abre `edge://extensions`, activa **Modo de desarrollador** y pulsa **Cargar desempaquetada**.
 - **Chrome:** abre `chrome://extensions`, activa **Modo de desarrollador** (arriba a la derecha) y pulsa **Cargar descomprimida**.
@@ -36,12 +36,16 @@ Elige la carpeta del repositorio (la que contiene `manifest.json`) y recarga las
 | Vimeo incrustado | ☑️ | Iframe; cubierto por los tests e2e con iframes locales. |
 | Vídeo de noticias | ☑️ | |
 
-## Diseños (desarrollo)
-Clic derecho en el icono → **Diseño (desarrollo)** para cambiar el aspecto en caliente (se aplica a Tarjeta, Ventana y Mini):
-- **Glass (original)**: cristal translúcido con carátula desenfocada y progreso en degradado.
-- **Cyber Brutalismo / Micrographics**: lavanda sobre violeta casi negro, trama de puntos, tipografía mono y micrográficas.
-- **Pixel art**: paleta de dos verdes y crema, esquinas escalonadas, carátula pixelada y barra por bloques.
-- **Retro Cyber**: terminal de fósforo verde con efecto CRT, líneas de escaneo y brillo.
+## Diseños
+Clic derecho en el icono → **Diseño** para cambiar el aspecto en caliente (Tarjeta, Ventana y Mini):
+- **Glassware**: cristal translúcido con cintas de color que siguen la música y paleta sacada de la carátula.
+- **Noir**: negro y rojo señal, carátula en blanco y negro, código de barras y relieve de espectro.
+- **Terminal CRT**: fósforo ámbar con curvatura de tubo, líneas de escaneo y ecualizador de texto.
+- **Liquid Metal**: metal cromado con mercurio en movimiento y anillo de color.
+
+Para que el visualizador siga el audio real de la pestaña, marca **Visualizador con el audio real de la pestaña** en el menú del icono; la captura empieza con el clic en el icono y el navegador muestra su indicador. Sin ella, el visualizador es simulado.
+
+La tarjeta se adapta a su tamaño (pastilla, fila, compacto, portada, panorámico) con container queries. Las fuentes se cargan desde la propia extensión.
 
 ## Estructura
 ```
@@ -54,7 +58,6 @@ src/
   content/
     config.js                    constantes y claves de almacenamiento
     util.js                      clamp y formato de tiempo
-    icons.js                     iconos SVG
     media.js                     medios remotos (del puente y de iframes) y política de selección
     frame-agent.js               agente sin interfaz en cada iframe: informa al marco superior y ejecuta sus órdenes
     tokens.js                    GENERADO desde design/tokens.json (variables CSS y colores del lienzo)

@@ -43,6 +43,10 @@ t('el service worker no envía cookies ni sigue redirecciones', /credentials: 'o
 t('el service worker exige pestaña emisora', /sender\.tab/.test(sw));
 t('el service worker valida la URL antes de descargar', /isAllowedArtworkUrl\(url\)/.test(sw));
 t('el estado PiP solo cambia si la extensión lo pidió', /pipAsked/.test(player) && /d === 'open' \? !pipAsked/.test(player));
+const off = read('src/offscreen/offscreen.js');
+t('la captura exige el ajuste opt-in y el clic en el icono', /mp_capture/.test(sw) && /startCapture\(tab\.id\)/.test(sw));
+t('el offscreen solo atiende a la extensión y rechaza mensajes de pestañas', /sender\.id !== chrome\.runtime\.id \|\| sender\.tab/.test(off) && /port\.sender\.id !== chrome\.runtime\.id/.test(off));
+t('el audio vuelve a los altavoces y a la página solo llegan números', /connect\(ctx\.destination\)/.test(off) && /getByteFrequencyData/.test(off) && !/postMessage\([^)]*stream/.test(off));
 t('las acciones anunciadas por la página se filtran', /KNOWN_ACTIONS/.test(player));
 
 // Service worker con fetch simulado: camino positivo y negativos de la descarga de carátulas.

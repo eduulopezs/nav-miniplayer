@@ -10,38 +10,19 @@
   const TH = {
     glass: { ...art, font: FONT, tw: 600, bg: [K.glass['bg-a'], K.glass['bg-b']], blur: true, veil: K.glass['mini-veil'], artR: 13, fg: K.glass.text, fg2: K.glass['mini-fg-2'], time: K.glass['mini-time'],
       track: K.glass['mini-track'], bar: [K.glass['bar-1'], K.glass['bar-2'], K.glass['bar-3']], barH: 4, barR: 2, shadow: K.glass['mini-shadow'] },
-    brutal: { ...art, font: MONO, tw: 700, upper: true, bg: [K.brutal['bg-a'], K.brutal['bg-b']], artR: 0, artBorder: K.brutal.ac, gray: true, tint: K.brutal['mini-tint'], fg: K.brutal.fg, fg2: K.brutal['mini-fg-2'], time: K.brutal.ac,
-      track: K.brutal['mini-track'], bar: [K.brutal.bar], barH: 2, barR: 0,
+    noir: { ...art, font: '"Archivo Narrow","Segoe UI",system-ui,sans-serif', tw: 700, upper: true, bg: [K.noir['mini-bg-a'], K.noir['mini-bg-b']], artR: 0, artBorder: K.noir['mini-bar'], gray: true, fg: K.noir['mini-fg'], fg2: K.noir['mini-fg-2'], time: K.noir['mini-time'],
+      track: K.noir['mini-track'], bar: [K.noir['mini-bar']], barH: 3, barR: 0 },
+    crt: { ...art, font: '"Lucida Console",Consolas,monospace', tw: 700, upper: true, prefix: '> ', bg: [K.crt['mini-bg-a'], K.crt['mini-bg-b']], artR: 0, artBorder: K.crt['mini-fg-2'], gray: true, tint: K.crt['mini-bar'] + '', fg: K.crt['mini-fg'], fg2: K.crt['mini-fg-2'], time: K.crt['mini-time'],
+      track: K.crt['mini-track'], bar: [K.crt['mini-bar']], barH: 5, barR: 0, glow: K.crt['mini-glow'],
       deco(b) {
-        const k = K.brutal;
-        b.fillStyle = k.dot;
-        for (let x = 1; x < CW; x += 9) for (let y = 1; y < CH; y += 9) b.fillRect(x, y, 1, 1);
-        b.strokeStyle = k.line; b.lineWidth = 1; b.strokeRect(.5, .5, CW - 1, CH - 1);
-        b.fillStyle = k.ac;
-        for (let x = 0; x <= 228; x += 6) b.fillRect(80 + x, x % 30 ? 60 : 59, 1, x % 30 ? 2 : 4);
-        b.fillRect(CW - 50, 4, 38, 11); b.fillStyle = k.ink; b.font = '700 8px ' + MONO; b.textBaseline = 'alphabetic'; b.fillText('ACTIVE', CW - 47, 12.5);
-        b.fillStyle = k.ac; b.font = '12px ' + MONO; b.fillText('+', 3, CH - 3);
-      } },
-    pixel: { ...art, font: '"Lucida Console","Courier New",monospace', tw: 700, upper: true, bg: [K.pixel['bg-a'], K.pixel['bg-b']], artR: 0, artBorder: K.pixel.frame, pixelArt: true, gray: true, tint: K.pixel['mini-tint'], fg: K.pixel.fg, fg2: K.pixel['fg-2'], time: K.pixel['mini-time'],
-      track: K.pixel.track, bar: [K.pixel.bar], barH: 6, barR: 0, seg: 5,
-      deco(b) {
-        const k = K.pixel;
-        b.fillStyle = k.frame;
-        b.fillRect(3, 0, CW - 6, 2); b.fillRect(3, CH - 2, CW - 6, 2); b.fillRect(0, 3, 2, CH - 6); b.fillRect(CW - 2, 3, 2, CH - 6);
-        b.fillRect(2, 2, 1, 1); b.fillRect(CW - 3, 2, 1, 1); b.fillRect(2, CH - 3, 1, 1); b.fillRect(CW - 3, CH - 3, 1, 1);
-        b.strokeStyle = k['frame-2']; b.lineWidth = 1; b.strokeRect(5.5, 5.5, CW - 11, CH - 11);
-        b.fillStyle = k.corner; b.fillRect(0, 0, 3, 3); b.fillRect(CW - 3, 0, 3, 3); b.fillRect(0, CH - 3, 3, 3); b.fillRect(CW - 3, CH - 3, 3, 3);
-      } },
-    retro: { ...art, font: '"Lucida Console",Consolas,monospace', tw: 700, upper: true, prefix: '> ', bg: [K.retro['bg-a'], K.retro['bg-b']], artR: 0, artBorder: K.retro['fg-2'], gray: true, tint: K.retro['mini-tint'], fg: K.retro.fg, fg2: K.retro['fg-2'], time: K.retro['mini-time'],
-      track: K.retro.track, bar: [K.retro.bar], barH: 5, barR: 0, glow: K.retro.glow,
-      deco(b) {
-        const k = K.retro;
+        const k = K.crt;
         const v = b.createRadialGradient(CW / 2, CH / 2, 14, CW / 2, CH / 2, CW * .62);
         v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, k['mini-vignette']);
         b.fillStyle = v; b.fillRect(0, 0, CW, CH);
-        b.strokeStyle = k.line; b.lineWidth = 2; b.strokeRect(1, 1, CW - 2, CH - 2);
-        b.fillStyle = k.scan; for (let y = 0; y < CH; y += 3) b.fillRect(0, y, CW, 1);
+        b.fillStyle = k['mini-scan']; for (let y = 0; y < CH; y += 3) b.fillRect(0, y, CW, 1);
       } },
+    metal: { ...art, font: '"Montserrat","Segoe UI",system-ui,sans-serif', tw: 700, blur: true, bg: [K.metal['mini-bg-a'], K.metal['mini-bg-b']], artR: 14, fg: K.metal['mini-fg'], fg2: K.metal['mini-fg-2'], time: K.metal['mini-time'],
+      track: K.metal['mini-track'], bar: [K.metal['mini-bar-1'], K.metal['mini-bar-2'], K.metal['mini-bar-3']], barH: 4, barR: 2, shadow: K.glass['mini-shadow'] },
   };
 
   NMP.themes = TH;

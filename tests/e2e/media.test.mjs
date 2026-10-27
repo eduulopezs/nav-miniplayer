@@ -24,13 +24,13 @@ test('new Audio() sin insertar: aparece, se pausa, se reanuda y salta', async ()
   const p = await start(() => { window.x = new Audio('/a.wav'); window.x.loop = true; });
   await p.waitFor(async () => (await p.read()).shown);
   assert.equal((await p.read()).playLabel, 'Pausar');
-  await p.click('play');
+  await p.click('act:play');
   await p.waitFor(() => xPaused(p));
   await p.waitFor(async () => (await p.read()).playLabel === 'Reproducir');
-  await p.click('play');
+  await p.click('act:play');
   await p.waitFor(async () => !(await xPaused(p)));
   const t0 = await xTime(p);
-  await p.click('fwd');
+  await p.click('act:fwd');
   await p.waitFor(async () => (await xTime(p)) >= t0 + 8);
   await p.page.close();
 });
@@ -45,7 +45,7 @@ test('medio dentro de un shadow DOM cerrado', async () => {
     window.x = a;
   });
   await p.waitFor(async () => (await p.read()).shown);
-  await p.click('play');
+  await p.click('act:play');
   await p.waitFor(() => xPaused(p));
   await p.page.close();
 });
@@ -56,7 +56,7 @@ test('un medio sin insertar que no suena no secuestra el reproductor', async () 
   await p.play();
   await sleep(1200);
   await p.toggle();
-  await p.click('play'); // el que suena es el <audio> de la página: lo pausa a él
+  await p.click('act:play'); // el que suena es el <audio> de la página: lo pausa a él
   await p.waitFor(() => p.paused());
   assert.equal(await p.media(() => window.y.paused), true);
   await p.page.close();
@@ -80,13 +80,13 @@ for (const [nombre, host] of [['mismo origen', null], ['origen cruzado', 'localh
     await p.toggle();
     await p.waitFor(async () => (await p.read()).shown);
     assert.equal((await p.read()).playLabel, 'Pausar');
-    await p.click('play');
+    await p.click('act:play');
     await p.waitFor(() => fEval(() => document.getElementById('a').paused));
     await p.waitFor(async () => (await p.read()).playLabel === 'Reproducir');
-    await p.click('play');
+    await p.click('act:play');
     await p.waitFor(async () => !(await fEval(() => document.getElementById('a').paused)));
     const t0 = await fEval(() => document.getElementById('a').currentTime);
-    await p.click('fwd');
+    await p.click('act:fwd');
     await p.waitFor(async () => (await fEval(() => document.getElementById('a').currentTime)) >= t0 + 8);
     await p.page.close();
   });

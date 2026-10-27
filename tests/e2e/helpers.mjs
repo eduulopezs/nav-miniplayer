@@ -69,6 +69,12 @@ export async function launch() {
 const find = (n, pred, out = []) => { if (pred(n)) out.push(n); for (const c of [...(n.children || []), ...(n.shadowRoots || [])]) find(c, pred, out); return out; };
 const attr = (n, k) => { const a = n.attributes || []; const i = a.indexOf(k); return i >= 0 ? a[i + 1] : null; };
 const hasClass = (n, c) => (attr(n, 'class') || '').split(/\s+/).includes(c);
+// Selectores del inspector: 'card' / 'br' (clase), 'act:play' (data-act), 't:title' (data-t), 'v:cur' (data-v) y 'bar' (data-bar).
+const match = (n, sel) => {
+  const [k, v] = sel.split(':');
+  if (v === undefined) return sel === 'bar' ? attr(n, 'data-bar') !== null : hasClass(n, sel);
+  return attr(n, { act: 'data-act', t: 'data-t', v: 'data-v' }[k]) === v;
+};
 const text = (n) => (n.children || []).map((c) => c.nodeValue || '').join('');
 
 // Abre una página de pruebas y devuelve un inspector del reproductor.
@@ -82,7 +88,15 @@ export async function openPage(env, server, { art, mode = 'card', theme, bare = 
   await sleep(300); // el content script lee su configuración de storage al arrancar
   const cdp = await ctx.newCDPSession(page);
   const tree = async () => (await cdp.send('DOM.getDocument', { depth: -1, pierce: true })).root;
-  const node = async (cls) => find(await tree(), (n) => hasClass(n, cls))[0];
+  const box = async (n) => {
+    try {
+      const { model } = await cdp.send('DOM.getBoxModel', { backendNodeId: n.backendNodeId });
+      const q = model.border, xs = [q[0], q[2], q[4], q[6]], ys = [q[1], q[3], q[5], q[7]], x = Math.min(...xs), y = Math.min(...ys);
+      return { x, y, w: Math.max(...xs) - x, h: Math.max(...ys) - y };
+    } catch (_) { return null; }
+  };
+  // Primer elemento que coincide y se ve (cada diseño repite algunos elementos según el formato).
+  const node = async (sel) => { for (const n of find(await tree(), (m) => match(m, sel))) { const b = await box(n); if (b && b.w > 0 && b.h > 0) return n; } return find(await tree(), (m) => match(m, sel))[0]; };
   const api = {
     page, cdp,
     media: (fn, arg) => page.evaluate(fn, arg),
@@ -94,27 +108,22 @@ export async function openPage(env, server, { art, mode = 'card', theme, bare = 
     // Estado visible del reproductor.
     async read() {
       const root = await tree();
-      const one = (c) => find(root, (n) => hasClass(n, c))[0];
-      const card = one('card'), ring = one('ring'), play = one('play'), cur = one('cur'), bar = one('bar'), title = one('title');
+      const one = (sel) => find(root, (n) => match(n, sel))[0];
+      const card = one('card'), play = one('act:play'), cur = one('v:cur'), bar = one('bar'), title = one('t:title');
+      const cls = card ? (attr(card, 'class') || '').split(/\s+/) : [];
+      const st = card ? attr(card, 'style') || '' : '';
       return {
-        shown: !!card && hasClass(card, 'show'),
+        shown: !!card && cls.includes('show'),
         cur: cur ? text(cur) : null,
-        valuenow: ring ? +attr(ring, 'aria-valuenow') : null,
-        dash: bar ? parseFloat(((attr(bar, 'style') || '').match(/dasharray:\s*([\d.]+)/) || [])[1]) : null,
+        valuenow: bar ? +attr(bar, 'aria-valuenow') : null,
+        progress: +((st.match(/--p:\s*([\d.]+)/) || [])[1] || 0) * 100,
         playLabel: play ? attr(play, 'aria-label') : null,
-        title: title ? text(title.children && title.children[0] ? title.children[0] : title) : null,
-        theme: card ? attr(card, 'data-theme') : null,
-        art: card ? ((attr(card, 'style') || '').match(/--art:\s*([^;]+)/) || [])[1] || null : null,
+        title: title ? text(title) : null,
+        theme: (cls.find((c) => c.startsWith('sk-')) || '').slice(3) || null,
+        art: (st.match(/--art:\s*([^;]+)/) || [])[1] || null,
       };
     },
-    async box(cls) {
-      const n = await node(cls);
-      const { model } = await cdp.send('DOM.getBoxModel', { backendNodeId: n.backendNodeId });
-      const q = model.border;
-      const xs = [q[0], q[2], q[4], q[6]], ys = [q[1], q[3], q[5], q[7]];
-      const x = Math.min(...xs), y = Math.min(...ys);
-      return { x, y, w: Math.max(...xs) - x, h: Math.max(...ys) - y };
-    },
+    async box(sel) { return box(await node(sel)); },
     async click(cls) {
       const b = await api.box(cls);
       await page.mouse.click(b.x + b.w / 2, b.y + b.h / 2);
