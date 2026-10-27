@@ -13,6 +13,12 @@ const files = new Set();
 if (manifest.background?.service_worker) files.add(manifest.background.service_worker);
 for (const cs of manifest.content_scripts ?? []) for (const f of [...(cs.js ?? []), ...(cs.css ?? [])]) files.add(f);
 for (const f of Object.values(manifest.icons ?? {})) files.add(f);
+// Scripts que el service worker carga con importScripts (ruta relativa a su carpeta).
+if (manifest.background?.service_worker) {
+  const swPath = manifest.background.service_worker;
+  const code = existsSync(join(root, swPath)) ? readFileSync(join(root, swPath), 'utf8') : '';
+  for (const [, f] of code.matchAll(/importScripts\('([^']+)'\)/g)) files.add(join(dirname(swPath), f).replace(/\\/g, '/'));
+}
 
 for (const f of files) {
   const path = join(root, f);

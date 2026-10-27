@@ -12,7 +12,7 @@
   const host = document.createElement('div');
   host.id = 'glass-mini-player-host';
   host.style.cssText = 'all:initial;position:fixed;left:0;top:0;z-index:2147483647;';
-  const root = host.attachShadow({ mode: 'open' });
+  const root = host.attachShadow({ mode: 'closed' }); // cerrado: la página no puede leer ni tocar el reproductor (ni el lienzo del Mini)
 
   root.innerHTML = `
 <style>
@@ -70,7 +70,9 @@ ${NMP.css}
 
 
   document.addEventListener('play', (e) => { if (e.target instanceof HTMLMediaElement) lastPlayed = e.target; }, true);
-  document.addEventListener('__mp_actions', (e) => { actions = new Set(String(e.detail).split(',').filter(Boolean)); });
+  // El puente corre en el mundo de la página, así que lo que anuncia puede estar falseado: solo se aceptan nombres conocidos.
+  const KNOWN_ACTIONS = new Set(['play', 'pause', 'stop', 'seekbackward', 'seekforward', 'seekto', 'previoustrack', 'nexttrack', '@pip']);
+  document.addEventListener('__mp_actions', (e) => { actions = new Set(String(e.detail).split(',').filter((n) => KNOWN_ACTIONS.has(n))); });
   document.dispatchEvent(new CustomEvent('__mp_query'));
 
   function pickMedia() {
@@ -84,12 +86,14 @@ ${NMP.css}
   }
 
 
+  // La carátula la decide la página: solo se admiten http(s), blob e imágenes en data URL.
+  const safeArt = (src) => (typeof src === 'string' && /^(https?:|blob:|data:image\/(png|jpe?g|gif|webp|avif);)/i.test(src) ? src : '');
   function bestArtwork(md) {
     if (md && md.artwork && md.artwork.length) {
       const size = (a) => parseInt(String(a.sizes || '').split(/[x\s]/)[0], 10) || 0;
-      return [...md.artwork].sort((a, b) => size(b) - size(a))[0].src;
+      return safeArt([...md.artwork].sort((a, b) => size(b) - size(a))[0].src);
     }
-    if (media && media.poster) return media.poster;
+    if (media && media.poster) return safeArt(media.poster);
     const yt = /[?&]v=([\w-]{11})/.exec(location.href);
     if (yt && /youtube\.com$/.test(location.hostname)) return `https://i.ytimg.com/vi/${yt[1]}/hqdefault.jpg`;
     return '';
@@ -138,6 +142,7 @@ ${NMP.css}
   // Respaldo: ventana flotante con marco (Document PiP), la abre main.js y mueve aquí el host.
   document.addEventListener('__mp_pip', (e) => {
     const d = String(e.detail);
+    if (d !== 'open' && d !== 'closed' && !d.startsWith('error:')) return;
     if (d === 'open') {
       pip = true;
       host.style.cssText = 'all:initial;position:fixed;inset:0;';
@@ -251,11 +256,11 @@ ${NMP.css}
   // Alternar entre ventana flotante (PiP) y tarjeta dentro de la página.
   btn.mode.addEventListener('click', () => { setMode('pip'); startFloat(); });
   // Clic izquierdo en el icono: mostrar u ocultar en el modo elegido (la ventana se abre ya, o con el siguiente clic en la página).
-  document.addEventListener('__mp_toggle', () => {
+  NMP.toggle = () => { // lo invoca el service worker desde el mundo aislado; la página no puede alcanzarlo
     if (vp.active) { document.exitPictureInPicture().catch(() => {}); return; }
     if (pip) { send('__pip'); return; }
     dismissed = !dismissed; render(); startFloat();
-  });
+  };
 
   // ---------- Render ----------
   function render() {
@@ -274,7 +279,7 @@ ${NMP.css}
       lastKey = key;
       curTitle = title; curArtist = artist; curImg = img;
       setText(titleEl, title); setText(artistEl, artist);
-      const url = img ? `url("${img.replace(/"/g, '%22')}")` : 'none';
+      const url = img ? `url("${img.replace(/["\\\n\r]/g, (c) => '%' + c.charCodeAt(0).toString(16).toUpperCase().padStart(2, '0'))}")` : 'none';
       card.style.setProperty('--art', url);
       art.classList.toggle('has-img', !!img);
     }

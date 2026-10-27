@@ -1,25 +1,61 @@
+importScripts('net-guard.js');
+const { isAllowedArtworkUrl, sniffImage, MAX_URL } = self.NMPNet;
+
 // Clic izquierdo: se ejecuta un script en la pestaña desde el propio clic, para que cuente como gesto del usuario
-// y el navegador deje abrir la ventana flotante al momento.
+// y el navegador deje abrir la ventana flotante al momento. Corre en el mundo aislado de la extensión (el mismo
+// que el content script), así que llama a una función que la página no puede ver ni invocar.
 chrome.action.onClicked.addListener((tab) => {
   if (tab.id == null) return;
-  chrome.scripting.executeScript({ target: { tabId: tab.id }, func: () => document.dispatchEvent(new CustomEvent('__mp_toggle')) }).catch(() => {});
+  chrome.scripting.executeScript({ target: { tabId: tab.id }, func: () => { const n = globalThis.__NMP; if (n && typeof n.toggle === 'function') n.toggle(); } }).catch(() => {});
 });
 
 // Descarga una carátula y la devuelve como data URL: así el canvas del PiP no queda "contaminado" por CORS.
-// Solo http(s), solo imágenes y con tope de tamaño; el resto se responde vacío.
+// La URL la elige la página, por lo que se restringe a http(s) público (net-guard.js), sin cookies, sin redirecciones,
+// con tope de tamaño y de tiempo, y el tipo se decide por los bytes reales de la imagen.
 const MAX_ART_BYTES = 5 * 1024 * 1024;
-const readAsDataURL = (blob) => new Promise((ok, ko) => { const fr = new FileReader(); fr.onload = () => ok(fr.result); fr.onerror = ko; fr.readAsDataURL(blob); });
-async function fetchArtwork(url) {
-  if (!/^https?:$/.test(new URL(url).protocol)) throw new Error('protocolo no permitido');
-  const res = await fetch(url);
-  if (!res.ok) throw new Error('HTTP ' + res.status);
-  const blob = await res.blob();
-  if (!blob.type.startsWith('image/') || blob.size > MAX_ART_BYTES) throw new Error('no es una imagen válida');
-  return readAsDataURL(blob);
+const ART_TIMEOUT_MS = 8000;
+const toBase64 = (bytes) => {
+  let s = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  return btoa(s);
+};
+async function readCapped(res, max) {
+  const reader = res.body.getReader();
+  const chunks = [];
+  let total = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    total += value.length;
+    if (total > max) { reader.cancel().catch(() => {}); throw new Error('imagen demasiado grande'); }
+    chunks.push(value);
+  }
+  const out = new Uint8Array(total);
+  let off = 0;
+  for (const c of chunks) { out.set(c, off); off += c.length; }
+  return out;
 }
+async function fetchArtwork(url) {
+  if (!isAllowedArtworkUrl(url)) throw new Error('URL no permitida');
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), ART_TIMEOUT_MS);
+  try {
+    const res = await fetch(url, { credentials: 'omit', redirect: 'error', referrerPolicy: 'no-referrer', signal: ctl.signal });
+    if (!res.ok || !res.body) throw new Error('HTTP ' + res.status);
+    if (+res.headers.get('content-length') > MAX_ART_BYTES) throw new Error('imagen demasiado grande');
+    const bytes = await readCapped(res, MAX_ART_BYTES);
+    const mime = sniffImage(bytes);
+    if (!mime) throw new Error('no es una imagen válida');
+    return `data:${mime};base64,${toBase64(bytes)}`;
+  } finally { clearTimeout(timer); }
+}
+const inflight = new Set(); // una descarga a la vez por pestaña
 chrome.runtime.onMessage.addListener((m, sender, reply) => {
-  if (sender.id !== chrome.runtime.id || !m || m.type !== 'img' || typeof m.url !== 'string') return;
-  fetchArtwork(m.url).then((data) => reply({ data }), () => reply({}));
+  const tabId = sender.tab && sender.tab.id;
+  if (sender.id !== chrome.runtime.id || tabId == null || !m || m.type !== 'img' || typeof m.url !== 'string' || m.url.length > MAX_URL) return;
+  if (inflight.has(tabId)) { reply({}); return; }
+  inflight.add(tabId);
+  fetchArtwork(m.url).then((data) => reply({ data }), () => reply({})).finally(() => inflight.delete(tabId));
   return true;
 });
 

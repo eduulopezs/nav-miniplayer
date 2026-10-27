@@ -34,6 +34,7 @@ manifest.json
 design/tokens.json              fuente única de tokens (primitivos y semánticos por diseño)
 src/
   background/service-worker.js   clic en el icono, menú contextual y descarga de carátulas
+  background/net-guard.js        reglas de red para carátulas (URL permitidas y detección de imagen por bytes)
   page/media-session-bridge.js   mundo de la página: captura los manejadores de Media Session
   content/
     config.js                    constantes y claves de almacenamiento
@@ -44,7 +45,7 @@ src/
     themes.js                    paletas del lienzo de Mini, una por diseño, leídas de los tokens
     renderer.js                  dibuja Mini en un canvas
     player.js                    DOM, estado, ventanas flotantes, arrastre, tamaño y teclado
-scripts/                         build-tokens.mjs (genera tokens.js), contrast.mjs (auditoría WCAG), check.mjs (manifest y sintaxis) y smoke.mjs (carga con DOM falso)
+scripts/                         build-tokens.mjs (genera tokens.js), contrast.mjs (auditoría WCAG), check.mjs (manifest y sintaxis), security.mjs (red y aislamiento) y smoke.mjs (carga con DOM falso)
 ```
 Los módulos de `content/` se cargan en el orden del manifest y comparten el espacio `__NMP`.
 
@@ -53,6 +54,9 @@ Los colores viven en `design/tokens.json` en tres capas: **primitivos** (`lavend
 
 - `npm run tokens` regenera `src/content/tokens.js` (no lo edites a mano; `npm test` falla si está desactualizado).
 - `npm run contrast` audita el contraste WCAG de texto/fondo de cada diseño; `npm test` lo ejecuta con `--strict`, así que un token que baje de su mínimo rompe la verificación (Glass es aproximado: su fondo es translúcido).
+
+## Seguridad
+Ver [SECURITY.md](SECURITY.md): modelo de amenazas, controles y límites conocidos.
 
 ## Desarrollo
 `npm test` comprueba que el manifest referencia archivos existentes, que todos los scripts compilan y que los módulos cargan y dibujan cada diseño. Sube el `version` del manifest en cada cambio.
