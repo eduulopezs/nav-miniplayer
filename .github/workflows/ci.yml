@@ -39,7 +39,13 @@ jobs:
           cache: npm
       - run: npm ci --no-audit --no-fund
       - run: npx playwright install --with-deps chromium
-      - run: npm run e2e
+      - name: e2e
+        run: |
+          set -o pipefail
+          npm run e2e 2>&1 | tee e2e.log
+      - name: Resumen de los tests que fallan (como anotaciones)
+        if: failure()
+        run: grep -E -A4 '^(not ok|    not ok)|^  error:|^  (\+|-) ' e2e.log | head -60 | while IFS= read -r l; do echo "::error::$l"; done
       - name: Capturas de los diseños
         if: always()
         uses: actions/upload-artifact@v4
