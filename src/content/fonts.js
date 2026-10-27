@@ -10,8 +10,23 @@
     glass: [['Figtree', 500, 'figtree-latin-500'], ['Figtree', 700, 'figtree-latin-700']],
     metal: [['Montserrat', 300, 'montserrat-latin-300'], ['Montserrat', 400, 'montserrat-latin-400'], ['Syne', 700, 'syne-latin-700'], ['Figtree', 500, 'figtree-latin-500'], ['Figtree', 700, 'figtree-latin-700']],
   };
-  const done = new Set();
+  const done = new Set(), faces = [], docs = new WeakMap(); // faces: las ya descargadas; docs: documento -> las que ya tiene
   const b64 = (s) => { const bin = atob(s), out = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i); return out.buffer; };
+
+  // Registra en `doc` las fuentes descargadas. La ventana flotante (Document PiP) es otro documento y no hereda las de la página:
+  // se llama también con el suyo cuando el reproductor se mueve allí.
+  NMP.syncFonts = (doc) => {
+    let have = docs.get(doc); if (!have) docs.set(doc, have = new Set());
+    const F = (doc.defaultView && doc.defaultView.FontFace) || FontFace;
+    for (const f of faces) {
+      if (have.has(f)) continue;
+      have.add(f);
+      try {
+        const face = new F(f.family, f.buf.slice(0), { weight: String(f.weight), display: 'swap' });
+        face.load().then(() => doc.fonts.add(face), () => {});
+      } catch (_) { /* fuente no válida */ }
+    }
+  };
 
   // Carga las fuentes de un diseño en document.fonts (las ve el shadow DOM). Si falla, el diseño usa sus tipografías de respaldo.
   NMP.loadFonts = (skin, onReady) => {
@@ -22,10 +37,8 @@
         chrome.runtime.sendMessage({ type: 'font', file }, (r) => {
           void chrome.runtime.lastError;
           if (!r || typeof r.data !== 'string') { done.delete(file); return; }
-          try {
-            const face = new FontFace(family, b64(r.data), { weight: String(weight), display: 'swap' });
-            face.load().then(() => { document.fonts.add(face); if (onReady) onReady(); }, () => {});
-          } catch (_) { /* fuente no válida */ }
+          faces.push({ family, weight, buf: b64(r.data) });
+          NMP.syncFonts(document); if (onReady) onReady();
         });
       } catch (_) { done.delete(file); /* contexto invalidado */ }
     }

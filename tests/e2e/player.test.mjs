@@ -33,6 +33,16 @@ test('oculto no hace trabajo: ni layouts ni estilos recalculados', async () => {
   await p.page.close();
 });
 
+test('las fuentes del diseño solo se cargan cuando el reproductor se muestra', async () => {
+  const p = await openPage(env, server);
+  await p.play();
+  await sleep(800);
+  assert.equal(await p.media(() => document.fonts.size), 0, 'fuentes cargadas con el reproductor oculto');
+  await p.toggle();
+  await p.waitFor(async () => (await p.media(() => document.fonts.size)) > 0);
+  await p.page.close();
+});
+
 test('play y pausa con el botón, y la etiqueta cambia', async () => {
   const p = await openPage(env, server);
   await p.toggle();

@@ -36,6 +36,7 @@ ${NMP.css}
   // Diseño activo: cada diseño trae su plantilla, su CSS y su visualizador (skins/*.js). Los nombres antiguos se reasignan al más parecido.
   const LEGACY = { brutal: 'noir', retro: 'crt', pixel: 'glass' };
   const vizCtx = { card, skin: '' };
+  let fontSkin = '';
   function applyTheme(t) {
     t = LEGACY[t] || t;
     if (!SK[t]) t = 'glass';
@@ -48,7 +49,7 @@ ${NMP.css}
     card.classList.add('sk-' + t);
     card.insertAdjacentHTML('afterbegin', SK[t].tpl() + '<i class="probe" aria-hidden="true"></i>');
     if (SK[t].setup) SK[t].setup(vizCtx);
-    NMP.loadFonts(t, () => { if (vizCtx.skin === t) requestAnimationFrame(layout); });
+    fontSkin = ''; // se cargan al mostrarse, no al arrancar la página
     lastKey = ''; lastPlaying = null; lastP = -1; lastHint = null; pending = null; // la plantilla es nueva: se vuelve a rellenar todo
     renderer.invalidate(); render();
   }
@@ -328,7 +329,11 @@ ${NMP.css}
     const fs = !!document.fullscreenElement;
     const visible = !!media && !dismissed && !fs && !vp.active;
     card.classList.toggle('show', visible || pip);
-    if (visible || pip) vizStart(); else vizStop();
+    if (visible || pip) {
+      vizStart();
+      if (fontSkin !== theme) { const t = fontSkin = theme; NMP.loadFonts(t, () => { if (theme === t) requestAnimationFrame(layout); }); }
+      if (host.ownerDocument !== document) NMP.syncFonts(host.ownerDocument);
+    } else vizStop();
     setPending(visible && !pip && !modeSwitch && !vp.starting && canOpenFloat());
     if (!media) return;
 
