@@ -12,7 +12,7 @@
   const host = document.createElement('div');
   host.id = 'glass-mini-player-host';
   host.style.cssText = 'all:initial;position:fixed;left:0;top:0;z-index:2147483647;';
-  const root = host.attachShadow({ mode: 'closed' }) // cerrado: la página no puede leer ni tocar el reproductor (ni el lienzo del Mini);
+  const root = host.attachShadow({ mode: 'closed' }); // cerrado: la página no puede leer ni tocar el reproductor (ni el lienzo del Mini)
 
   root.innerHTML = `
 <style>
