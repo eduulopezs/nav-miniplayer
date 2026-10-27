@@ -1,0 +1,2 @@
+Fuentes incluidas (SIL Open Font License 1.1): Silkscreen, JetBrains Mono, Archivo Narrow, Space Mono.
+Cada familia conserva su copyright original; ver https://openfontlicense.org
