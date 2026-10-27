@@ -23,5 +23,9 @@ ctx.document.createElement = () => ({ getContext: () => c2d, width: 0, height: 0
 for (const th of Object.keys(N.themes)) {
   const r = N.createRenderer(() => ({ theme: th, title: 'Título largo '.repeat(5), artist: 'Artista', art: '', media: { duration: 100, currentTime: 30 } }));
   r.attach(c2d); r.draw(); r.setDpr(4); r.draw(); r.invalidate(); r.draw(); r.release();
+  for (const media of [{ duration: 100, currentTime: 30, paused: true }, { duration: Infinity, currentTime: 30, paused: false }, null]) { // pausa, directo y sin medio
+    const r2 = N.createRenderer(() => ({ theme: th, title: 'T', artist: 'A', art: '', media }));
+    r2.attach(c2d); r2.draw(); r2.release();
+  }
 }
 console.log('✓ renderer dibuja todos los diseños');
