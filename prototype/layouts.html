@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Layouts responsive</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@500;700&family=Instrument+Serif:ital@1&family=Fraunces:wght@600&family=DM+Mono:wght@500&family=Outfit:wght@300;500&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <style>
 /* ============================================================
    Prototipo de la issue #12: el contenido se reorganiza según el tamaño (container queries), sin zoom.
@@ -111,7 +113,7 @@ code { font-family: "Cascadia Mono", Consolas, monospace; font-size: .92em; back
 .theme-brutal .paused .art { filter: grayscale(1) sepia(1) hue-rotate(205deg) saturate(1.2) brightness(.7); }
 .meta { grid-area: meta; line-height: 1.25; }
 .title, .artist { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: var(--upper); }
-.title { font-weight: 650; font-size: 14px; color: var(--text); text-shadow: 0 1px 6px rgba(0,0,0,.35); }
+.title { font-weight: 650; font-size: calc(14px * var(--tk, 1)); color: var(--text); text-shadow: 0 1px 6px rgba(0,0,0,.35); }
 .artist { font-size: 12.5px; color: var(--text-2); margin-top: 1px; }
 .scroll { text-overflow: clip; }
 .scroll > span { display: inline-block; animation: marq var(--t, 6s) ease-in-out infinite alternate; }
@@ -214,7 +216,7 @@ code { font-family: "Cascadia Mono", Consolas, monospace; font-size: .92em; back
   .x-vol { margin-right: 14px; display: none; }
   .x-speed { display: none; }
   .side { position: absolute; top: 10px; right: 10px; }
-  .title { font-size: clamp(16px, 8cqh, 24px); }
+  .title { font-size: calc(clamp(16px, 8cqh, 24px) * var(--tk, 1)); }
   .artist { font-size: clamp(12.5px, 5.4cqh, 16px); }
 }
 @container (height >= 140px) and (width >= 600px) and (aspect-ratio > 21 / 10) { .x-vol { display: flex; } }
@@ -226,7 +228,7 @@ code { font-family: "Cascadia Mono", Consolas, monospace; font-size: .92em; back
   .inner { grid-template-columns: 1fr; grid-template-areas: "art" "meta" "bar" "ctl"; row-gap: 12px; column-gap: 0; align-content: space-between; justify-items: stretch; }
   .art { justify-self: center; width: var(--art-s); height: var(--art-s); border-radius: 16px; }
   .theme-brutal .art { border-radius: 0; }
-  .title { font-size: clamp(17px, 6.4cqw, 26px); }
+  .title { font-size: calc(clamp(17px, 6.4cqw, 26px) * var(--tk, 1)); }
   .artist { font-size: clamp(13px, 4.2cqw, 17px); margin-top: 3px; }
   .side { position: absolute; top: 24px; right: 24px; background: var(--chip-bg); border-radius: 999px; padding: 2px; }
   .theme-brutal .side { border-radius: 0; }
@@ -237,6 +239,175 @@ code { font-family: "Cascadia Mono", Consolas, monospace; font-size: .92em; back
   .inner { --art-s: min(calc(100cqw - 32px), calc(100cqh - 252px)); }
   .inner { grid-template-columns: 1fr 1fr; grid-template-areas: "art art" "meta meta" "bar bar" "ctl ctl" "spd vol"; }
   .x-speed, .x-vol { display: flex; }
+}
+
+/* ============================================================
+   DISEÑOS NUEVOS (ronda 1): Editorial, Vinilo, Aurora, HUD.
+   Cambian variables y capas decorativas; la maquetación sigue siendo la de los layouts.
+   ============================================================ */
+.idx, .eq, .grain, .screws { display: none; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes eqb { 0%, 100% { transform: scaleY(.25); } 50% { transform: scaleY(1); } }
+@keyframes drift { 0% { transform: translate3d(-4%, -3%, 0) rotate(0deg) scale(1.05); } 100% { transform: translate3d(4%, 3%, 0) rotate(8deg) scale(1.2); } }
+@keyframes scan { to { background-position: 0 100cqh; } }
+
+/* ---------- 1. EDITORIAL: negro, tipografía grande, un solo acento ---------- */
+.theme-editorial {
+  --font: "Archivo Narrow", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --surface: #0a0a0b; --sheen-a: transparent; --sheen-b: transparent;
+  --edge-hi: rgba(244,241,234,.22); --edge-lo: transparent; --shadow-1: rgba(0,0,0,.55); --shadow-2: transparent;
+  --text: #f4f1ea; --text-2: #aaa69c; --text-3: #aaa69c; --btn: #f4f1ea; --hover: rgba(244,241,234,.12);
+  --track: rgba(244,241,234,.22); --fill: #ff4d2e; --thumb: #ff4d2e; --glow-op: 0;
+  --play-bg: #ff4d2e; --play-fg: #0a0a0b; --art-ring: transparent; --chip-bg: #0a0a0b; --upper: uppercase; --radius-k: 0; --tk: 1.3;
+}
+.theme-editorial .card { -webkit-backdrop-filter: none; backdrop-filter: none; box-shadow: inset 0 0 0 1px var(--edge-hi), 0 24px 48px var(--shadow-1); }
+.theme-editorial .b, .theme-editorial .b.speed, .theme-editorial .art, .theme-editorial .thumb, .theme-editorial .track { border-radius: 0; }
+.theme-editorial .art { background: var(--art) center / cover, #ff4d2e; background-blend-mode: luminosity; box-shadow: none; }
+.theme-editorial .art svg { display: none; }
+.theme-editorial .paused .art { filter: grayscale(1) brightness(.7); }
+.theme-editorial .title { font-weight: 800; letter-spacing: -.015em; line-height: .98; text-shadow: none; }
+.theme-editorial .artist { font-family: "Instrument Serif", Georgia, "Times New Roman", serif; font-style: italic; text-transform: none; font-size: 14px; letter-spacing: .01em; }
+.theme-editorial .t { font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--text-2); }
+.theme-editorial .track { height: 2px; }
+.theme-editorial .bar:hover .track, .theme-editorial .bar:focus-visible .track { height: 4px; }
+.theme-editorial .thumb { width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px; transform: scale(1); }
+.theme-editorial .b.play { box-shadow: none; }
+.theme-editorial .b.play:hover { background: #ff7a5e; }
+.theme-editorial .idx { display: block; font: 700 10.5px/1 var(--font); letter-spacing: .2em; color: #ff4d2e; margin-bottom: 5px; text-transform: uppercase; }
+.theme-editorial .side { background: transparent; }
+@container (height >= 280px) and (aspect-ratio <= 21 / 10) { .theme-editorial .title { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; } }
+@container (height >= 140px) and (width >= 400px) and (aspect-ratio > 21 / 10) { .theme-editorial .title { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; } .theme-editorial .meta { border-bottom: 1px solid var(--edge-hi); padding-bottom: 8px; } }
+@container (height < 140px) { .theme-editorial .idx { display: none; } .theme-editorial .artist { font-size: 12.5px; } }
+
+@container (height >= 280px) and (aspect-ratio < 23 / 20) { .theme-editorial .inner { --art-s: min(calc(100cqw - 32px), calc(100cqh - 246px)); } }
+@container (height >= 350px) and (aspect-ratio < 23 / 20) { .theme-editorial .inner { --art-s: min(calc(100cqw - 32px), calc(100cqh - 292px)); } }
+
+/* ---------- 2. VINILO: disco que gira, latón y pantalla ámbar ---------- */
+.theme-vinyl {
+  --font: "Fraunces", "Iowan Old Style", "Palatino Linotype", Georgia, serif; --mono: "DM Mono", "Cascadia Mono", Consolas, monospace;
+  --surface: #1a1411; --sheen-a: rgba(255,214,160,.12); --sheen-b: rgba(0,0,0,.28);
+  --edge-hi: rgba(255,226,180,.38); --edge-lo: rgba(0,0,0,.6); --shadow-1: rgba(0,0,0,.6); --shadow-2: rgba(0,0,0,.4);
+  --text: #f3e6d0; --text-2: #c9b79a; --text-3: #ffb454; --btn: #eadbbf; --hover: rgba(255,190,110,.16);
+  --track: #0b0806; --fill: linear-gradient(90deg, #ff9d3c, #ffd27a); --thumb: #e9c98a; --glow-op: .16;
+  --play-bg: conic-gradient(from 210deg, #f0d79c, #8a6a2e, #f8e8bd, #8a6a2e, #f0d79c); --play-fg: #2a1d0c;
+  --art-ring: transparent; --chip-bg: rgba(10,6,4,.7); --upper: none; --radius-k: .6; --tk: 1.08;
+  --brass: conic-gradient(from 210deg, #f0d79c, #8a6a2e, #f8e8bd, #8a6a2e, #f0d79c);
+}
+.theme-vinyl .card {
+  background: repeating-linear-gradient(90deg, rgba(255,255,255,.018) 0 1px, transparent 1px 3px), linear-gradient(145deg, var(--sheen-a), var(--sheen-b)), var(--surface);
+  -webkit-backdrop-filter: none; backdrop-filter: none;
+  box-shadow: 0 18px 44px var(--shadow-1), 0 2px 8px var(--shadow-2), inset 0 1px 0 var(--edge-hi), inset 0 0 0 1px rgba(0,0,0,.5), inset 0 -2px 6px var(--edge-lo);
+}
+.theme-vinyl .art {
+  border-radius: 50%; box-shadow: 0 6px 16px rgba(0,0,0,.6), 0 0 0 2px #050403, 0 0 0 3px rgba(255,226,180,.18); position: relative; overflow: hidden;
+  background: radial-gradient(circle, transparent 0 40%, rgba(255,255,255,.05) 41% 42%, transparent 43%), repeating-radial-gradient(circle, #181818 0 1.2px, #0a0a0a 1.2px 2.6px);
+}
+.theme-vinyl .art > svg { display: none; }
+.theme-vinyl .art > * { grid-area: 1 / 1; }
+.theme-vinyl .art::before { content: ""; grid-area: 1 / 1; height: 38%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle, #0b0b0b 0 7%, transparent 8%), var(--art) center / cover; box-shadow: 0 0 0 1px rgba(0,0,0,.6); animation: spin 5s linear infinite; }
+.theme-vinyl .paused .art::before { animation-play-state: paused; }
+.theme-vinyl .art::after { content: ""; grid-area: 1 / 1; width: 100%; height: 100%; border-radius: inherit; pointer-events: none; background: conic-gradient(from 25deg, transparent 0 6%, rgba(255,255,255,.2) 12%, transparent 20% 56%, rgba(255,255,255,.16) 62%, transparent 70%); }
+.theme-vinyl .paused .art { filter: none; }
+.theme-vinyl .title { font-weight: 600; letter-spacing: .005em; text-shadow: 0 1px 0 rgba(0,0,0,.6); }
+.theme-vinyl .artist { font-style: italic; color: var(--text-2); }
+.theme-vinyl .t { font-family: var(--mono); font-size: 11px; color: #ffb454; text-shadow: 0 0 8px rgba(255,170,70,.65); background: #0f0a07; padding: 3px 5px; border-radius: 3px; box-shadow: inset 0 1px 3px #000, 0 0 0 1px rgba(255,226,180,.08); text-align: center; min-width: 40px; }
+.theme-vinyl .track { height: 7px; border-radius: 3px; background: repeating-linear-gradient(90deg, rgba(255,255,255,.2) 0 1px, transparent 1px 8px), var(--track); box-shadow: inset 0 1px 3px #000; }
+.theme-vinyl .bar:hover .track, .theme-vinyl .bar:focus-visible .track { height: 9px; }
+.theme-vinyl .fill { box-shadow: 0 0 10px rgba(255,157,60,.7); border-radius: 3px; }
+.theme-vinyl .thumb { width: 10px; height: 20px; margin: -10px 0 0 -5px; border-radius: 2px; background: linear-gradient(90deg, #8a6a2e, #f8e8bd 45%, #8a6a2e); box-shadow: 0 2px 5px rgba(0,0,0,.7); transform: scale(1); }
+.theme-vinyl .b { color: var(--btn); }
+.theme-vinyl .b.play { color: #2a1d0c; background: var(--play-bg); box-shadow: inset 0 0 0 3px rgba(0,0,0,.28), inset 0 2px 2px rgba(255,255,255,.55), 0 6px 14px rgba(0,0,0,.6); }
+.theme-vinyl .b.play:hover { filter: brightness(1.12); transform: scale(1.04); }
+.theme-vinyl .b.speed { width: 38px; height: 38px; min-width: 0; padding: 0; border-radius: 50%; background: var(--brass); color: #2a1d0c; font-family: var(--mono); box-shadow: inset 0 0 0 3px rgba(0,0,0,.25), inset 0 2px 2px rgba(255,255,255,.5), 0 4px 10px rgba(0,0,0,.55); }
+.theme-vinyl .idx { display: none; }
+.theme-vinyl .screws { display: block; position: absolute; inset: 0; pointer-events: none; z-index: 2;
+  background:
+    radial-gradient(circle 3px at 7px 7px, #d8c394 0 50%, #4e3d20 60%, transparent 70%),
+    radial-gradient(circle 3px at calc(100% - 7px) 7px, #d8c394 0 50%, #4e3d20 60%, transparent 70%),
+    radial-gradient(circle 3px at 7px calc(100% - 7px), #d8c394 0 50%, #4e3d20 60%, transparent 70%),
+    radial-gradient(circle 3px at calc(100% - 7px) calc(100% - 7px), #d8c394 0 50%, #4e3d20 60%, transparent 70%); }
+@container (height < 140px) { .theme-vinyl .screws { display: none; } }
+.theme-vinyl .side { background: transparent; }
+
+/* ---------- 3. AURORA: malla de color viva sacada de la carátula, cristal y grano ---------- */
+.theme-aurora {
+  --font: "Outfit", "Manrope", "Segoe UI Variable Display", system-ui, sans-serif;
+  --surface: rgba(18,18,28,.34); --sheen-a: rgba(255,255,255,.22); --sheen-b: rgba(255,255,255,.04);
+  --edge-hi: rgba(255,255,255,.5); --edge-lo: rgba(255,255,255,.08); --shadow-1: rgba(0,0,0,.4); --shadow-2: rgba(0,0,0,.2);
+  --text: #fff; --text-2: rgba(255,255,255,.82); --text-3: rgba(255,255,255,.78); --btn: #fff; --hover: rgba(255,255,255,.2);
+  --track: rgba(255,255,255,.25); --fill: #fff; --thumb: #fff; --glow-op: .95;
+  --play-bg: rgba(255,255,255,.26); --play-fg: #fff; --art-ring: rgba(255,255,255,.35); --chip-bg: rgba(255,255,255,.2); --upper: none; --radius-k: 1.35; --tk: 1.12;
+}
+.theme-aurora .card { -webkit-backdrop-filter: blur(46px) saturate(230%); backdrop-filter: blur(46px) saturate(230%); box-shadow: 0 24px 60px var(--shadow-1), inset 0 1px 0 var(--edge-hi), inset 0 0 0 1px rgba(255,255,255,.14); }
+.theme-aurora .glow { inset: -80px; background: var(--art) -10% 0 / 80% 90% no-repeat, var(--art) 110% 100% / 80% 90% no-repeat, var(--art) 50% 50% / 55% 60% no-repeat; filter: blur(46px) saturate(2.1); animation: drift 14s ease-in-out infinite alternate; }
+.theme-aurora .paused .glow { animation-play-state: paused; opacity: .6; }
+.theme-aurora .grain { display: block; position: absolute; inset: 0; z-index: 2; pointer-events: none; opacity: .3; mix-blend-mode: overlay;
+  background: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .7 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+.theme-aurora .art { border-radius: 24%; box-shadow: 0 12px 30px rgba(0,0,0,.35), inset 0 0 0 1px var(--art-ring), inset 0 1px 0 rgba(255,255,255,.5); }
+.theme-aurora .title { font-weight: 500; letter-spacing: -.01em; }
+.theme-aurora .artist { font-weight: 300; letter-spacing: .03em; }
+.theme-aurora .t { font-weight: 300; letter-spacing: .04em; }
+.theme-aurora .track { height: 3px; }
+.theme-aurora .bar:hover .track, .theme-aurora .bar:focus-visible .track { height: 5px; }
+.theme-aurora .fill { box-shadow: 0 0 12px rgba(255,255,255,.9); }
+.theme-aurora .thumb { box-shadow: 0 0 0 4px rgba(255,255,255,.25), 0 0 14px #fff; }
+.theme-aurora .b.play { -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); box-shadow: inset 0 1px 0 rgba(255,255,255,.75), inset 0 0 0 1px rgba(255,255,255,.4), 0 10px 26px rgba(0,0,0,.25); }
+.theme-aurora .b.play:hover { background: rgba(255,255,255,.38); color: #fff; }
+.theme-aurora .b.speed { background: rgba(255,255,255,.16); box-shadow: inset 0 0 0 1px rgba(255,255,255,.3); }
+
+/* ---------- 4. HUD Y2K: marcos técnicos, microtipografía, segmentos y escáner ---------- */
+.theme-hud {
+  --font: "JetBrains Mono", "Space Mono", "Cascadia Mono", Consolas, monospace;
+  --surface: rgba(3,8,9,.86); --sheen-a: transparent; --sheen-b: transparent;
+  --edge-hi: rgba(182,255,59,.55); --edge-lo: transparent; --shadow-1: rgba(182,255,59,.12); --shadow-2: transparent;
+  --text: #e4ffd0; --text-2: #8fd16a; --text-3: #b6ff3b; --btn: #d6ff8a; --hover: rgba(182,255,59,.18);
+  --track: rgba(182,255,59,.2); --fill: #b6ff3b; --thumb: #fff; --glow-op: 0;
+  --play-bg: #b6ff3b; --play-fg: #04100a; --art-ring: rgba(182,255,59,.6); --chip-bg: #04100a; --upper: uppercase; --radius-k: 0; --tk: .9;
+}
+.theme-hud .card { -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); clip-path: polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px); box-shadow: inset 0 0 0 1px var(--edge-hi), inset 0 0 40px var(--shadow-1); }
+.theme-hud .grain { display: block; position: absolute; inset: 0; z-index: 3; pointer-events: none; opacity: .55;
+  background: repeating-linear-gradient(0deg, rgba(182,255,59,.07) 0 1px, transparent 1px 3px), linear-gradient(180deg, transparent 0, rgba(182,255,59,.12) 50%, transparent 100%) 0 0 / 100% 40px no-repeat; animation: scan 5s linear infinite; }
+.theme-hud .screws { display: block; position: absolute; inset: 5px; z-index: 3; pointer-events: none;
+  background:
+    linear-gradient(#b6ff3b, #b6ff3b) 0 0 / 12px 1.5px no-repeat, linear-gradient(#b6ff3b, #b6ff3b) 0 0 / 1.5px 12px no-repeat,
+    linear-gradient(#b6ff3b, #b6ff3b) 100% 0 / 12px 1.5px no-repeat, linear-gradient(#b6ff3b, #b6ff3b) 100% 0 / 1.5px 12px no-repeat,
+    linear-gradient(#b6ff3b, #b6ff3b) 0 100% / 12px 1.5px no-repeat, linear-gradient(#b6ff3b, #b6ff3b) 0 100% / 1.5px 12px no-repeat,
+    linear-gradient(#b6ff3b, #b6ff3b) 100% 100% / 12px 1.5px no-repeat, linear-gradient(#b6ff3b, #b6ff3b) 100% 100% / 1.5px 12px no-repeat; }
+@container (height < 64px) { .theme-hud .screws { display: none; } }
+.theme-hud .b, .theme-hud .b.speed, .theme-hud .art, .theme-hud .thumb, .theme-hud .track { border-radius: 0; }
+.theme-hud .art { filter: contrast(1.45) brightness(1.1); background: var(--art) center / cover, #b6ff3b; background-blend-mode: luminosity; box-shadow: inset 0 0 0 1px var(--art-ring); position: relative; }
+.theme-hud .art svg { display: none; }
+.theme-hud .art::after { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(0deg, rgba(0,0,0,.35) 0 1px, transparent 1px 3px); pointer-events: none; }
+.theme-hud .paused .art { filter: grayscale(1) brightness(.6); }
+.theme-hud .title { font-size: 12.5px; font-weight: 700; letter-spacing: .05em; text-shadow: 0 0 10px rgba(182,255,59,.45); }
+.theme-hud .artist { font-size: 11px; letter-spacing: .08em; }
+.theme-hud .artist::before { content: "// "; color: #b6ff3b; }
+.theme-hud .t { font-size: 10.5px; letter-spacing: .1em; text-shadow: 0 0 8px rgba(182,255,59,.6); }
+.theme-hud .track { height: 8px; background: repeating-linear-gradient(90deg, var(--track) 0 6px, transparent 6px 8px); }
+.theme-hud .fill { background: #b6ff3b; -webkit-mask: repeating-linear-gradient(90deg, #000 0 6px, transparent 6px 8px); mask: repeating-linear-gradient(90deg, #000 0 6px, transparent 6px 8px); filter: drop-shadow(0 0 5px rgba(182,255,59,.8)); }
+.theme-hud .bar:hover .track, .theme-hud .bar:focus-visible .track { height: 10px; }
+.theme-hud .thumb { width: 2px; height: 18px; margin: -9px 0 0 -1px; background: #fff; box-shadow: 0 0 10px #b6ff3b; transform: scale(1); }
+.theme-hud .b { outline: 1px solid transparent; }
+.theme-hud .b:hover { outline-color: rgba(182,255,59,.6); }
+.theme-hud .b.play { clip-path: polygon(7px 0, 100% 0, 100% calc(100% - 7px), calc(100% - 7px) 100%, 0 100%, 0 7px); box-shadow: none; }
+.theme-hud .b.play:hover { background: #d4ff7a; }
+.theme-hud .b.speed { outline: 1px solid rgba(182,255,59,.5); }
+.theme-hud .idx { display: block; font: 700 9.5px/1 var(--font); letter-spacing: .16em; color: #b6ff3b; margin-bottom: 5px; }
+.theme-hud .idx::after { content: " \25B8 PLAY"; }
+.theme-hud .paused .idx::after { content: " \275A\275A PAUSA"; color: #ff3d9a; }
+.theme-hud .live-badge .idx::after { content: " \25CF EN VIVO"; color: #ff3d9a; }
+.theme-hud .side { background: transparent; }
+@container (height < 140px) { .theme-hud .idx { display: none; } }
+@container (height >= 280px) and (aspect-ratio < 23 / 20) { .theme-hud .inner { --art-s: min(calc(100cqw - 32px), calc(100cqh - 222px)); } }
+@container (height >= 350px) and (aspect-ratio < 23 / 20) { .theme-hud .inner { --art-s: min(calc(100cqw - 32px), calc(100cqh - 268px)); } }
+@container (height >= 140px) { .theme-hud .art { overflow: hidden; } .theme-hud .eq { display: flex; } }
+.eq { position: absolute; left: 6px; bottom: 6px; height: 14px; gap: 2px; align-items: flex-end; z-index: 1; }
+.eq i { display: block; width: 3px; height: 100%; background: #b6ff3b; transform-origin: bottom; animation: eqb .9s ease-in-out infinite; }
+.eq i:nth-child(2) { animation-duration: .6s; animation-delay: -.2s; } .eq i:nth-child(3) { animation-duration: 1.1s; animation-delay: -.5s; }
+.eq i:nth-child(4) { animation-duration: .75s; animation-delay: -.1s; } .eq i:nth-child(5) { animation-duration: .95s; animation-delay: -.7s; }
+.paused .eq i { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) {
+  .theme-vinyl .art::before, .theme-aurora .glow, .theme-hud .grain, .eq i { animation: none; }
 }
 
 /* iconos pequeños en cualquier layout cuando falta ancho */
@@ -269,6 +440,10 @@ code { font-family: "Cascadia Mono", Consolas, monospace; font-size: .92em; back
     <span class="group" style="margin-left:12px">Diseño:
       <button class="chip" data-theme-btn="glass" aria-pressed="true">Glass</button>
       <button class="chip" data-theme-btn="brutal" aria-pressed="false">Brutalismo</button>
+      <button class="chip" data-theme-btn="editorial" aria-pressed="false">Editorial</button>
+      <button class="chip" data-theme-btn="vinyl" aria-pressed="false">Vinilo</button>
+      <button class="chip" data-theme-btn="aurora" aria-pressed="false">Aurora</button>
+      <button class="chip" data-theme-btn="hud" aria-pressed="false">HUD</button>
     </span>
     <div class="readout" aria-live="polite"><b id="rdLayout">Compacto</b> · <span id="rdSize">320 × 150</span> px</div>
   </div>
@@ -334,8 +509,8 @@ code { font-family: "Cascadia Mono", Consolas, monospace; font-size: .92em; back
     card.innerHTML = `
       <div class="glow"></div>
       <div class="inner">
-        <div class="art" aria-hidden="true">${ICON.note}</div>
-        <div class="meta" aria-live="polite"><div class="title"></div><div class="artist"></div></div>
+        <div class="art" aria-hidden="true">${ICON.note}<span class="eq"><i></i><i></i><i></i><i></i><i></i></span></div>
+        <div class="meta" aria-live="polite"><div class="idx" aria-hidden="true"></div><div class="title"></div><div class="artist"></div></div>
         <div class="side"><button class="b small mode" title="Pasar a Mini" aria-label="Pasar a Mini">${ICON.mode}</button><button class="b small close" title="Ocultar" aria-label="Ocultar">${ICON.close}</button></div>
         <div class="barrow">
           <span class="t cur">0:00</span>
@@ -354,6 +529,7 @@ code { font-family: "Cascadia Mono", Consolas, monospace; font-size: .92em; back
         <div class="x-speed"><button class="b speed" title="Velocidad" aria-label="Velocidad de reproducción">1×</button></div>
         <div class="x-vol"><button class="b small mute" title="Silenciar" aria-label="Silenciar">${ICON.vol}</button></div>
       </div>
+      <div class="grain" aria-hidden="true"></div><div class="screws" aria-hidden="true"></div>
       <div class="probe" aria-hidden="true"></div>
       ${live ? '<div class="grip tl" data-g="tl"></div><div class="grip tr" data-g="tr"></div><div class="grip bl" data-g="bl"></div><div class="grip br" data-g="br"></div>' : ''}`;
     host.appendChild(card);
@@ -405,6 +581,7 @@ code { font-family: "Cascadia Mono", Consolas, monospace; font-size: .92em; back
     const T = cur();
     for (const c of cards) {
       setText(c.title, T.title); setText(c.artist, T.artist);
+      c.q('.idx').textContent = 'N°' + String(S.i + 1).padStart(2, '0') + ' / ' + String(TRACKS.length).padStart(2, '0');
       c.card.style.setProperty('--art', T.art);
       fit(c);
     }
@@ -515,7 +692,7 @@ code { font-family: "Cascadia Mono", Consolas, monospace; font-size: .92em; back
   // Diseño (los dos temas cambian solo variables)
   document.querySelectorAll('[data-theme-btn]').forEach((b) => b.addEventListener('click', () => {
     const t = b.dataset.themeBtn;
-    THEME_STAGES().forEach((el) => { el.classList.remove('theme-glass', 'theme-brutal'); el.classList.add('theme-' + t); });
+    THEME_STAGES().forEach((el) => { el.classList.remove('theme-glass', 'theme-brutal', 'theme-editorial', 'theme-vinyl', 'theme-aurora', 'theme-hud'); el.classList.add('theme-' + t); });
     document.querySelectorAll('[data-theme-btn]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
     requestAnimationFrame(() => cards.forEach(fit));
   }));
