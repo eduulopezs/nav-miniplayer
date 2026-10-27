@@ -114,6 +114,12 @@ export async function openPage(env, server, { art, mode = 'card', theme } = {}) 
       const b = await api.box(cls);
       await page.mouse.click(b.x + b.w / 2, b.y + b.h / 2);
     },
+    // Estilo calculado de un elemento del reproductor (se evalúa en el nodo por CDP, porque el shadow está cerrado).
+    async style(cls, prop) {
+      const { object } = await cdp.send('DOM.resolveNode', { backendNodeId: (await node(cls)).backendNodeId });
+      const r = await cdp.send('Runtime.callFunctionOn', { objectId: object.objectId, returnByValue: true, functionDeclaration: `function () { return getComputedStyle(this).getPropertyValue(${JSON.stringify(prop)}); }` });
+      return r.result.value;
+    },
     async focus(cls) { await cdp.send('DOM.focus', { backendNodeId: (await node(cls)).backendNodeId }); },
     // Igual que el clic izquierdo en el icono de la extensión.
     async toggle() {
