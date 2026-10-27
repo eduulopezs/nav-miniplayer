@@ -33,14 +33,24 @@ test('oculto no hace trabajo: ni layouts ni estilos recalculados', async () => {
   await p.page.close();
 });
 
+test('las fuentes del diseño solo se cargan cuando el reproductor se muestra', async () => {
+  const p = await openPage(env, server);
+  await p.play();
+  await sleep(800);
+  assert.equal(await p.media(() => document.fonts.size), 0, 'fuentes cargadas con el reproductor oculto');
+  await p.toggle();
+  await p.waitFor(async () => (await p.media(() => document.fonts.size)) > 0);
+  await p.page.close();
+});
+
 test('play y pausa con el botón, y la etiqueta cambia', async () => {
   const p = await openPage(env, server);
   await p.toggle();
   assert.equal(await p.paused(), true);
-  await p.click('play');
+  await p.click('act:play');
   await p.waitFor(async () => !(await p.paused()));
   await p.waitFor(async () => (await p.read()).playLabel === 'Pausar');
-  await p.click('play');
+  await p.click('act:play');
   await p.waitFor(() => p.paused());
   await p.waitFor(async () => (await p.read()).playLabel === 'Reproducir');
   await p.page.close();
@@ -50,12 +60,12 @@ test('saltar 10 s hacia delante y hacia atrás', async () => {
   const p = await openPage(env, server);
   await p.toggle();
   await p.seek(20);
-  await p.click('fwd');
+  await p.click('act:fwd');
   near(await p.time(), 30, 1, 'tras avanzar');
-  await p.click('back');
+  await p.click('act:back');
   near(await p.time(), 20, 1, 'tras retroceder');
   await p.seek(4);
-  await p.click('back');
+  await p.click('act:back');
   assert.equal(await p.time(), 0, 'no baja de 0');
   await p.page.close();
 });
@@ -68,7 +78,7 @@ test('tiempo y barra de progreso siguen al medio', async () => {
   await p.waitFor(async () => (await p.read()).cur === '0:10' || (await p.read()).cur === '0:11');
   const s = await p.read();
   near(s.valuenow, 26, 3, 'aria-valuenow');
-  near(s.dash, 26, 3, 'longitud de la barra');
+  near(s.progress, 26, 3, 'progreso visible (--p)');
   await p.pause();
   const t = await p.time();
   await sleep(800);
@@ -76,14 +86,17 @@ test('tiempo y barra de progreso siguen al medio', async () => {
   await p.page.close();
 });
 
-test('el borde de la tarjeta es una barra de progreso arrastrable', async () => {
+test('la barra de progreso busca al pulsar y arrastrar', async () => {
   const p = await openPage(env, server);
   await p.toggle();
-  const b = await p.box('card');
-  // El borde se recorre desde la esquina superior izquierda: un clic en el centro del borde superior cae en W/2 / (2(W+H)) del total.
-  const f = (b.w / 2) / (2 * (b.w + b.h));
-  await p.page.mouse.click(b.x + b.w / 2, b.y + 3);
-  near(await p.time(), f * 40, 2, 'posición tras pulsar el borde');
+  const b = await p.box('bar');
+  await p.page.mouse.click(b.x + b.w / 2, b.y + b.h / 2);
+  near(await p.time(), 20, 2, 'posición tras pulsar la barra');
+  await p.page.mouse.move(b.x + b.w * .25, b.y + b.h / 2);
+  await p.page.mouse.down();
+  await p.page.mouse.move(b.x + b.w * .75, b.y + b.h / 2, { steps: 5 });
+  await p.page.mouse.up();
+  near(await p.time(), 30, 2, 'posición tras arrastrar');
   await p.page.close();
 });
 
@@ -122,7 +135,7 @@ test('se ajusta al tamaño: arrastrar una esquina cambia ancho y alto', async ()
 
 // Arrastra la tarjeta por el título (lejos del borde, que es la barra de progreso).
 async function dragCard(p, dx, dy) {
-  const t = await p.box('title');
+  const t = await p.box('t:title');
   const x = t.x + 4, y = t.y + t.h / 2;
   await p.page.mouse.move(x, y);
   await p.page.mouse.down();
@@ -182,6 +195,6 @@ test('prefers-reduced-motion: sin transiciones ni animaciones', async () => {
   await p.page.emulateMedia({ reducedMotion: 'reduce' });
   await p.waitFor(async () => (await p.style('card', 'transition-duration')) === '0s');
   assert.equal(await p.style('card', 'transform'), 'none', 'la tarjeta no debe desplazarse al aparecer');
-  assert.equal(await p.style('play', 'transition-duration'), '0s');
+  assert.equal(await p.style('act:play', 'transition-duration'), '0s');
   await p.page.close();
 });

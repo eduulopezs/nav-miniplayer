@@ -3,10 +3,9 @@
   window.__glassMiniPlayer = true;
 
   const NMP = globalThis.__NMP;
-  const { SKIP, MIN_DURATION, MARGIN, EDGE, POS_KEY, SIZE_KEY, THEME_KEY, MODE_KEY, SLIM, SLIM_BELOW, DESIGN, MIN, MAX, CW, CH, DPR0, SITE_BUTTONS } = NMP.cfg;
-  const { clamp, fmt } = NMP.util;
-  const { icons, themes: TH, tokens } = NMP;
-  const G = tokens.theme.glass; // degradado de la barra de progreso (Glass)
+  const { SKIP, MIN_DURATION, MARGIN, POS_KEY, SIZE_KEY, THEME_KEY, MODE_KEY, MIN, MAX, CW, CH, DPR0, SITE_BUTTONS } = NMP.cfg;
+  const { clamp, fmt, fmt2, pad2, strSeed, barcode, palette, DEFAULT_PAL } = NMP.util;
+  const { themes: TH, skins: SK, viz } = NMP;
 
   // ---------- DOM ----------
   const host = document.createElement('div');
@@ -19,53 +18,41 @@
 ${NMP.css}
 </style>
 <div class="card" role="region" aria-label="Minirreproductor" tabindex="0" aria-keyshortcuts="Space ArrowLeft ArrowRight Escape">
-  <div class="glow"></div>
-  <svg class="ring" role="progressbar" aria-label="Progreso" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-    <defs>
-      <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stop-color="${G['bar-1']}"/><stop offset=".5" stop-color="${G['bar-2']}"/><stop offset="1" stop-color="${G['bar-3']}"/>
-      </linearGradient>
-    </defs>
-    <rect class="track" pathLength="100"/>
-    <rect class="bar" pathLength="100"/>
-  </svg>
-  <div class="inner">
-  <div class="top">
-    <div class="art">${icons.note}</div>
-    <div class="meta" aria-live="polite"><div class="title"></div><div class="artist"></div><div class="artist hint"></div></div>
-    <div class="side">
-    <button class="mode" title="Pasar a Mini" aria-label="Pasar a Mini"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><rect x="12" y="11" width="6" height="5" rx="1.5" fill="currentColor"/></svg></button>
-    <button class="close" title="Ocultar" aria-label="Ocultar">${icons.close}</button>
-    </div>
-  </div>
-  <div class="controls">
-    <span class="time cur">0:00</span>
-    <div class="buttons">
-      <button class="prev" title="Anterior" aria-label="Anterior">${icons.prev}</button>
-      <button class="back" title="Retroceder ${SKIP} s" aria-label="Retroceder ${SKIP} segundos">${icons.back}</button>
-      <button class="play" title="Reproducir" aria-label="Reproducir">${icons.play}</button>
-      <button class="fwd" title="Avanzar ${SKIP} s" aria-label="Avanzar ${SKIP} segundos">${icons.fwd}</button>
-      <button class="next" title="Siguiente" aria-label="Siguiente">${icons.next}</button>
-    </div>
-    <span class="time end dur">0:00</span>
-  </div>
-  </div>
+  <div class="hint" aria-hidden="true"></div>
   <div class="grip tl"></div><div class="grip tr"></div><div class="grip bl"></div><div class="grip br"></div>
 </div>`;
 
   const $ = (s) => root.querySelector(s);
-  const inner = $('.inner'), grips = root.querySelectorAll('.grip');
-  const card = $('.card'), ring = $('.ring'), bar = $('.bar'), art = $('.art');
-  const titleEl = $('.title'), artistEl = $('.artist'), hintEl = $('.hint'), curEl = $('.cur'), durEl = $('.dur');
-  const btn = { prev: $('.prev'), back: $('.back'), play: $('.play'), fwd: $('.fwd'), next: $('.next'), close: $('.close'), mode: $('.mode') };
+  const grips = root.querySelectorAll('.grip');
+  const card = $('.card'), hintEl = $('.hint');
+  const qa = (sel) => card.querySelectorAll(sel);
 
   // ---------- Estado ----------
   let modeSwitch = false; // cambiando de tipo de ventana, esperando a que se cierre la anterior
   let media = null, lastPlayed = null, dismissed = true, actions = new Set();
-  let lastKey = '', lastPlaying = null, pip = false, curTitle = '', curArtist = '', curImg = '';
+  let lastKey = '', lastPlaying = null, pip = false, curTitle = '', curArtist = '', curImg = '', lastTrack = '', trackNo = 0;
   let fm = 'pip';
   let theme = 'glass';
-  const applyTheme = (t) => { theme = TH[t] ? t : 'glass'; if (theme === 'glass') delete card.dataset.theme; else card.dataset.theme = theme; renderer.invalidate(); };
+  // Diseño activo: cada diseño trae su plantilla, su CSS y su visualizador (skins/*.js). Los nombres antiguos se reasignan al más parecido.
+  const LEGACY = { brutal: 'noir', retro: 'crt', pixel: 'glass' };
+  const vizCtx = { card, skin: '' };
+  let fontSkin = '';
+  function applyTheme(t) {
+    t = LEGACY[t] || t;
+    if (!SK[t]) t = 'glass';
+    if (t === theme && vizCtx.skin === t) return;
+    theme = t; vizCtx.skin = t;
+    if (vizCtx._ro) { vizCtx._ro.disconnect(); vizCtx._ro = null; }
+    vizCtx._kv = vizCtx._lv = undefined;
+    for (const n of [...card.children]) if (!n.classList.contains('grip') && !n.classList.contains('hint')) n.remove();
+    card.classList.forEach((c) => { if (c.startsWith('sk-')) card.classList.remove(c); });
+    card.classList.add('sk-' + t);
+    card.insertAdjacentHTML('afterbegin', SK[t].tpl() + '<i class="probe" aria-hidden="true"></i>');
+    if (SK[t].setup) SK[t].setup(vizCtx);
+    fontSkin = ''; // se cargan al mostrarse, no al arrancar la página
+    lastKey = ''; lastPlaying = null; lastP = -1; lastHint = null; pending = null; // la plantilla es nueva: se vuelve a rellenar todo
+    renderer.invalidate(); render();
+  }
   const setMode = (v) => { applyMode(v); try { chrome.storage.local.set({ [MODE_KEY]: v }); } catch (_) { /* contexto invalidado */ } };
 
   // Cambio de modo: cierra la ventana anterior, espera a su evento de cierre y entonces muestra/abre la nueva.
@@ -148,18 +135,25 @@ ${NMP.css}
   // ---------- Acciones ----------
   const seekTo = (t) => { if (media && isFinite(media.duration)) media.currentTime = Math.max(0, Math.min(media.duration, t)); };
 
-  btn.play.addEventListener('click', () => { if (!media) return; media.paused ? media.play().catch(() => {}) : media.pause(); });
-  btn.back.addEventListener('click', () => media && seekTo(media.currentTime - SKIP));
-  btn.fwd.addEventListener('click', () => media && seekTo(media.currentTime + SKIP));
-  btn.prev.addEventListener('click', () => {
-    if (!media) return;
-    if (media.currentTime > 3 || (!actions.has('previoustrack') && !findSiteButton('prev'))) return seekTo(0);
-    if (actions.has('previoustrack')) send('previoustrack'); else findSiteButton('prev').click();
+  // Todas las acciones salen de [data-act] (cada diseño pone sus botones donde quiere); el clic se resuelve aquí.
+  const ACT = {
+    play() { if (!media) return; media.paused ? media.play().catch(() => {}) : media.pause(); },
+    back() { if (media) seekTo(media.currentTime - SKIP); },
+    fwd() { if (media) seekTo(media.currentTime + SKIP); },
+    prev() {
+      if (!media) return;
+      if (media.currentTime > 3 || (!actions.has('previoustrack') && !findSiteButton('prev'))) return seekTo(0);
+      if (actions.has('previoustrack')) send('previoustrack'); else findSiteButton('prev').click();
+    },
+    next() { if (actions.has('nexttrack')) send('nexttrack'); else findSiteButton('next')?.click(); },
+    mute() { if (media) { media.muted = !media.muted; render(); } },
+    mode() { if (fm === 'pip') startFloat(); else setMode('pip'); },
+    hide() { dismissed = true; render(); },
+  };
+  card.addEventListener('click', (e) => {
+    const a = e.target.closest('[data-act]'), fn = a && !a.disabled && Object.hasOwn(ACT, a.dataset.act) && ACT[a.dataset.act];
+    if (fn) { fn(); render(); }
   });
-  btn.next.addEventListener('click', () => {
-    if (actions.has('nexttrack')) send('nexttrack'); else findSiteButton('next')?.click();
-  });
-  btn.close.addEventListener('click', () => { dismissed = true; render(); });
 
   // Teclado con el reproductor enfocado (Tab): Espacio/K play-pausa, ←/→ ±SKIP s, Esc oculta.
   // Sobre un botón, Espacio/Intro los gestiona el propio botón.
@@ -167,12 +161,13 @@ ${NMP.css}
     if (e.altKey || e.ctrlKey || e.metaKey || !media) return;
     const onButton = e.composedPath()[0].tagName === 'BUTTON'; // sin instanceof: en la ventana flotante es otro documento
     if ((e.key === ' ' || e.key === 'Enter') && onButton) return;
-    if (e.key === ' ' || e.key === 'k') btn.play.click();
-    else if (e.key === 'ArrowLeft' && !btn.back.disabled) btn.back.click();
-    else if (e.key === 'ArrowRight' && !btn.fwd.disabled) btn.fwd.click();
-    else if (e.key === 'Escape') btn.close.click();
+    const live = media.duration === Infinity;
+    if (e.key === ' ' || e.key === 'k') ACT.play();
+    else if (e.key === 'ArrowLeft' && !live) ACT.back();
+    else if (e.key === 'ArrowRight' && !live) ACT.fwd();
+    else if (e.key === 'Escape') ACT.hide();
     else return;
-    e.preventDefault(); e.stopPropagation();
+    e.preventDefault(); e.stopPropagation(); render();
   });
 
   // Respaldo: ventana flotante con marco (Document PiP), la abre main.js y mueve aquí el host.
@@ -196,24 +191,6 @@ ${NMP.css}
     render();
     settleSwitch();
   });
-
-  // Texto largo: en vez de "…", se desplaza de lado a lado mostrando todo el nombre.
-  function setText(el, text) {
-    el.innerHTML = '<span></span>';
-    el.firstChild.textContent = text;
-    el.title = text;
-    fitMarquee(el);
-  }
-  function fitMarquee(el) {
-    el.classList.remove('scroll');
-    const d = el.scrollWidth - el.clientWidth;
-    if (d > 1) {
-      el.style.setProperty('--d', -d + 'px');
-      el.style.setProperty('--t', Math.max(4, d / 22 + 3) + 's');
-      el.classList.add('scroll');
-    }
-  }
-
 
   // ---------- Ventana flotante sin marco: el reproductor se dibuja en un canvas y se saca con el PiP de vídeo ----------
   const vp = { active: false, starting: false, exiting: false, video: null, stop: null, pausing: 0 };
@@ -274,8 +251,8 @@ ${NMP.css}
     setHandler('seekbackward', () => media && seekTo(media.currentTime - SKIP));
     setHandler('seekforward', () => media && seekTo(media.currentTime + SKIP));
     setHandler('seekto', (d) => seekTo(d.seekTime));
-    setHandler('previoustrack', () => btn.prev.click());
-    if (actions.has('nexttrack') || findSiteButton('next')) setHandler('nexttrack', () => btn.next.click());
+    setHandler('previoustrack', () => ACT.prev());
+    if (actions.has('nexttrack') || findSiteButton('next')) setHandler('nexttrack', () => ACT.next());
     vp.stop = startTicker(vpTick);
     render();
   }
@@ -293,7 +270,6 @@ ${NMP.css}
   // La API exige un gesto del usuario: se abre con el primer clic o tecla en la página.
   ['pointerdown', 'keydown'].forEach((t) => document.addEventListener(t, startFloat, true));
   // Alternar entre ventana flotante (PiP) y tarjeta dentro de la página.
-  btn.mode.addEventListener('click', () => { if (fm === 'pip') startFloat(); else setMode('pip'); });
   // Clic izquierdo en el icono: mostrar u ocultar en el modo elegido (la ventana se abre ya, o con el siguiente clic en la página).
   NMP.toggle = () => { // lo invoca el service worker desde el mundo aislado; la página no puede alcanzarlo
     if (vp.active) { document.exitPictureInPicture().catch(() => {}); return; }
@@ -303,24 +279,49 @@ ${NMP.css}
 
   // El navegador solo abre la ventana con un gesto en la página: mientras espera, la tarjeta lo dice (cualquier clic o tecla la abre).
   const canOpenFloat = () => !openFailed && (fm === 'win' ? actions.has('@pip') : fm === 'pip' && (canVideoPip() || actions.has('@pip')));
-  let pending = null;
+  let pending = null, lastHint = null;
   function setPending(on) {
     if (on === pending) return;
     pending = on;
     card.classList.toggle('pending', on);
-    if (!on) requestAnimationFrame(() => fitMarquee(artistEl)); // el artista estaba oculto: recalcular su desplazamiento
     hintEl.textContent = on ? (fm === 'pip' ? 'Toca para abrir Mini' : 'Toca para abrir la ventana') : '';
     const label = on && fm === 'pip' ? 'Abrir Mini' : 'Pasar a Mini';
-    btn.mode.title = label; btn.mode.setAttribute('aria-label', label);
+    qa('[data-act=mode]').forEach((b) => { b.title = label; b.setAttribute('aria-label', label); });
   }
 
   // ---------- Render ----------
   // Solo hay trabajo (y temporizador) mientras algo se ve: tarjeta visible en una pestaña visible, ventana flotante o Mini.
   const isActive = () => pip || vp.active || (!dismissed && !document.hidden);
   let loop = 0;
-  const sleep = () => { if (loop) { clearInterval(loop); loop = 0; } };
+  const sleep = () => { if (loop) { clearInterval(loop); loop = 0; } vizStop(); };
   const setTxt = (el, v) => { if (el._t !== v) { el._t = v; el.textContent = v; } };
-  let lastDash = '', lastNow = -1;
+
+  // Visualizador: un temporizador propio (~30 fps, ~10 con movimiento reducido) que solo corre mientras la tarjeta se ve.
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
+  let vizT = 0, vizLast = 0;
+  function vizTick() {
+    const n = performance.now();
+    if (reduceMotion.matches && n - vizLast < 100) return;
+    const dt = Math.min(.05, (n - vizLast) / 1000); vizLast = n;
+    viz.step(dt); viz.draw(vizCtx);
+  }
+  const vizStart = () => { if (!vizT) { vizLast = performance.now(); vizT = setInterval(vizTick, 33); } };
+  function vizStop() { if (vizT) { clearInterval(vizT); vizT = 0; } }
+
+  // Paleta de la carátula: tiñe los diseños (--c1..--c3). Sin carátula, o si no se puede leer, la de por defecto.
+  const setPalette = (p) => p.forEach((c, i) => card.style.setProperty('--c' + (i + 1), c));
+  function loadPalette(src) {
+    setPalette(DEFAULT_PAL);
+    if (!src) return;
+    const done = (im) => { if (curImg !== src) return; const p = palette(im); if (p) setPalette(p); };
+    const load = (u, cors, fail) => { const im = new Image(); if (cors) im.crossOrigin = 'anonymous'; im.onload = () => done(im); im.onerror = fail; im.src = u; };
+    load(src, true, () => {
+      if (vp.active || vp.starting) return; // Mini pide la misma carátula al service worker y solo atiende una descarga a la vez
+      try { chrome.runtime.sendMessage({ type: 'img', url: src }, (r) => { void chrome.runtime.lastError; if (r && r.data) load(r.data, false, () => {}); }); } catch (_) { /* sin background */ }
+    });
+  }
+
+  let lastP = -1;
   function render() {
     if (!isActive()) { sleep(); if (dismissed) card.classList.remove('show'); return; }
     if (!loop) loop = setInterval(render, 250);
@@ -328,6 +329,11 @@ ${NMP.css}
     const fs = !!document.fullscreenElement;
     const visible = !!media && !dismissed && !fs && !vp.active;
     card.classList.toggle('show', visible || pip);
+    if (visible || pip) {
+      vizStart();
+      if (fontSkin !== theme) { const t = fontSkin = theme; NMP.loadFonts(t, () => { if (theme === t) requestAnimationFrame(layout); }); }
+      if (host.ownerDocument !== document) NMP.syncFonts(host.ownerDocument);
+    } else vizStop();
     setPending(visible && !pip && !modeSwitch && !vp.starting && canOpenFloat());
     if (!media) return;
 
@@ -337,52 +343,59 @@ ${NMP.css}
     const img = bestArtwork(md);
     const key = title + '\u0001' + artist + '\u0001' + img;
     if (key !== lastKey) {
+      const imgChanged = img !== curImg || !lastKey;
       lastKey = key;
       curTitle = title; curArtist = artist; curImg = img;
-      setText(titleEl, title); setText(artistEl, artist);
+      if (title + artist !== lastTrack) { lastTrack = title + artist; trackNo++; }
+      qa('[data-t=title]').forEach((e) => { e.textContent = title; e.title = title; });
+      qa('[data-t=artist]').forEach((e) => { e.textContent = artist; e.title = artist; });
+      qa('[data-t=idx]').forEach((e) => { e.textContent = pad2(trackNo % 100) + '/--'; });
+      qa('[data-t=no]').forEach((e) => { e.textContent = pad2(trackNo % 100); });
       const url = img ? `url("${img.replace(/["\\\n\r]/g, (c) => '%' + c.charCodeAt(0).toString(16).toUpperCase().padStart(2, '0'))}")` : 'none';
       card.style.setProperty('--art', url);
-      art.classList.toggle('has-img', !!img);
+      card.style.setProperty('--bars', barcode(strSeed(title)));
+      if (imgChanged) loadPalette(img);
     }
 
-    const live = media.duration === Infinity;
-    card.classList.toggle('live', live);
-    const dur = media.duration;
-    const p = live ? 100 : dur > 0 ? Math.min(100, (media.currentTime / dur) * 100) : 0;
-    const dash = p > 0 ? `${p.toFixed(2)} 100` : '0 100';
-    if (dash !== lastDash) { lastDash = dash; bar.style.strokeDasharray = dash; }
-    if (Math.round(p) !== lastNow) { lastNow = Math.round(p); ring.setAttribute('aria-valuenow', lastNow); }
-    setTxt(curEl, fmt(media.currentTime));
-    setTxt(durEl, live ? '' : fmt(dur));
+    const live = media.duration === Infinity, dur = isFinite(media.duration) ? media.duration : 0, ct = media.currentTime || 0;
+    card.classList.toggle('live-badge', live);
+    const p = live ? 1 : dur > 0 ? Math.min(1, ct / dur) : 0;
+    if (p !== lastP) { lastP = p; card.style.setProperty('--p', p.toFixed(4)); }
+    const V = {
+      cur: fmt(ct), cur2: fmt2(ct), curd: fmt2(ct).replace(':', '.'), dur: live ? 'LIVE' : fmt(dur), dur2: live ? 'LIVE' : fmt2(dur), durd: live ? 'LIVE' : '/ ' + fmt(dur),
+      rem: live ? '--:--' : '-' + fmt(Math.max(0, dur - ct)), rem2: live ? '--:--' : '-' + fmt2(Math.max(0, dur - ct)), pct: Math.round(p * 100) + '%',
+    };
+    qa('[data-v]').forEach((e) => { const t = V[e.dataset.v]; if (t != null) setTxt(e, t); });
+    const now = Math.round(p * 100), vt = live ? 'En directo' : fmt(ct) + ' de ' + fmt(dur);
+    qa('[data-bar]').forEach((b) => { if (b._n !== now) { b._n = now; b.setAttribute('aria-valuenow', now); } if (b._vt !== vt) { b._vt = vt; b.setAttribute('aria-valuetext', vt); } });
 
     const playing = !media.paused && !media.ended;
     if (playing !== lastPlaying) {
       lastPlaying = playing;
-      btn.play.innerHTML = playing ? icons.pause : icons.play;
       const label = playing ? 'Pausar' : 'Reproducir';
-      btn.play.title = label; btn.play.setAttribute('aria-label', label);
+      qa('[data-act=play]').forEach((b) => { b.title = label; b.setAttribute('aria-label', label); });
     }
     card.classList.toggle('paused', !playing);
+    card.classList.toggle('muted', !!media.muted);
     card.classList.toggle('loading', playing && media.readyState < 3); // reproduciendo pero sin datos suficientes
-    btn.back.disabled = btn.fwd.disabled = live;
-    btn.next.disabled = !(actions.has('nexttrack') || findSiteButton('next'));
+    qa('[data-act=back],[data-act=fwd]').forEach((b) => { b.disabled = live; });
+    const canNext = actions.has('nexttrack') || !!findSiteButton('next');
+    qa('[data-act=next]').forEach((b) => { b.disabled = !canNext; });
+    viz.setSource(playing && !media.muted, strSeed(title), media.duration);
   }
 
   // El bucle de 250 ms ya cubre el progreso; los eventos solo sirven para reaccionar al instante a play, pausa y cambios de pista.
   ['play', 'pause', 'ended', 'loadedmetadata', 'durationchange'].forEach((ev) => document.addEventListener(ev, render, true));
   document.addEventListener('visibilitychange', render);
-  render();
+  applyTheme(theme);
 
   // ---------- Tamaño ----------
+  // Radio de las esquinas: crece con el tamaño sin pasar de la mitad del alto (pastilla). En la ventana con marco no hay esquinas.
+  const radius = (w, h) => Math.min(h / 2, 20 + Math.min(w, h) * .05);
   function layout() {
     const w = card.clientWidth, h = card.clientHeight;
     if (!w || !h) return;
-    const slim = h < SLIM_BELOW, d = slim ? SLIM : DESIGN;
-    const k = clamp(Math.min(w / d.w, h / d.h), 0.5, 4);
-    inner.classList.toggle('slim', slim);
-    requestAnimationFrame(() => { fitMarquee(titleEl); fitMarquee(artistEl); });
-    inner.style.cssText = `width:${w / k}px;height:${h / k}px;zoom:${k}`;
-    card.style.setProperty('--r', (pip ? 0 : Math.min(44 * k, h / 2)) + 'px');
+    card.style.setProperty('--r', (pip ? 0 : radius(w, h)) + 'px');
   }
   new ResizeObserver(layout).observe(card);
 
@@ -429,29 +442,30 @@ ${NMP.css}
     g.addEventListener('pointercancel', end);
   });
 
-  // ---------- Arrastre + barra de progreso en el borde ----------
-  function edgeFraction(e) {
-    const r = card.getBoundingClientRect();
-    const x = e.clientX - r.left, y = e.clientY - r.top, W = r.width, H = r.height;
-    const d = [y, W - x, H - y, x];
-    const side = d.indexOf(Math.min(...d));
-    const s = [x, W + y, W + H + (W - x), 2 * W + H + (H - y)][side];
-    return Math.max(0, Math.min(1, s / (2 * (W + H))));
-  }
-  const nearEdge = (e) => {
-    const r = card.getBoundingClientRect();
-    return Math.min(e.clientX - r.left, r.right - e.clientX, e.clientY - r.top, r.bottom - e.clientY) <= EDGE;
-  };
+  // ---------- Barra de progreso (la de cada diseño): clic o arrastre para buscar ----------
+  const barFrac = (e, b) => { const r = b.getBoundingClientRect(); return clamp((e.clientX - r.left) / Math.max(1, r.width), 0, 1); };
+  card.addEventListener('pointerdown', (e) => {
+    const b = e.button === 0 && e.target.closest('[data-bar]');
+    if (!b || !media || !isFinite(media.duration)) return;
+    b.setPointerCapture(e.pointerId); b.classList.add('drag');
+    seekTo(barFrac(e, b) * media.duration); render();
+  });
+  card.addEventListener('pointermove', (e) => {
+    const b = e.target.closest('[data-bar]');
+    if (b && b.classList.contains('drag') && media && isFinite(media.duration)) { seekTo(barFrac(e, b) * media.duration); render(); }
+  });
+  const endBar = (e) => { const b = e.target.closest('[data-bar]'); if (b) b.classList.remove('drag'); };
+  card.addEventListener('pointerup', endBar);
+  card.addEventListener('pointercancel', endBar);
 
+  // ---------- Arrastre ----------
   const SNAP = 14;
   const snap = (v, max) => Math.abs(v - MARGIN) < SNAP ? MARGIN : Math.abs(v - (max - MARGIN)) < SNAP ? max - MARGIN : v;
   let mode = null, offX = 0, offY = 0;
   card.addEventListener('pointerdown', (e) => {
-    if (e.button !== 0 || e.target.closest('button')) return;
+    if (e.button !== 0 || e.target.closest('button,[data-bar]')) return;
     card.setPointerCapture(e.pointerId);
-    if (nearEdge(e) && media && isFinite(media.duration)) {
-      mode = 'scrub'; seekTo(edgeFraction(e) * media.duration); render();
-    } else if (!pip) {
+    if (!pip) {
       mode = 'drag';
       const r = host.getBoundingClientRect();
       offX = e.clientX - r.left; offY = e.clientY - r.top;
@@ -463,8 +477,6 @@ ${NMP.css}
       const x = e.clientX - offX, y = e.clientY - offY;
       place(e.altKey ? x : snap(x, window.innerWidth - card.offsetWidth), e.altKey ? y : snap(y, window.innerHeight - card.offsetHeight));
     }
-    else if (mode === 'scrub' && media && isFinite(media.duration)) { seekTo(edgeFraction(e) * media.duration); render(); }
-    else card.classList.toggle('edge', nearEdge(e));
   });
   const endPointer = () => {
     if (mode === 'drag') savePos();
@@ -472,7 +484,6 @@ ${NMP.css}
   };
   card.addEventListener('pointerup', endPointer);
   card.addEventListener('pointercancel', endPointer);
-  card.addEventListener('pointerleave', () => { if (!mode) card.classList.remove('edge'); });
 
   function place(x, y) {
     if (pip) return;

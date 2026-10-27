@@ -49,10 +49,27 @@ async function fetchArtwork(url) {
     return `data:${mime};base64,${toBase64(bytes)}`;
   } finally { clearTimeout(timer); }
 }
+// Fuentes de los diseños: se leen de la propia extensión y se entregan al content script en base64 (no son accesibles desde las páginas).
+const FONT_FILE = /^[a-z0-9]+(?:-[a-z0-9]+)*-latin-\d{3}$/;
+const fontCache = new Map();
+async function readFont(file) {
+  if (fontCache.has(file)) return fontCache.get(file);
+  const res = await fetch(chrome.runtime.getURL(`src/fonts/${file}-normal.woff2`));
+  if (!res.ok) throw new Error('fuente no encontrada');
+  const data = toBase64(new Uint8Array(await res.arrayBuffer()));
+  fontCache.set(file, data);
+  return data;
+}
 const inflight = new Set(); // una descarga a la vez por pestaña
 chrome.runtime.onMessage.addListener((m, sender, reply) => {
   const tabId = sender.tab && sender.tab.id;
-  if (sender.id !== chrome.runtime.id || tabId == null || !m || m.type !== 'img' || typeof m.url !== 'string' || m.url.length > MAX_URL) return;
+  if (sender.id !== chrome.runtime.id || tabId == null || !m) return;
+  if (m.type === 'font') {
+    if (typeof m.file !== 'string' || !FONT_FILE.test(m.file)) return;
+    readFont(m.file).then((data) => reply({ data }), () => reply({}));
+    return true;
+  }
+  if (m.type !== 'img' || typeof m.url !== 'string' || m.url.length > MAX_URL) return;
   if (inflight.has(tabId)) { reply({}); return; }
   inflight.add(tabId);
   fetchArtwork(m.url).then((data) => reply({ data }), () => reply({})).finally(() => inflight.delete(tabId));
@@ -63,7 +80,7 @@ chrome.runtime.onMessage.addListener((m, sender, reply) => {
 const MODE_KEY = 'mp_mode';
 const THEME_KEY = 'mp_theme';
 const MODES = { pip: 'Mini · ventana flotante sin marco', win: 'Ventana · flotante con marco y controles', card: 'Tarjeta · dentro de la página' };
-const THEMES = { glass: 'Glass (original)', brutal: 'Cyber Brutalismo / Micrographics', pixel: 'Pixel art', retro: 'Retro Cyber' };
+const THEMES = { glass: 'Glassware', noir: 'Noir', crt: 'Terminal CRT', metal: 'Liquid Metal' };
 const syncMenu = (mode, theme) => {
   const up = (id, checked) => chrome.contextMenus.update(id, { checked }, () => void chrome.runtime.lastError);
   if (mode) for (const id of Object.keys(MODES)) up(id, id === mode);
@@ -73,7 +90,7 @@ chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.removeAll(() => {
     for (const [id, title] of Object.entries(MODES)) chrome.contextMenus.create({ id, type: 'radio', title, contexts: ['action'], checked: id === 'pip' });
     chrome.contextMenus.create({ id: 'sep', type: 'separator', contexts: ['action'] });
-    chrome.contextMenus.create({ id: 'themes', title: 'Diseño (desarrollo)', contexts: ['action'] });
+    chrome.contextMenus.create({ id: 'themes', title: 'Diseño', contexts: ['action'] });
     for (const [id, title] of Object.entries(THEMES)) chrome.contextMenus.create({ id: 'th:' + id, parentId: 'themes', type: 'radio', title, contexts: ['action'], checked: id === 'glass' });
     chrome.storage.local.get([MODE_KEY, THEME_KEY], (r) => syncMenu((r && r[MODE_KEY]) || 'pip', (r && r[THEME_KEY]) || 'glass'));
   });

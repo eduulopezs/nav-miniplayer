@@ -11,13 +11,13 @@ after(async () => { await env.close(); await server.close(); });
 
 test('los 4 diseños se aplican y se ven distintos', async () => {
   const hashes = {};
-  for (const theme of ['glass', 'brutal', 'pixel', 'retro']) {
+  for (const theme of ['glass', 'noir', 'crt', 'metal']) {
     const p = await openPage(env, server, { theme });
     await p.toggle();
     await p.waitFor(async () => (await p.read()).shown);
     await sleep(500);
     const s = await p.read();
-    assert.equal(s.theme, theme === 'glass' ? null : theme, `data-theme de ${theme}`);
+    assert.equal(s.theme, theme, `diseño aplicado (${theme})`);
     const b = await p.box('card');
     const buf = await p.page.screenshot({ path: `${SHOTS}/${theme}.png`, clip: { x: b.x - 8, y: b.y - 8, width: b.w + 16, height: b.h + 16 } });
     hashes[theme] = createHash('sha1').update(buf).digest('hex');

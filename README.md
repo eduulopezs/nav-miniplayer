@@ -21,12 +21,14 @@ Elige la carpeta del repositorio (la que contiene `manifest.json`) y recarga las
 - Botón × (al pasar el ratón) o icono de la extensión en la barra: ocultar/mostrar.
 - Teclado: con Tab se enfoca el reproductor; **Espacio** o **K** play/pausa, **←/→** ±10 s, **Esc** lo oculta. El progreso y la pista se anuncian a lectores de pantalla, y con "reducir movimiento" activado los títulos largos se truncan en vez de desplazarse.
 
-## Diseños (desarrollo)
-Clic derecho en el icono → **Diseño (desarrollo)** para cambiar el aspecto en caliente (se aplica a Tarjeta, Ventana y Mini):
-- **Glass (original)**: cristal translúcido con carátula desenfocada y progreso en degradado.
-- **Cyber Brutalismo / Micrographics**: lavanda sobre violeta casi negro, trama de puntos, tipografía mono y micrográficas.
-- **Pixel art**: paleta de dos verdes y crema, esquinas escalonadas, carátula pixelada y barra por bloques.
-- **Retro Cyber**: terminal de fósforo verde con efecto CRT, líneas de escaneo y brillo.
+## Diseños
+Clic derecho en el icono → **Diseño** para cambiar el aspecto en caliente (Tarjeta, Ventana y Mini):
+- **Glassware**: cristal translúcido con cintas de color que siguen la música y paleta sacada de la carátula.
+- **Noir**: negro y rojo señal, carátula en blanco y negro, código de barras y relieve de espectro.
+- **Terminal CRT**: fósforo ámbar con curvatura de tubo, líneas de escaneo y ecualizador de texto.
+- **Liquid Metal**: metal cromado con mercurio en movimiento y anillo de color.
+
+La tarjeta se adapta a su tamaño (pastilla, fila, compacto, portada, panorámico) con container queries. El visualizador es simulado a partir de la pista; las fuentes se cargan desde la propia extensión.
 
 ## Estructura
 ```
