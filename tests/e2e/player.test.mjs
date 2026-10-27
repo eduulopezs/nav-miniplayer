@@ -1,0 +1,121 @@
+// Comportamiento del reproductor con la extensión real cargada en Chromium.
+import { test, before, after } from 'node:test';
+import assert from 'node:assert/strict';
+import { launch, startServer, openPage, sleep } from './helpers.mjs';
+
+let env, server;
+before(async () => { server = await startServer(); env = await launch(); });
+after(async () => { await env.close(); await server.close(); });
+
+const near = (v, expected, tol, msg) => assert.ok(Math.abs(v - expected) <= tol, `${msg}: ${v} no está cerca de ${expected} (±${tol})`);
+
+test('arranca oculto y se muestra y oculta con el icono', async () => {
+  const p = await openPage(env, server);
+  assert.equal((await p.read()).shown, false);
+  await p.toggle();
+  const s = await p.read();
+  assert.equal(s.shown, true);
+  assert.equal(s.title, 'Canción de prueba');
+  await p.toggle();
+  assert.equal((await p.read()).shown, false);
+  await p.page.close();
+});
+
+test('oculto no hace trabajo: ni layouts ni estilos recalculados', async () => {
+  const p = await openPage(env, server);
+  await p.play();
+  await sleep(500);
+  const a = await p.metrics();
+  await sleep(3000);
+  const b = await p.metrics();
+  assert.equal(b.LayoutCount - a.LayoutCount, 0, 'layouts con el reproductor oculto');
+  assert.equal(b.RecalcStyleCount - a.RecalcStyleCount, 0, 'recálculos de estilo con el reproductor oculto');
+  await p.page.close();
+});
+
+test('play y pausa con el botón, y la etiqueta cambia', async () => {
+  const p = await openPage(env, server);
+  await p.toggle();
+  assert.equal(await p.paused(), true);
+  await p.click('play');
+  await p.waitFor(async () => !(await p.paused()));
+  await p.waitFor(async () => (await p.read()).playLabel === 'Pausar');
+  await p.click('play');
+  await p.waitFor(() => p.paused());
+  await p.waitFor(async () => (await p.read()).playLabel === 'Reproducir');
+  await p.page.close();
+});
+
+test('saltar 10 s hacia delante y hacia atrás', async () => {
+  const p = await openPage(env, server);
+  await p.toggle();
+  await p.seek(20);
+  await p.click('fwd');
+  near(await p.time(), 30, 1, 'tras avanzar');
+  await p.click('back');
+  near(await p.time(), 20, 1, 'tras retroceder');
+  await p.seek(4);
+  await p.click('back');
+  assert.equal(await p.time(), 0, 'no baja de 0');
+  await p.page.close();
+});
+
+test('tiempo y barra de progreso siguen al medio', async () => {
+  const p = await openPage(env, server);
+  await p.toggle();
+  await p.seek(10);
+  await p.play();
+  await p.waitFor(async () => (await p.read()).cur === '0:10' || (await p.read()).cur === '0:11');
+  const s = await p.read();
+  near(s.valuenow, 26, 3, 'aria-valuenow');
+  near(s.dash, 26, 3, 'longitud de la barra');
+  await p.pause();
+  const t = await p.time();
+  await sleep(800);
+  assert.equal((await p.read()).cur, `0:${String(Math.floor(t)).padStart(2, '0')}`);
+  await p.page.close();
+});
+
+test('el borde de la tarjeta es una barra de progreso arrastrable', async () => {
+  const p = await openPage(env, server);
+  await p.toggle();
+  const b = await p.box('card');
+  // El borde se recorre desde la esquina superior izquierda: un clic en el centro del borde superior cae en W/2 / (2(W+H)) del total.
+  const f = (b.w / 2) / (2 * (b.w + b.h));
+  await p.page.mouse.click(b.x + b.w / 2, b.y + 3);
+  near(await p.time(), f * 40, 2, 'posición tras pulsar el borde');
+  await p.page.close();
+});
+
+test('teclado: Espacio, flechas y Esc con el reproductor enfocado', async () => {
+  const p = await openPage(env, server);
+  await p.toggle();
+  await p.seek(10);
+  await p.focus('card');
+  await p.page.keyboard.press('Space');
+  await p.waitFor(async () => !(await p.paused()));
+  await p.page.keyboard.press('ArrowRight');
+  near(await p.time(), 20, 1.5, 'tras →');
+  await p.page.keyboard.press('ArrowLeft');
+  near(await p.time(), 10, 1.5, 'tras ←');
+  await p.page.keyboard.press('k');
+  await p.waitFor(() => p.paused());
+  await p.page.keyboard.press('Escape');
+  await p.waitFor(async () => !(await p.read()).shown);
+  await p.page.close();
+});
+
+test('se ajusta al tamaño: arrastrar una esquina cambia ancho y alto', async () => {
+  const p = await openPage(env, server);
+  await p.toggle();
+  const before = await p.box('card');
+  const g = await p.box('br');
+  await p.page.mouse.move(g.x + g.w / 2, g.y + g.h / 2);
+  await p.page.mouse.down();
+  await p.page.mouse.move(g.x + g.w / 2 - 60, g.y + g.h / 2 - 30, { steps: 5 });
+  await p.page.mouse.up();
+  const after = await p.box('card');
+  near(after.w, before.w - 60, 2, 'ancho');
+  near(after.h, before.h - 30, 2, 'alto');
+  await p.page.close();
+});

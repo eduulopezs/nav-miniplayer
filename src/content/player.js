@@ -122,7 +122,8 @@ ${NMP.css}
     return found;
   }
 
-  const send = (name) => document.dispatchEvent(new CustomEvent('__mp_cmd', { detail: name }));
+  let pipAsked = false; // la ventana con marco solo se acepta como abierta si la extensión la pidió: la página no puede fingirlo
+  const send = (name) => { if (name === '__pip') pipAsked = true; document.dispatchEvent(new CustomEvent('__mp_cmd', { detail: name })); };
 
   // ---------- Acciones ----------
   const seekTo = (t) => { if (media && isFinite(media.duration)) media.currentTime = Math.max(0, Math.min(media.duration, t)); };
@@ -157,7 +158,8 @@ ${NMP.css}
   // Respaldo: ventana flotante con marco (Document PiP), la abre main.js y mueve aquí el host.
   document.addEventListener('__mp_pip', (e) => {
     const d = String(e.detail);
-    if (d !== 'open' && d !== 'closed' && !d.startsWith('error:')) return;
+    if (d === 'open' ? !pipAsked : d === 'closed' ? !pip : !d.startsWith('error:')) return; // evento no pedido o falso
+    pipAsked = false;
     if (d === 'open') {
       pip = true;
       host.style.cssText = 'all:initial;position:fixed;inset:0;';
