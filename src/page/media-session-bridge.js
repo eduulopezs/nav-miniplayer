@@ -45,7 +45,8 @@
     document.addEventListener('__mp_sbq', () => {
       try {
         const pl = document.getElementById('movie_player');
-        const r = (pl && typeof pl.getPlayerResponse === 'function' && pl.getPlayerResponse()) || window.ytInitialPlayerResponse;
+        let r = pl && typeof pl.getPlayerResponse === 'function' && pl.getPlayerResponse();
+        if (!r) { r = window.ytInitialPlayerResponse; if (r && r.videoDetails && r.videoDetails.videoId !== new URLSearchParams(location.search).get('v')) r = null; } // tras navegar sin recargar, esa variable es del vídeo anterior
         const spec = r && r.storyboards && r.storyboards.playerStoryboardSpecRenderer && r.storyboards.playerStoryboardSpecRenderer.spec;
         const id = r && r.videoDetails && r.videoDetails.videoId;
         document.dispatchEvent(new CustomEvent('__mp_sb', { detail: typeof spec === 'string' && typeof id === 'string' ? JSON.stringify({ id, spec }) : '' }));

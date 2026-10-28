@@ -125,7 +125,7 @@ chrome.runtime.onMessage.addListener((m, sender, reply) => {
   }
   if (m.type === 'sb') {
     if (typeof m.url !== 'string' || m.url.length > MAX_URL) return;
-    if (inflightSb.has(tabId)) { reply({}); return; }
+    if (inflightSb.has(tabId)) { reply({ busy: true }); return; }
     inflightSb.add(tabId);
     fetchArtwork(m.url, isStoryboardUrl).then((data) => reply({ data }), () => reply({})).finally(() => inflightSb.delete(tabId));
     return true;

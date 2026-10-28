@@ -39,7 +39,8 @@
 
   function sheetUrl(sb, sheet) {
     const { level: v } = sb;
-    return sb.base.replace('$L', v.l).replace('$N', v.name.replace('$M', sheet)) + '&sigh=' + encodeURIComponent(v.sigh);
+    const url = sb.base.replace('$L', () => v.l).replace('$N', () => v.name.replace('$M', () => sheet));
+    return url + (url.includes('?') ? '&' : '?') + 'sigh=' + encodeURIComponent(v.sigh);
   }
 
   NMP.storyboard = { parse, locate, sheetUrl };
