@@ -22,7 +22,13 @@ async function startCapture(tabId) {
     } catch (e) { if (!/single offscreen/i.test(String(e && e.message))) throw e; }
     const r = await chrome.runtime.sendMessage({ target: 'offscreen', type: 'cap-start', tabId, streamId });
     if (r && r.ok) chrome.tabs.sendMessage(tabId, { type: 'viz-connect' }).catch(() => {});
-  } catch (e) { console.warn('[Nav Miniplayer] captura de audio no disponible:', e && e.message); /* pestaña no capturable (chrome://, ya capturada...): sigue el visualizador simulado */ }
+  } catch (e) { const msg = (e && e.message) || String(e);
+    console.warn('[Nav Miniplayer] captura de audio no disponible:', msg);
+    // Aviso visible en el icono (6 s) para saber por qué no hay captura sin abrir la consola
+    chrome.action.setBadgeBackgroundColor({ tabId, color: '#c0392b' }).catch(() => {});
+    chrome.action.setBadgeText({ tabId, text: '!' }).catch(() => {});
+    chrome.action.setTitle({ tabId, title: 'Captura de audio no disponible: ' + msg.slice(0, 160) }).catch(() => {});
+    setTimeout(() => { chrome.action.setBadgeText({ tabId, text: '' }).catch(() => {}); chrome.action.setTitle({ tabId, title: 'Mostrar/ocultar minirreproductor' }).catch(() => {}); }, 6000); /* pestaña no capturable (chrome://, ya capturada...): sigue el visualizador simulado */ }
 }
 
 // Atajos de teclado (chrome.commands, configurables en chrome://extensions/shortcuts): se ejecutan sobre la pestaña activa.
