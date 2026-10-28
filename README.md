@@ -38,6 +38,9 @@ Elige la carpeta del repositorio (la que contiene `manifest.json`) y recarga las
 | Vimeo incrustado | ☑️ | Iframe; cubierto por los tests e2e con iframes locales. |
 | Vídeo de noticias | ☑️ | |
 
+## Ventana aparte (todas las pestañas)
+Clic derecho en el icono → **Abrir ventana aparte (todas las pestañas)** (o el atajo "Abrir la ventana aparte", sin tecla por defecto). Es una ventana de la extensión, sin depender de un gesto en la página ni de Picture-in-Picture, con los mismos diseños y layouts: arriba hay una pastilla por pestaña con sonido (icono y título), el botón ↗ lleva a la pestaña elegida y los controles, la barra de progreso y el teclado (Espacio, ←/→) actúan sobre ella. Por defecto muestra la que suena. Recuerda su posición y tamaño. Mientras está cerrada, las pestañas no informan de nada.
+
 ## Diseños
 Clic derecho en el icono → **Diseño** para cambiar el aspecto en caliente (Tarjeta, Ventana y Mini):
 - **Glassware**: cristal translúcido con cintas de color que siguen la música y paleta sacada de la carátula.
@@ -55,6 +58,7 @@ manifest.json
 design/tokens.json              fuente única de tokens (primitivos y semánticos por diseño)
 src/
   background/service-worker.js   clic en el icono, menú contextual, descarga de carátulas y relevo de mensajes de iframes
+  background/sessions.js         sesiones de todas las pestañas, órdenes de la ventana aparte y su apertura
   background/net-guard.js        reglas de red para carátulas (URL permitidas y detección de imagen por bytes)
   page/media-session-bridge.js   mundo de la página: captura los manejadores de Media Session y vigila los medios sin insertar o en shadow DOM
   content/

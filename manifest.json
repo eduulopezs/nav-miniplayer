@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Nav Miniplayer",
-  "version": "1.8.2",
+  "version": "1.9.0",
   "description": "Minirreproductor flotante con estilo glass para controlar el audio/vídeo de la pestaña: play/pausa, ±10 s, anterior/siguiente y progreso en el borde.",
   "minimum_chrome_version": "116",
   "permissions": ["storage", "contextMenus", "scripting", "tabCapture", "offscreen"],
@@ -14,7 +14,8 @@
     "seek-back": { "suggested_key": { "default": "Alt+Shift+Comma" }, "description": "Retroceder" },
     "seek-fwd": { "suggested_key": { "default": "Alt+Shift+Period" }, "description": "Avanzar" },
     "prev-track": { "description": "Pista anterior" },
-    "next-track": { "description": "Pista siguiente" }
+    "next-track": { "description": "Pista siguiente" },
+    "open-window": { "description": "Abrir la ventana aparte con todas las pestañas" }
   },
   "icons": { "16": "icons/16.png", "48": "icons/48.png", "128": "icons/128.png" },
   "content_scripts": [

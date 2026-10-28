@@ -17,7 +17,14 @@ for (const f of Object.values(manifest.icons ?? {})) files.add(f);
 if (manifest.background?.service_worker) {
   const swPath = manifest.background.service_worker;
   const code = existsSync(join(root, swPath)) ? readFileSync(join(root, swPath), 'utf8') : '';
-  for (const [, f] of code.matchAll(/importScripts\('([^']+)'\)/g)) files.add(join(dirname(swPath), f).replace(/\\/g, '/'));
+  for (const [, args] of code.matchAll(/importScripts\(([^)]*)\)/g)) for (const [, f] of args.matchAll(/'([^']+)'/g)) files.add(join(dirname(swPath), f).replace(/\\/g, '/'));
+}
+// Página de la ventana aparte: sus scripts y su hoja de estilos (rutas relativas a la página).
+{
+  const page = 'src/window/player.html';
+  const html = existsSync(join(root, page)) ? readFileSync(join(root, page), 'utf8') : '';
+  files.add(page);
+  for (const [, f] of html.matchAll(/(?:src|href)="([^"]+)"/g)) files.add(join(dirname(page), f).replace(/\\/g, '/'));
 }
 
 for (const f of files) {

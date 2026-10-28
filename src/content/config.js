@@ -10,6 +10,7 @@
     SIZE_KEY: 'mp_size',
     THEME_KEY: 'mp_theme', // desarrollo: 'glass' | 'noir' | 'crt' | 'metal'
     PREFS_KEY: 'mp_prefs', // { skip, autoshow, autohide }
+    REMOTE_KEY: 'mp_remote', // true mientras la ventana aparte está abierta: las pestañas informan de su medio
     VOL_KEY: 'mp_vol', // volumen recordado por sitio
     MODE_KEY: 'mp_mode', // 'pip' (vídeo, sin marco) | 'win' (ventana con controles propios) | 'card' (en la página)
     MIN: { w: 240, h: 48 }, MAX: { w: 800, h: 480 },

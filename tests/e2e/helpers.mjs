@@ -50,7 +50,7 @@ export async function startServer() {
     }
     if (url.pathname === '/leak.png') { r.writeHead(200, { 'content-type': 'image/png' }); return r.end(Buffer.from('89504e470d0a1a0a000000000000000000000000', 'hex')); }
     const artwork = url.searchParams.get('art');
-    const meta = `navigator.mediaSession.metadata=new MediaMetadata({title:'Canción de prueba',artist:'Artista',artwork:${artwork ? `[{src:${JSON.stringify(artwork)},sizes:'512x512'}]` : '[]'}});`;
+    const meta = `navigator.mediaSession.metadata=new MediaMetadata({title:${JSON.stringify((url.searchParams.get('title') || 'Canción de prueba'))},artist:'Artista',artwork:${artwork ? `[{src:${JSON.stringify(artwork)},sizes:'512x512'}]` : '[]'}});`;
     r.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
     r.end(`<!doctype html><meta charset=utf-8><title>Prueba</title><body style="margin:0;height:100vh;background:#336">${url.searchParams.has('bare') ? '' : '<audio id=a src="/a.wav" loop></audio>'}<script>${meta}</script>`);
   });
@@ -83,11 +83,12 @@ const text = (n) => (n.children || []).map((c) => c.nodeValue || '').join('');
 
 // Abre una página de pruebas y devuelve un inspector del reproductor.
 // `bare`: página sin el <audio id=a> (cada prueba crea el medio a su manera).
-export async function openPage(env, server, { art, mode = 'card', theme, bare = false } = {}) {
+export async function openPage(env, server, { art, mode = 'card', theme, bare = false, title } = {}) {
   const { ctx, sw } = env;
   await sw.evaluate((v) => chrome.storage.local.set(v), { mp_mode: mode, ...(theme ? { mp_theme: theme } : {}) });
   const page = await ctx.newPage();
-  await page.goto(`${server.base}/${art ? `?art=${encodeURIComponent(art)}` : bare ? '?bare=1' : ''}`);
+  const q = new URLSearchParams(); if (art) q.set('art', art); if (bare) q.set('bare', '1'); if (title) q.set('title', title);
+  await page.goto(`${server.base}/${q.size ? '?' + q : ''}`);
   if (!bare) await page.waitForFunction(() => document.getElementById('a').readyState > 0);
   await sleep(300); // el content script lee su configuración de storage al arrancar
   const cdp = await ctx.newCDPSession(page);

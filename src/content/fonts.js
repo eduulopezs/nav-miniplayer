@@ -10,6 +10,7 @@
     glass: [['Figtree', 500, 'figtree-latin-500'], ['Figtree', 700, 'figtree-latin-700']],
     metal: [['Montserrat', 300, 'montserrat-latin-300'], ['Montserrat', 400, 'montserrat-latin-400'], ['Syne', 700, 'syne-latin-700'], ['Figtree', 500, 'figtree-latin-500'], ['Figtree', 700, 'figtree-latin-700']],
   };
+  NMP.fontFiles = FILES; // la ventana aparte (página de la extensión) las carga directamente desde src/fonts
   const done = new Set(), faces = [], docs = new WeakMap(); // faces: las ya descargadas; docs: documento -> las que ya tiene
   const b64 = (s) => { const bin = atob(s), out = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i); return out.buffer; };
 
