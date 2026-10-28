@@ -47,6 +47,9 @@ const off = read('src/offscreen/offscreen.js');
 t('la captura exige el ajuste opt-in y el clic en el icono', /mp_capture/.test(sw) && /startCapture\(tab\.id\)/.test(sw));
 t('el offscreen solo atiende a la extensión y rechaza mensajes de pestañas', /sender\.id !== chrome\.runtime\.id \|\| sender\.tab/.test(off) && /port\.sender\.id !== chrome\.runtime\.id/.test(off));
 t('el audio vuelve a los altavoces y a la página solo llegan números', /connect\(ctx\.destination\)/.test(off) && /getByteFrequencyData/.test(off) && !/postMessage\([^)]*stream/.test(off));
+const sess = read('src/background/sessions.js');
+t('las órdenes de la ventana solo salen de la página de la extensión y de una lista cerrada', /fromWindow\(sender\)/.test(sess) && /CMD\.test\(m\.cmd\)/.test(sess) && /\^\(\?:play\|pause\|toggle/.test(sess));
+t('las sesiones solo se aceptan del marco superior de una pestaña y con campos acotados', /m\.type === 'sess' && sender\.tab && sender\.frameId === 0/.test(sess) && /web\(m\.art\)/.test(sess));
 t('las acciones anunciadas por la página se filtran', /KNOWN_ACTIONS/.test(player));
 
 // Service worker con fetch simulado: camino positivo y negativos de la descarga de carátulas.
@@ -57,9 +60,9 @@ t('las acciones anunciadas por la página se filtran', /KNOWN_ACTIONS/.test(play
     body: { getReader() { let sent = false; return { read: async () => (sent ? { done: true } : ((sent = true), { done: false, value: body })), cancel: async () => {} }; } } });
   const sctx = vm.createContext({
     URL, AbortController, setTimeout, clearTimeout, btoa: (s) => Buffer.from(s, 'binary').toString('base64'), console,
-    importScripts() { vm.runInContext(read('src/background/net-guard.js'), sctx); },
-    chrome: { runtime: { id: 'me', onMessage: { addListener: (f) => { listener = f; } }, onInstalled: { addListener() {} } }, action: { onClicked: { addListener() {} } }, commands: { onCommand: { addListener() {} } },
-      scripting: {}, storage: { onChanged: { addListener() {} }, local: { get() {}, set() {} } }, contextMenus: { onClicked: { addListener() {} }, removeAll() {}, create() {}, update() {} } },
+    importScripts(...fs) { for (const f of fs) vm.runInContext(read('src/background/' + f), sctx); },
+    chrome: { runtime: { id: 'me', getURL: (p) => 'chrome-extension://me/' + p, onMessage: { addListener: (f) => { listener = f; } }, onInstalled: { addListener() {} }, onStartup: { addListener() {} } }, tabs: { onRemoved: { addListener() {} } }, windows: { onRemoved: { addListener() {} } }, action: { onClicked: { addListener() {} } }, commands: { onCommand: { addListener() {} } },
+      scripting: {}, storage: { onChanged: { addListener() {} }, local: { get() {}, set() {} }, session: { get: async () => ({}), set: async () => {}, remove: async () => {} } }, contextMenus: { onClicked: { addListener() {} }, removeAll() {}, create() {}, update() {} } },
     fetch: async (u, o) => { calls.push([u, o]); return sctx.__next(u); },
   });
   sctx.self = sctx;

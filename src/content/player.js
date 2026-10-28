@@ -3,7 +3,7 @@
   window.__glassMiniPlayer = true;
 
   const NMP = globalThis.__NMP;
-  const { MIN_DURATION, MARGIN, POS_KEY, SIZE_KEY, THEME_KEY, MODE_KEY, PREFS_KEY, VOL_KEY, MIN, MAX, CW, CH, DPR0, SITE_BUTTONS } = NMP.cfg;
+  const { MIN_DURATION, REMOTE_KEY, MARGIN, POS_KEY, SIZE_KEY, THEME_KEY, MODE_KEY, PREFS_KEY, VOL_KEY, MIN, MAX, CW, CH, DPR0, SITE_BUTTONS } = NMP.cfg;
   const { clamp, fmt, fmt2, pad2, strSeed, barcode, palette, DEFAULT_PAL } = NMP.util;
   const { themes: TH, skins: SK, viz, media: MEDIA } = NMP;
 
@@ -263,6 +263,55 @@ ${NMP.menuCss}
     if (!media) return;
     act(); render();
   };
+
+  // ---------- Ventana aparte (#16) ----------
+  // Mientras la ventana aparte de la extensión está abierta (mp_remote), esta pestaña informa de su medio al service worker y obedece sus
+  // órdenes. Sin ventana no se informa de nada: no hay temporizador ni mensajes.
+  let remoteOn = false, repT = 0, repKey = '';
+  const favicon = () => { const l = document.querySelector('link[rel~="icon"]'); try { return l ? new URL(l.getAttribute('href'), location.href).href : new URL('/favicon.ico', location.href).href; } catch (_) { return ''; } };
+  function report(force) {
+    if (!remoteOn) return;
+    const m = pickMedia();
+    if (!m) { if (repKey) { repKey = ''; try { chrome.runtime.sendMessage({ type: 'sess-end' }); } catch (_) { /* sin background */ } } return; }
+    const md = navigator.mediaSession && navigator.mediaSession.metadata;
+    const prevMedia = media; media = m; const art = bestArtwork(md); media = prevMedia; // bestArtwork mira el medio activo para el póster
+    const msg = {
+      type: 'sess', title: (md && md.title) || document.title || location.hostname, artist: (md && (md.artist || md.album)) || location.hostname.replace(/^www\./, ''),
+      host: location.hostname.replace(/^www\./, ''), fav: favicon(), art: /^https?:/i.test(art) ? art : '',
+      playing: !m.paused && !m.ended, live: m.duration === Infinity, d: isFinite(m.duration) ? m.duration : 0, t: m.currentTime || 0, rate: m.playbackRate || 1, muted: !!m.muted,
+      next: actions.has('nexttrack') || !!findSiteButton('next'), prev: actions.has('previoustrack') || !!findSiteButton('prev'),
+    };
+    const key = JSON.stringify([msg.title, msg.artist, msg.art, msg.playing, msg.live, Math.round(msg.d), msg.muted, msg.next, msg.prev, msg.rate]);
+    if (!force && key === repKey && !msg.playing) return; // parado y sin cambios: nada que decir
+    repKey = key;
+    try { chrome.runtime.sendMessage(msg); } catch (_) { /* sin background */ }
+  }
+  let repQ = 0;
+  const schedReport = () => { if (remoteOn && !repQ) repQ = setTimeout(() => { repQ = 0; report(true); }, 50); };
+  function setRemote(on) {
+    if (on === remoteOn) return;
+    remoteOn = on;
+    clearInterval(repT); repT = 0; repKey = '';
+    if (on) { repT = setInterval(() => report(false), 2000); report(true); }
+  }
+  ['play', 'pause', 'ended', 'loadedmetadata', 'durationchange', 'seeked', 'ratechange', 'volumechange'].forEach((ev) => document.addEventListener(ev, schedReport, true));
+  window.addEventListener('pagehide', () => { if (remoteOn && repKey) { try { chrome.runtime.sendMessage({ type: 'sess-end' }); } catch (_) { /* sin background */ } } });
+  // Órdenes de la ventana aparte (por el service worker): solo nombres conocidos; actúan sobre el medio que esta pestaña mostraría.
+  const RC = /^(play|pause|toggle|back|fwd|prev|next|mute|seek:(\d{1,9}(?:\.\d+)?))$/;
+  try {
+    chrome.runtime.onMessage.addListener((m, sender) => {
+      if (sender.id !== chrome.runtime.id || sender.tab || !m || m.type !== 'rc-cmd' || typeof m.cmd !== 'string') return;
+      const c = RC.exec(m.cmd);
+      if (!c) return;
+      media = pickMedia();
+      if (!media) return;
+      if (c[1] === 'play') { if (media.paused) media.play().catch(() => {}); }
+      else if (c[1] === 'pause') media.pause();
+      else if (c[2] != null) seekTo(+c[2]);
+      else ACT[c[1] === 'toggle' ? 'play' : c[1]]();
+      render(); schedReport();
+    });
+  } catch (_) { /* sin background */ }
 
   // Respaldo: ventana flotante con marco (Document PiP), la abre main.js y mueve aquí el host.
   document.addEventListener('__mp_pip', (e) => {
@@ -626,7 +675,8 @@ ${NMP.menuCss}
   window.addEventListener('resize', () => applyPos(savedPos));
 
   try {
-    chrome.storage.local.get([POS_KEY, SIZE_KEY, MODE_KEY, THEME_KEY, PREFS_KEY, VOL_KEY], (r) => {
+    chrome.storage.local.get([POS_KEY, SIZE_KEY, MODE_KEY, THEME_KEY, PREFS_KEY, VOL_KEY, REMOTE_KEY], (r) => {
+      if (r && r[REMOTE_KEY] === true) setRemote(true);
       if (r && r[PREFS_KEY]) applyPrefs(r[PREFS_KEY]);
       if (r && r[VOL_KEY] && typeof r[VOL_KEY] === 'object') volByHost = r[VOL_KEY];
       if (r && r[MODE_KEY]) fm = r[MODE_KEY];
@@ -639,6 +689,7 @@ ${NMP.menuCss}
       if (c[MODE_KEY] && c[MODE_KEY].newValue) applyMode(c[MODE_KEY].newValue);
       if (c[THEME_KEY] && c[THEME_KEY].newValue) applyTheme(c[THEME_KEY].newValue);
       if (c[PREFS_KEY]) applyPrefs(c[PREFS_KEY].newValue);
+      if (c[REMOTE_KEY]) setRemote(c[REMOTE_KEY].newValue === true);
       if (c[SIZE_KEY] && !rs && c[SIZE_KEY].newValue) setSize(c[SIZE_KEY].newValue.w, c[SIZE_KEY].newValue.h);
       if (c[POS_KEY] && mode !== 'drag') { savedPos = c[POS_KEY].newValue; applyPos(savedPos); } });
   } catch (_) { applyPos(null); }

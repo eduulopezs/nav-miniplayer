@@ -1,0 +1,22 @@
+:root { color-scheme: dark; --bg: #14151a; --fg: #eef0f3; --fg2: #a6a9b3; --line: rgba(255, 255, 255, .12); --chip: rgba(255, 255, 255, .08); }
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; background: var(--bg); color: var(--fg); font: 500 12px/1.3 "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif; overflow: hidden; }
+body { display: grid; grid-template-rows: auto minmax(0, 1fr); }
+#bar { display: flex; align-items: center; gap: 6px; padding: 6px 8px; border-bottom: 1px solid var(--line); min-width: 0; }
+#chips { display: flex; gap: 6px; flex: 1; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+#chips::-webkit-scrollbar { display: none; }
+.chip { all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: center; gap: 6px; max-width: 180px; padding: 4px 8px 4px 6px; border-radius: 999px; background: var(--chip); flex: none; }
+.chip:hover { background: rgba(255, 255, 255, .16); }
+.chip[aria-selected=true] { background: var(--fg); color: var(--bg); }
+.chip:focus-visible, #go:focus-visible { outline: 2px solid #fff; outline-offset: 1px; }
+.chip i { flex: none; width: 16px; height: 16px; border-radius: 50%; overflow: hidden; display: grid; place-items: center; background: rgba(128, 128, 128, .35); font: 700 10px/1 system-ui, sans-serif; font-style: normal; }
+.chip i img { width: 100%; height: 100%; object-fit: cover; }
+.chip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chip.paused span { opacity: .65; }
+#go { all: unset; box-sizing: border-box; cursor: pointer; flex: none; width: 28px; height: 28px; display: grid; place-items: center; border-radius: 8px; background: var(--chip); }
+#go:hover { background: rgba(255, 255, 255, .16); }
+#go[disabled] { opacity: .35; pointer-events: none; }
+#app { min-height: 0; }
+#empty { position: absolute; inset: 40px 0 0; display: grid; place-items: center; margin: 0; color: var(--fg2); padding: 16px; text-align: center; }
+#empty[hidden] { display: none; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }

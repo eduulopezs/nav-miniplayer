@@ -1,4 +1,4 @@
-importScripts('net-guard.js');
+importScripts('net-guard.js', 'sessions.js');
 const { isAllowedArtworkUrl, sniffImage, MAX_URL } = self.NMPNet;
 
 // Clic izquierdo: se ejecuta un script en la pestaña desde el propio clic, para que cuente como gesto del usuario
@@ -35,6 +35,7 @@ async function startCapture(tabId) {
 // Mostrar/ocultar (_execute_action) lo gestiona onClicked.
 const COMMANDS = new Set(['play-pause', 'seek-back', 'seek-fwd', 'prev-track', 'next-track']);
 chrome.commands.onCommand.addListener((cmd) => {
+  if (cmd === 'open-window') { self.NMPSess.openWindow(); return; }
   if (!COMMANDS.has(cmd)) return;
   chrome.tabs.query({ active: true, lastFocusedWindow: true }, (tabs) => {
     const tab = tabs && tabs[0];
@@ -142,6 +143,7 @@ chrome.runtime.onInstalled.addListener(() => {
     for (const [id, title] of Object.entries(MODES)) chrome.contextMenus.create({ id, type: 'radio', title, contexts: ['action'], checked: id === 'pip' });
     chrome.contextMenus.create({ id: 'sep', type: 'separator', contexts: ['action'] });
     chrome.contextMenus.create({ id: 'cap', type: 'checkbox', title: 'Visualizador con el audio real de la pestaña', contexts: ['action'], checked: false });
+    chrome.contextMenus.create({ id: 'win', title: 'Abrir ventana aparte (todas las pestañas)', contexts: ['action'] });
     chrome.contextMenus.create({ id: 'themes', title: 'Diseño', contexts: ['action'] });
     for (const [id, title] of Object.entries(THEMES)) chrome.contextMenus.create({ id: 'th:' + id, parentId: 'themes', type: 'radio', title, contexts: ['action'], checked: id === 'glass' });
     chrome.storage.local.get([MODE_KEY, THEME_KEY], (r) => syncMenu((r && r[MODE_KEY]) || 'pip', (r && r[THEME_KEY]) || 'glass'));
@@ -149,6 +151,7 @@ chrome.runtime.onInstalled.addListener(() => {
 });
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   const id = String(info.menuItemId);
+  if (id === 'win') { self.NMPSess.openWindow(); return; }
   if (id === 'cap') { // el clic en el menú también es un gesto del usuario: al activarla se captura ya la pestaña actual
     await chrome.storage.local.set({ [CAPTURE_KEY]: !!info.checked });
     if (info.checked && tab && tab.id != null) startCapture(tab.id);
