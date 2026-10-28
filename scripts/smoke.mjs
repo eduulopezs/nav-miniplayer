@@ -75,3 +75,23 @@ console.log('✓ medios remotos y política de selección');
   for (const h of U.DEFAULT_PAL) ok(U.contrast(U.rgbOf(h), bg) >= 3, `la paleta por defecto ${h} no llega a 3:1`);
   console.log('✓ paleta de la carátula: contraste mínimo 3:1');
 }
+
+// Storyboard de YouTube: el spec lo escribe la página, así que se valida; y la miniatura se calcula por hoja, columna y fila.
+{
+  const S = N.storyboard, ok = (cond, msg) => { if (!cond) throw new Error('storyboard: ' + msg); };
+  const base = 'https://i.ytimg.com/sb/abc/storyboard3_L$L/$N.jpg?sqp=xyz';
+  const spec = base + '|48#27#100#10#10#0#default#rs$AAA|80#45#100#10#10#0#M$M#rs$BBB|160#90#200#5#5#10000#M$M#rs$CCC';
+  const sb = S.parse(spec);
+  ok(sb && sb.level.w === 160 && sb.level.l === 2, 'elige el nivel más pequeño con al menos 100 px de ancho');
+  ok(S.sheetUrl(sb, 3) === 'https://i.ytimg.com/sb/abc/storyboard3_L2/M3.jpg?sqp=xyz&sigh=rs%24CCC', 'URL de la hoja');
+  // 200 miniaturas de 25 por hoja, una cada 10 s: el segundo 265 es la miniatura 26 -> hoja 1, primera celda.
+  let p = S.locate(sb, 265, 2000); ok(p.sheet === 1 && p.col === 1 && p.row === 0, 'hoja, columna y fila (' + JSON.stringify(p) + ')');
+  p = S.locate(sb, 5000, 2000); ok(p.sheet === 7 && p.col === 4 && p.row === 4, 'se acota a la última miniatura');
+  ok(S.parse('http://i.ytimg.com/x/$L/$N|160#90#10#5#5#0#M$M#s') === null, 'solo https');
+  ok(S.parse(base.replace('$N', 'n') + '|160#90#10#5#5#0#M$M#s') === null, 'la base debe llevar $L y $N');
+  ok(S.parse(base + '|160#90#10#5#5#0#../x#s') === null, 'nombre con caracteres raros');
+  ok(S.parse(base + '|99999#90#10#5#5#0#M$M#s') === null, 'tamaños fuera de rango');
+  ok(S.parse(base + '|160#90#10#5#5#abc#M$M#s') === null, 'intervalo no numérico');
+  ok(S.parse('x'.repeat(5000)) === null && S.parse(42) === null, 'longitud y tipo');
+  console.log('✓ storyboard: validación y cálculo de la miniatura');
+}

@@ -39,6 +39,21 @@
     }, (err) => { pipPending = false; pipEvent('error:' + (err && err.message || err)); });
   }
 
+  // Storyboard de YouTube (miniaturas de la barra): el spec solo es visible desde el mundo de la página. Se entrega como texto, sin referencias;
+  // el content script lo valida. Solo responde en YouTube y cuando el content script lo pide.
+  if (/(^|\.)youtube\.com$/.test(location.hostname)) {
+    document.addEventListener('__mp_sbq', () => {
+      try {
+        const pl = document.getElementById('movie_player');
+        let r = pl && typeof pl.getPlayerResponse === 'function' && pl.getPlayerResponse();
+        if (!r) { r = window.ytInitialPlayerResponse; if (r && r.videoDetails && r.videoDetails.videoId !== new URLSearchParams(location.search).get('v')) r = null; } // tras navegar sin recargar, esa variable es del vídeo anterior
+        const spec = r && r.storyboards && r.storyboards.playerStoryboardSpecRenderer && r.storyboards.playerStoryboardSpecRenderer.spec;
+        const id = r && r.videoDetails && r.videoDetails.videoId;
+        document.dispatchEvent(new CustomEvent('__mp_sb', { detail: typeof spec === 'string' && typeof id === 'string' ? JSON.stringify({ id, spec }) : '' }));
+      } catch (_) { /* el sitio decide */ }
+    });
+  }
+
   // Medios que el content script no ve: sin insertar (new Audio()) o dentro de un shadow DOM, abierto o cerrado.
   // Se registran al llamar a play() y se publica su estado (sin referencias: solo números y banderas) por un evento.
   const MAX_TRACKED = 16;

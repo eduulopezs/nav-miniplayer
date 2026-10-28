@@ -30,6 +30,11 @@
     return true;
   }
 
+  // Las hojas del storyboard de YouTube solo se piden a los servidores de miniaturas de YouTube, por https.
+  function isStoryboardUrl(input) {
+    return isAllowedArtworkUrl(input) && /^https:\/\/([\w-]+\.)*ytimg\.com[:/]/i.test(input);
+  }
+
   // Identifica el formato por sus primeros bytes (no se fía del Content-Type). SVG queda fuera a propósito.
   function sniffImage(b) {
     if (!b || b.length < 12) return null;
@@ -42,5 +47,5 @@
     return null;
   }
 
-  g.NMPNet = { isAllowedArtworkUrl, sniffImage, MAX_URL };
+  g.NMPNet = { isAllowedArtworkUrl, isStoryboardUrl, sniffImage, MAX_URL };
 })(typeof self !== 'undefined' ? self : globalThis);

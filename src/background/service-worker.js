@@ -1,5 +1,5 @@
 importScripts('net-guard.js', 'sessions.js');
-const { isAllowedArtworkUrl, sniffImage, MAX_URL } = self.NMPNet;
+const { isAllowedArtworkUrl, isStoryboardUrl, sniffImage, MAX_URL } = self.NMPNet;
 
 // Clic izquierdo: se ejecuta un script en la pestaña desde el propio clic, para que cuente como gesto del usuario
 // y el navegador deje abrir la ventana flotante al momento. Corre en el mundo aislado de la extensión (el mismo
@@ -70,8 +70,8 @@ async function readCapped(res, max) {
   for (const c of chunks) { out.set(c, off); off += c.length; }
   return out;
 }
-async function fetchArtwork(url) {
-  if (!isAllowedArtworkUrl(url)) throw new Error('URL no permitida');
+async function fetchArtwork(url, extra = () => true) {
+  if (!isAllowedArtworkUrl(url) || !extra(url)) throw new Error('URL no permitida');
   const ctl = new AbortController();
   const timer = setTimeout(() => ctl.abort(), ART_TIMEOUT_MS);
   try {
@@ -112,6 +112,7 @@ chrome.runtime.onMessage.addListener((m, sender) => {
   if (sender.id === chrome.runtime.id && !sender.tab && m && m.type === 'cap-idle') chrome.offscreen.closeDocument().catch(() => {});
 });
 const inflight = new Set(); // una descarga a la vez por pestaña
+const inflightSb = new Set(); // ídem para las hojas del storyboard
 chrome.runtime.onMessage.addListener((m, sender, reply) => {
   const tabId = sender.tab && sender.tab.id;
   if (sender.id !== chrome.runtime.id || tabId == null || !m) return;
@@ -120,6 +121,13 @@ chrome.runtime.onMessage.addListener((m, sender, reply) => {
   if (m.type === 'font') {
     if (typeof m.file !== 'string' || !FONT_FILE.test(m.file)) return;
     readFont(m.file).then((data) => reply({ data }), () => reply({}));
+    return true;
+  }
+  if (m.type === 'sb') {
+    if (typeof m.url !== 'string' || m.url.length > MAX_URL) return;
+    if (inflightSb.has(tabId)) { reply({ busy: true }); return; }
+    inflightSb.add(tabId);
+    fetchArtwork(m.url, isStoryboardUrl).then((data) => reply({ data }), () => reply({})).finally(() => inflightSb.delete(tabId));
     return true;
   }
   if (m.type !== 'img' || typeof m.url !== 'string' || m.url.length > MAX_URL) return;

@@ -30,6 +30,11 @@
   .vol-r { width: var(--size-vol); height: var(--size-target); flex: none; min-width: 0; accent-color: var(--vol-c, #fff); cursor: pointer; touch-action: none; }
   .vol-r:focus-visible { outline: var(--size-ring) solid var(--focus); outline-offset: var(--size-ring-offset); }
   .vol-r:disabled { opacity: var(--opacity-disabled); pointer-events: none; }
+  /* Miniatura bajo el puntero (storyboard de YouTube): la coloca el script justo encima de la barra. */
+  .sb { display: none; position: absolute; z-index: 8; overflow: hidden; pointer-events: none; border-radius: var(--space-3); box-shadow: 0 2px 10px rgba(0,0,0,.45); background: var(--scrim-toast); }
+  .sb.on { display: block; }
+  .sb i { position: absolute; inset: 0; }
+  .sb b { position: absolute; left: 50%; bottom: var(--space-1); transform: translateX(-50%); padding: 1px var(--space-2); border-radius: var(--radius-pill); font: var(--weight-strong) var(--type-xs)/1.3 var(--font-sans); color: var(--on-overlay); background: var(--scrim-toast); font-variant-numeric: tabular-nums; }
   .probe { position: absolute; width: 0; height: 0; overflow: hidden; visibility: hidden; }
   .probe::after { content: "Compacto"; }
   @container (height < 64px) { .probe::after { content: "Pastilla"; } }

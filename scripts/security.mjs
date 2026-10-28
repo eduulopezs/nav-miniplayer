@@ -9,7 +9,7 @@ const read = (f) => readFileSync(join(root, f), 'utf8');
 const ctx = vm.createContext({ URL });
 ctx.self = ctx;
 vm.runInContext(read('src/background/net-guard.js'), ctx);
-const { isAllowedArtworkUrl: ok, sniffImage } = ctx.NMPNet;
+const { isAllowedArtworkUrl: ok, isStoryboardUrl: sbOk, sniffImage } = ctx.NMPNet;
 
 let fails = 0;
 const t = (name, cond) => { if (!cond) fails++; console.log(`${cond ? '✓' : '✗'} ${name}`); };
@@ -41,6 +41,7 @@ t('el puente no deja banderas globales', !/window\.__\w+/.test(bridge));
 t('toggle ya no pasa por un evento del DOM', !/__mp_toggle/.test(player + sw));
 t('el service worker no envía cookies ni sigue redirecciones', /credentials: 'omit'/.test(sw) && /redirect: 'error'/.test(sw));
 t('el service worker exige pestaña emisora', /sender\.tab/.test(sw));
+t('las hojas del storyboard solo salen de ytimg.com por https', sbOk('https://i.ytimg.com/sb/a/storyboard3_L2/M0.jpg?sqp=x&sigh=y') && sbOk('https://i9.ytimg.com/sb/a/b.jpg') && !sbOk('http://i.ytimg.com/a.jpg') && !sbOk('https://ytimg.com.evil.example/a.jpg') && !sbOk('https://evil.example/ytimg.com/a.jpg') && !sbOk('https://cdn.example.org/a.jpg') && !sbOk('https://x.ytimg.com@evil.example/a.jpg'));
 t('el service worker valida la URL antes de descargar', /isAllowedArtworkUrl\(url\)/.test(sw));
 t('el estado PiP solo cambia si la extensión lo pidió', /pipAsked/.test(player) && /!pipAsked \|\| !\(d === 'open'/.test(player));
 const off = read('src/offscreen/offscreen.js');
@@ -75,6 +76,9 @@ t('las acciones anunciadas por la página se filtran', /KNOWN_ACTIONS/.test(play
   t('la petición va sin cookies ni redirecciones', calls[0][1].credentials === 'omit' && calls[0][1].redirect === 'error' && calls[0][1].referrerPolicy === 'no-referrer');
   const n = calls.length;
   r = await ask('http://127.0.0.1/a.png'); t('IP privada: respuesta vacía y sin petición', !r.data && calls.length === n);
+  const askSb = (url) => new Promise((done) => { const r = listener({ type: 'sb', url }, { id: 'me', tab: { id: 1 } }, done); if (r !== true) setTimeout(() => done('sin respuesta'), 20); });
+  const m = calls.length; r = await askSb('https://cdn.example.org/a.png'); t('storyboard: otro servidor, sin petición', !r.data && calls.length === m);
+  r = await askSb('https://i.ytimg.com/sb/a/b.jpg?sigh=1'); await new Promise((d) => setTimeout(d, 5)); r = await askSb('https://i.ytimg.com/sb/a/b.jpg?sigh=1'); t('storyboard: descarga una hoja de ytimg.com', r.data && r.data.startsWith('data:image/png;base64,'));
   r = await ask('https://cdn.example.org/a.png', { id: 'otro', tab: { id: 1 } }); t('rechaza remitente que no es la extensión', r === 'sin respuesta');
   r = await ask('https://cdn.example.org/a.png', { id: 'me' }); t('rechaza mensajes sin pestaña', r === 'sin respuesta');
   sctx.__next = () => mkRes(Uint8Array.from(str('<svg xmlns="http://www.w3.org/2000/svg"></svg>')));
