@@ -22,7 +22,7 @@ async function startCapture(tabId) {
     } catch (e) { if (!/single offscreen/i.test(String(e && e.message))) throw e; }
     const r = await chrome.runtime.sendMessage({ target: 'offscreen', type: 'cap-start', tabId, streamId });
     if (r && r.ok) chrome.tabs.sendMessage(tabId, { type: 'viz-connect' }).catch(() => {});
-  } catch (_) { /* pestaña no capturable (chrome://, ya capturada...): sigue el visualizador simulado */ }
+  } catch (e) { console.warn('[Nav Miniplayer] captura de audio no disponible:', e && e.message); /* pestaña no capturable (chrome://, ya capturada...): sigue el visualizador simulado */ }
 }
 
 // Atajos de teclado (chrome.commands, configurables en chrome://extensions/shortcuts): se ejecutan sobre la pestaña activa.
@@ -141,9 +141,13 @@ chrome.runtime.onInstalled.addListener(() => {
     chrome.storage.local.get([MODE_KEY, THEME_KEY], (r) => syncMenu((r && r[MODE_KEY]) || 'pip', (r && r[THEME_KEY]) || 'glass'));
   });
 });
-chrome.contextMenus.onClicked.addListener((info) => {
+chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   const id = String(info.menuItemId);
-  if (id === 'cap') { chrome.storage.local.set({ [CAPTURE_KEY]: !!info.checked }); return; }
+  if (id === 'cap') { // el clic en el menú también es un gesto del usuario: al activarla se captura ya la pestaña actual
+    await chrome.storage.local.set({ [CAPTURE_KEY]: !!info.checked });
+    if (info.checked && tab && tab.id != null) startCapture(tab.id);
+    return;
+  }
   if (MODES[id]) chrome.storage.local.set({ [MODE_KEY]: id });
   else if (id.startsWith('th:') && THEMES[id.slice(3)]) chrome.storage.local.set({ [THEME_KEY]: id.slice(3) });
 });

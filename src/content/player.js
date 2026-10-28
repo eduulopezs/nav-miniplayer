@@ -411,8 +411,8 @@ ${NMP.menuCss}
     } catch (_) { /* sin background */ }
   }
   const vizDisconnect = () => { if (vizPort) { try { vizPort.disconnect(); } catch (_) { /* ya cerrado */ } vizPort = null; } };
-  let wantViz = false;
-  try { chrome.runtime.onMessage.addListener((m, sender) => { if (sender.id === chrome.runtime.id && !sender.tab && m && m.type === 'viz-connect' && wantViz) vizConnect(); }); } catch (_) { /* sin background */ }
+  let wantViz = false, vizPending = 0; // vizPending: el aviso de conexión puede llegar antes de que el reproductor se muestre
+  try { chrome.runtime.onMessage.addListener((m, sender) => { if (sender.id === chrome.runtime.id && !sender.tab && m && m.type === 'viz-connect') { if (wantViz) vizConnect(); else vizPending = Date.now(); } }); } catch (_) { /* sin background */ }
   const vizStart = () => { if (!vizT) { vizLast = performance.now(); vizT = setInterval(vizTick, 33); } };
   function vizStop() { wantViz = false; vizDisconnect(); if (vizT) { clearInterval(vizT); vizT = 0; } }
 
@@ -438,7 +438,8 @@ ${NMP.menuCss}
     const visible = !!media && !dismissed && !fs && !vp.active;
     card.classList.toggle('show', visible || pip);
     if (visible || pip) {
-      wantViz = true; vizStart();
+      if (!wantViz) { wantViz = true; if (vizPending && Date.now() - vizPending < 4000) vizConnect(); }
+      vizPending = 0; vizStart();
       if (fontSkin !== theme) { const t = fontSkin = theme; NMP.loadFonts(t, () => { if (theme === t) requestAnimationFrame(layout); }); }
       if (host.ownerDocument !== document) NMP.syncFonts(host.ownerDocument);
     } else vizStop();
