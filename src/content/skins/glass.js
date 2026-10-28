@@ -8,7 +8,7 @@ SKINS.glass = { label: 'Glassware', tpl: () => `
   <div class="gl-wrap">
     <div class="gl-cov" aria-hidden="true"></div>
     <div class="gl-meta"><div class="gl-title" data-t="title"></div><div class="gl-artist" data-t="artist"></div></div>
-    <div class="gl-chips"><button data-act="mode" title="Pasar a Mini" aria-label="Pasar a Mini"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"/><rect x="12" y="11" width="6" height="5" rx="1.4" fill="currentColor" stroke="none"/></svg></button><button data-act="hide" title="Ocultar" aria-label="Ocultar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7l10 10M17 7L7 17"/></svg></button></div>
+    <div class="gl-chips"><button data-act="hide" title="Ocultar" aria-label="Ocultar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7l10 10M17 7L7 17"/></svg></button></div>
     <div class="gl-prog"><span class="gl-t" data-v="cur">0:00</span><div class="gl-bar" role="slider" tabindex="0" data-bar aria-label="Progreso" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i></i></div><span class="gl-t r" data-v="dur">0:00</span></div>
     <div class="gl-ctl">
       <button class="gl-b pv" data-act="prev" title="Anterior" aria-label="Anterior"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 5.5v13" /><path d="M19 6v12l-9.5-6z" fill="currentColor"/></svg></button>

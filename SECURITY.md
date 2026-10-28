@@ -4,7 +4,7 @@ La extensión se inyecta en todas las páginas (`<all_urls>`) y procesa datos qu
 
 ## Qué se protege
 1. **Red privilegiada.** El service worker puede descargar cualquier origen (`host_permissions`). La página no debe poder usarlo para leer recursos que ella no puede leer (red local, servicios en `localhost`, metadatos cloud, intranets).
-2. **Contenido del reproductor.** Con la carátula pintada en el lienzo del modo Mini, un shadow DOM abierto permitiría a la página leer esos píxeles.
+2. **Contenido del reproductor.** Con la carátula y los datos de la pista dentro de un shadow DOM abierto, la página podría leerlos.
 3. **Capacidades de la extensión.** La página no debe poder ordenar acciones de la extensión.
 
 ## Controles

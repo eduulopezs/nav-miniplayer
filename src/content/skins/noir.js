@@ -14,7 +14,7 @@ SKINS.noir = { label: 'Noir', tpl: () => `
         <div class="nr-cell"><label>Pista</label><b class="nr-title" data-t="title"></b></div>
         <div class="nr-cell"><label>Artista</label><span class="nr-artist" data-t="artist"></span></div>
       </div>
-      <div class="nr-chips"><button data-act="mode" title="Pasar a Mini" aria-label="Pasar a Mini"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><rect x="3" y="5" width="18" height="14"/><rect x="12" y="11" width="6" height="5" fill="currentColor"/></svg></button><button data-act="hide" title="Ocultar" aria-label="Ocultar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+      <div class="nr-chips"><button data-act="hide" title="Ocultar" aria-label="Ocultar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
       <div class="nr-cells"><div class="nr-cell"><label>N°</label><span data-t="idx">01/04</span></div><div class="nr-cell"><label>Restante</label><span data-v="rem2">-00:00</span></div><div class="nr-cell"><label>Avance</label><span data-v="pct">0%</span></div></div>
       <div class="nr-code" role="slider" tabindex="0" data-bar aria-label="Progreso" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i></i></div>
       <div class="nr-foot">

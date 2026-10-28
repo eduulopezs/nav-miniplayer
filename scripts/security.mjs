@@ -42,7 +42,7 @@ t('toggle ya no pasa por un evento del DOM', !/__mp_toggle/.test(player + sw));
 t('el service worker no envía cookies ni sigue redirecciones', /credentials: 'omit'/.test(sw) && /redirect: 'error'/.test(sw));
 t('el service worker exige pestaña emisora', /sender\.tab/.test(sw));
 t('el service worker valida la URL antes de descargar', /isAllowedArtworkUrl\(url\)/.test(sw));
-t('el estado PiP solo cambia si la extensión lo pidió', /pipAsked/.test(player) && /d === 'open' \? !pipAsked/.test(player));
+t('el estado PiP solo cambia si la extensión lo pidió', /pipAsked/.test(player) && /!pipAsked \|\| !\(d === 'open'/.test(player));
 const off = read('src/offscreen/offscreen.js');
 t('la captura exige el ajuste opt-in y el clic en el icono', /mp_capture/.test(sw) && /startCapture\(tab\.id\)/.test(sw));
 t('el offscreen solo atiende a la extensión y rechaza mensajes de pestañas', /sender\.id !== chrome\.runtime\.id \|\| sender\.tab/.test(off) && /port\.sender\.id !== chrome\.runtime\.id/.test(off));

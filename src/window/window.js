@@ -15,7 +15,7 @@
   root.innerHTML = `<style>${NMP.tokens.css}
 ${NMP.css}
   .card.wnd { cursor: default; }
-  .wnd [data-act=mode], .wnd [data-act=hide] { display: none !important; }
+  .wnd [data-act=hide] { display: none !important; }
   </style><div class="card pip show wnd" role="region" aria-label="Reproductor" tabindex="0"><div class="toast"></div></div>`;
   const card = root.querySelector('.card');
   const qa = (sel) => card.querySelectorAll(sel);

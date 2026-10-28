@@ -23,21 +23,14 @@ const lum = ([r, g, b]) => { const f = (v) => { v /= 255; return v <= .03928 ? v
 const ratio = (fg, bg) => { const [a, b] = [lum(over(fg, bg)), lum(parse(bg))].sort((x, y) => y - x); return (a + .05) / (b + .05); };
 const hex = ([r, g, b]) => '#' + [r, g, b].map((v) => Math.round(v).toString(16).padStart(2, '0')).join('');
 
-// [tema, texto, token del texto, token del fondo, mínimo]; 4.5 texto normal, 3 texto grande / componentes de interfaz.
-const pairs = [
-  ['glass', 'título', 'text', 'bg-a', 4.5], ['glass', 'título', 'text', 'bg-b', 4.5],
-  ['glass', 'artista', 'mini-fg-2', 'bg-a', 4.5], ['glass', 'tiempo', 'mini-time', 'bg-a', 4.5],
-  ['noir', 'título', 'mini-fg', 'mini-bg-a', 4.5], ['noir', 'artista', 'mini-fg-2', 'mini-bg-a', 4.5], ['noir', 'tiempo', 'mini-time', 'mini-bg-a', 4.5],
-  ['crt', 'título', 'mini-fg', 'mini-bg-a', 4.5], ['crt', 'artista', 'mini-fg-2', 'mini-bg-a', 4.5], ['crt', 'tiempo', 'mini-time', 'mini-bg-a', 4.5],
-  ['metal', 'título', 'mini-fg', 'mini-bg-a', 4.5], ['metal', 'artista', 'mini-fg-2', 'mini-bg-a', 4.5], ['metal', 'tiempo', 'mini-time', 'mini-bg-a', 4.5],
-];
+// [tema, texto, token del texto, token del fondo (o función), mínimo]; 4.5 texto normal, 3 texto grande / componentes de interfaz.
+const pairs = [];
 
-// Pares de los tokens compartidos: anillo de foco (componente de interfaz, 3:1; WCAG 1.4.11 y 2.4.11) y texto del aviso y del toast sobre su velo, que se compone sobre el fondo del diseño.
-const base = (k) => k['mini-bg-a'] ?? k['bg-a'];
+// Pares de los tokens compartidos: anillo de foco (componente de interfaz, 3:1; WCAG 1.4.11 y 2.4.11) y texto del toast sobre su velo, que se compone sobre el fondo del diseño.
+const base = (k) => k['bg-b']; // fondo sobre el que se compone la tarjeta (el que usa la paleta de la carátula)
 const veil = (key) => (k) => hex(over(k[key], base(k)));
 for (const th of ['glass', 'noir', 'crt', 'metal']) {
   pairs.push([th, 'foco', 'focus', base, 3]);
-  pairs.push([th, 'aviso', 'on-overlay', veil('scrim-hint'), 4.5]);
   pairs.push([th, 'toast', 'on-overlay', veil('scrim-toast'), 4.5]);
 }
 

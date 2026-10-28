@@ -9,7 +9,7 @@ after(async () => { await env.close(); await server.close(); });
 
 const near = (v, expected, tol, msg) => assert.ok(Math.abs(v - expected) <= tol, `${msg}: ${v} no está cerca de ${expected} (±${tol})`);
 const vol = (p) => p.media(() => document.getElementById('a').volume);
-const reset = () => env.sw.evaluate(() => chrome.storage.local.remove(['mp_prefs', 'mp_vol', 'mp_size', 'mp_pos']));
+const reset = () => env.sw.evaluate(() => chrome.storage.local.remove(['mp_prefs', 'mp_vol']));
 
 test('la rueda sobre la tarjeta cambia el volumen en pasos de 5 %', async () => {
   await reset();
@@ -86,15 +86,4 @@ test('tooltip con el tiempo bajo el puntero en la barra', async () => {
   await p.page.mouse.move(b.x + b.w / 2 + 1, b.y + b.h / 2);
   await p.waitFor(async () => /^0:(1[89]|2[0-2])$/.test(await p.attr('bar', 'title') || ''));
   await p.page.close();
-});
-
-test('auto mostrar: la tarjeta aparece sola al empezar a sonar', async () => {
-  await reset();
-  await env.sw.evaluate(() => chrome.storage.local.set({ mp_prefs: { skip: 10, autoshow: true, autohide: 0 } }));
-  const p = await openPage(env, server);
-  assert.equal((await p.read()).shown, false);
-  await p.play();
-  await p.waitFor(async () => (await p.read()).shown);
-  await p.page.close();
-  await reset();
 });

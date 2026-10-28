@@ -1,5 +1,5 @@
 // Genera src/content/tokens.js a partir de design/tokens.json.
-// Resuelve '{primitivo}' y '{primitivo}@alfa' a valores concretos (el lienzo de Mini no entiende var()).
+// Resuelve '{primitivo}' y '{primitivo}@alfa' a valores concretos.
 // Uso: node scripts/build-tokens.mjs [--check]  (--check falla si tokens.js no está al día).
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -28,7 +28,7 @@ for (const [name, tokens] of Object.entries(src.themes)) {
   themes[name] = Object.fromEntries(Object.entries(tokens).map(([k, v]) => [k, resolve(v, `${name}.${k}`)]));
 }
 
-const decl = (o) => Object.entries(o).filter(([k]) => !k.startsWith('mini-')).map(([k, v]) => `--${k}: ${v};`).join(' ');
+const decl = (o) => Object.entries(o).map(([k, v]) => `--${k}: ${v};`).join(' ');
 const shared = Object.fromEntries(Object.entries(src.shared).map(([k, v]) => [k, resolve(v, `shared.${k}`)]));
 const css = [
   `.card { ${decl(shared)} ${decl(themes.glass)} }`,

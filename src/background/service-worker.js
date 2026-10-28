@@ -116,6 +116,7 @@ chrome.runtime.onMessage.addListener((m, sender, reply) => {
   const tabId = sender.tab && sender.tab.id;
   if (sender.id !== chrome.runtime.id || tabId == null || !m) return;
   if (m.type === 'mp-frame' || m.type === 'mp-cmd') return void relayFrame(m, sender, tabId);
+  if (m.type === 'open-window') return void self.NMPSess.openWindow(); // la pestaña lo pide cuando no puede abrir la ventana con marco
   if (m.type === 'font') {
     if (typeof m.file !== 'string' || !FONT_FILE.test(m.file)) return;
     readFont(m.file).then((data) => reply({ data }), () => reply({}));
@@ -128,25 +129,21 @@ chrome.runtime.onMessage.addListener((m, sender, reply) => {
   return true;
 });
 
-// Clic derecho en el icono: elegir el tipo de ventana y (para desarrollo) el diseño.
-const MODE_KEY = 'mp_mode';
+// Clic derecho en el icono: captura de audio, ventana aparte y (para desarrollo) el diseño.
 const THEME_KEY = 'mp_theme';
-const MODES = { pip: 'Mini · ventana flotante sin marco', win: 'Ventana · flotante con marco y controles', card: 'Tarjeta · dentro de la página' };
 const THEMES = { glass: 'Glassware', noir: 'Noir', crt: 'Terminal CRT', metal: 'Liquid Metal' };
-const syncMenu = (mode, theme) => {
+const syncMenu = (theme) => {
   const up = (id, checked) => chrome.contextMenus.update(id, { checked }, () => void chrome.runtime.lastError);
-  if (mode) for (const id of Object.keys(MODES)) up(id, id === mode);
   if (theme) for (const id of Object.keys(THEMES)) up('th:' + id, id === theme);
 };
 chrome.runtime.onInstalled.addListener(() => {
+  chrome.storage.local.remove(['mp_mode', 'mp_pos', 'mp_size']); // ajustes de los modos Mini y Tarjeta, ya retirados
   chrome.contextMenus.removeAll(() => {
-    for (const [id, title] of Object.entries(MODES)) chrome.contextMenus.create({ id, type: 'radio', title, contexts: ['action'], checked: id === 'pip' });
-    chrome.contextMenus.create({ id: 'sep', type: 'separator', contexts: ['action'] });
     chrome.contextMenus.create({ id: 'cap', type: 'checkbox', title: 'Visualizador con el audio real de la pestaña', contexts: ['action'], checked: false });
     chrome.contextMenus.create({ id: 'win', title: 'Abrir ventana aparte (todas las pestañas)', contexts: ['action'] });
     chrome.contextMenus.create({ id: 'themes', title: 'Diseño', contexts: ['action'] });
     for (const [id, title] of Object.entries(THEMES)) chrome.contextMenus.create({ id: 'th:' + id, parentId: 'themes', type: 'radio', title, contexts: ['action'], checked: id === 'glass' });
-    chrome.storage.local.get([MODE_KEY, THEME_KEY], (r) => syncMenu((r && r[MODE_KEY]) || 'pip', (r && r[THEME_KEY]) || 'glass'));
+    chrome.storage.local.get(THEME_KEY, (r) => syncMenu((r && r[THEME_KEY]) || 'glass'));
   });
 });
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
@@ -157,7 +154,6 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     if (info.checked && tab && tab.id != null) startCapture(tab.id);
     return;
   }
-  if (MODES[id]) chrome.storage.local.set({ [MODE_KEY]: id });
-  else if (id.startsWith('th:') && THEMES[id.slice(3)]) chrome.storage.local.set({ [THEME_KEY]: id.slice(3) });
+  if (id.startsWith('th:') && THEMES[id.slice(3)]) chrome.storage.local.set({ [THEME_KEY]: id.slice(3) });
 });
-chrome.storage.onChanged.addListener((c) => syncMenu(c[MODE_KEY] && c[MODE_KEY].newValue, c[THEME_KEY] && c[THEME_KEY].newValue));
+chrome.storage.onChanged.addListener((c) => syncMenu(c[THEME_KEY] && c[THEME_KEY].newValue));
