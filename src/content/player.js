@@ -131,18 +131,21 @@ ${NMP.menuCss}
   };
 
   // skip: segundos de los saltos.
-  const prefs = { skip: 10 };
+  const prefs = { skip: 10, blur: false };
   let volByHost = {}; // volumen recordado por sitio
   const HOST_KEY = location.hostname;
   const applyPrefs = (v) => {
     if (!v || typeof v !== 'object') return;
     if ([5, 10, 15, 30].includes(v.skip)) prefs.skip = v.skip;
+    if (typeof v.blur === 'boolean') prefs.blur = v.blur;
     applySkip();
   };
   const setPref = (k, v) => { prefs[k] = v; applySkip(); try { chrome.storage.local.set({ [PREFS_KEY]: { ...prefs } }); } catch (_) { /* contexto invalidado */ } };
   // Los botones de salto de cada diseño muestran los segundos (data-skn) y los dicen en su etiqueta.
   function applySkip() {
     const n = prefs.skip;
+    card.classList.toggle('cov-blur', prefs.blur);
+    qa('[data-act=cover]').forEach((b) => b.setAttribute('aria-pressed', String(prefs.blur)));
     qa('[data-skn]').forEach((e) => { e.textContent = (e.dataset.skn || '') + n; });
     qa('[data-act=back]').forEach((b) => { b.title = `Retroceder ${n} s`; b.setAttribute('aria-label', `Retroceder ${n} segundos`); });
     qa('[data-act=fwd]').forEach((b) => { b.title = `Avanzar ${n} s`; b.setAttribute('aria-label', `Avanzar ${n} segundos`); });
@@ -175,6 +178,7 @@ ${NMP.menuCss}
       if (actions.has('previoustrack')) send('previoustrack'); else findSiteButton('prev').click();
     },
     next() { if (actions.has('nexttrack')) send('nexttrack'); else findSiteButton('next')?.click(); },
+    cover() { setPref('blur', !prefs.blur); },
     mute() { if (media) { media.muted = !media.muted; render(); } },
     hide() { if (pip) send('__pip'); else { dismissed = true; render(); } },
   };
@@ -189,7 +193,9 @@ ${NMP.menuCss}
   // Sobre un botón, Espacio/Intro los gestiona el propio botón.
   card.addEventListener('keydown', (e) => {
     if (e.altKey || e.ctrlKey || e.metaKey || !media) return;
-    const onButton = e.composedPath()[0].tagName === 'BUTTON'; // sin instanceof: en la ventana flotante es otro documento
+    const tag = e.composedPath()[0].tagName;
+    if (tag === 'INPUT' && e.key !== 'Escape') return; // el regulador de volumen usa las flechas
+    const onButton = tag === 'BUTTON'; // sin instanceof: en la ventana flotante es otro documento
     if ((e.key === ' ' || e.key === 'Enter') && onButton) return;
     const live = media.duration === Infinity;
     if (e.key === ' ' || e.key === 'k') ACT.play();
@@ -222,6 +228,12 @@ ${NMP.menuCss}
     isPip: () => pip,
   });
   card.addEventListener('contextmenu', (e) => { if (media && menu.open()) e.preventDefault(); });
+  // Regulador de volumen de la tarjeta: mismo camino que la rueda y el menú (recuerda el volumen por sitio).
+  card.addEventListener('input', (e) => {
+    const r = e.target.closest && e.target.closest('[data-vol]');
+    if (!r) return;
+    setVolume(+r.value / 100); render(); if (menu.isOpen()) menu.sync();
+  });
   // Rueda sobre la tarjeta: volumen en pasos de 5 %.
   card.addEventListener('wheel', (e) => {
     if (!tunable()) return;
@@ -418,6 +430,8 @@ ${NMP.menuCss}
     }
     card.classList.toggle('paused', !playing);
     card.classList.toggle('muted', !!media.muted);
+    const vol = tunable() ? Math.round((media.muted ? 0 : media.volume) * 100) : 100;
+    qa('[data-vol]').forEach((r) => { if (+r.value !== vol) r.value = vol; r.disabled = !tunable(); r.setAttribute('aria-valuetext', vol + '%'); });
     card.classList.toggle('loading', playing && media.readyState < 3); // reproduciendo pero sin datos suficientes
     qa('[data-act=back],[data-act=fwd]').forEach((b) => { b.disabled = live; });
     const canNext = actions.has('nexttrack') || !!findSiteButton('next');

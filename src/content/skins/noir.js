@@ -5,7 +5,7 @@
 
 SKINS.noir = { label: 'Noir', tpl: () => `
   <div class="nr-wrap">
-    <div class="nr-art" aria-hidden="true"><canvas class="nr-ridge" data-viz="ridge"></canvas></div><div class="nr-shade"></div>
+    <button class="nr-art" data-act="cover" aria-pressed="false" aria-label="Difuminar carátula" title="Difuminar carátula"><canvas class="nr-ridge" data-viz="ridge"></canvas></button><div class="nr-shade"></div>
     <div class="nr-no" aria-hidden="true"><small>PISTA</small><span data-t="no">01</span></div>
     <div class="nr-body">
       <div class="nr-stripes" aria-hidden="true"></div>
@@ -28,7 +28,8 @@ SKINS.noir = { label: 'Noir', tpl: () => `
         </div>
       </div>
       <div class="nr-ext">
-        <button class="nr-b vl" data-act="mute" title="Silenciar" aria-label="Silenciar o activar sonido"><span class="nr-vol"><span class="ic ic-vol"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z" fill="currentColor"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></svg></span><span class="ic ic-mute"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z" fill="currentColor"/><path d="M16 9.5l5 5M21 9.5l-5 5"/></svg></span><em></em></span></button>
+        <button class="nr-b vl" data-act="mute" title="Silenciar" aria-label="Silenciar o activar sonido"><span class="nr-vol"><span class="ic ic-vol"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z" fill="currentColor"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></svg></span><span class="ic ic-mute"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z" fill="currentColor"/><path d="M16 9.5l5 5M21 9.5l-5 5"/></svg></span></span></button>
+        <input type="range" class="vol-r" data-vol min="0" max="100" step="1" value="100" aria-label="Volumen">
       </div>
     </div>
   </div>` };
@@ -116,7 +117,7 @@ SKINS.noir.viz = {
 .nr-b svg { width: 50%; height: 50%; }
 .nr-b.pl { background: var(--rd); color: var(--bk); box-shadow: none; width: calc(var(--bs, 30px) * 1.3); clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px)); }
 .nr-b.pl:hover { background: #ff5a5a; }
-.nr-ext { grid-area: ext; display: none; gap: 6px; }
+.nr-ext { grid-area: ext; display: none; align-items: center; gap: 6px; --vol-c: var(--pp); }
 .nr-ext .nr-b { width: auto; min-width: var(--bs, 30px); padding: 0 10px; }
 .nr-vol { display: flex; align-items: center; gap: 6px; } .nr-vol svg { width: 13px; height: 13px; }
 .card:not(.muted) .nr-vol .ic-mute svg, .card.muted .nr-vol .ic-vol svg { position: absolute; }
@@ -161,6 +162,7 @@ SKINS.noir.viz = {
 }
 @container (64px <= height < 140px) and (width < 540px) { .nr-b.bk, .nr-b.fw { display: none; } }
 @container (64px <= height < 140px) and (width >= 540px) { .nr-b.bk, .nr-b.fw { display: grid; } }
+@container (64px <= height < 140px) and (width >= 640px) { .nr-body { grid-template-columns: minmax(0, 1fr) auto auto; grid-template-areas: "meta foot ext" "code foot ext"; } .nr-ext { display: flex; } }
 @container (64px <= height < 140px) and (width < 330px) { .nr-b.pv, .nr-b.nx { display: none; } }
 
 /* PANORÁMICO: talón grande a la izquierda y cuerpo con celdas */

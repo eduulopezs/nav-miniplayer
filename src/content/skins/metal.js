@@ -7,7 +7,7 @@ SKINS.metal = { label: 'Liquid Metal', tpl: () => `
   <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="lmg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".55" stop-color="#cfd3da"/><stop offset="1" stop-color="#8e949f"/></linearGradient></defs></svg>
   <canvas class="lm-mer" data-viz="mer" aria-hidden="true"></canvas>
   <div class="lm-wrap">
-    <div class="lm-orb" aria-hidden="true"><div class="lm-cov"></div></div>
+    <div class="lm-orb"><button class="lm-cov" data-act="cover" aria-pressed="false" aria-label="Difuminar carátula" title="Difuminar carátula"></button></div>
     <div class="lm-meta"><div class="lm-title" data-t="title"></div><div class="lm-artist" data-t="artist"></div></div>
     <div class="lm-chips"><button data-act="hide" title="Ocultar" aria-label="Ocultar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7l10 10M17 7L7 17"/></svg></button></div>
     <div class="lm-time"><span data-v="cur">0:00</span><i data-v="dur">0:00</i></div>
@@ -19,7 +19,7 @@ SKINS.metal = { label: 'Liquid Metal', tpl: () => `
       <button class="lm-b fw" data-act="fwd" title="Avanzar 10 s" aria-label="Avanzar 10 segundos"><span data-skn="+">+10</span></button>
       <button class="lm-b nx" data-act="next" title="Siguiente" aria-label="Siguiente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 5.5v13"/><path d="M5 6.2v11.6L14.2 12z" fill="currentColor"/></svg></button>
     </div>
-    <div class="lm-ext"><button class="lm-b vl" data-act="mute" title="Silenciar" aria-label="Silenciar o activar sonido"><span class="ic ic-vol"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z" fill="currentColor"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></svg></span><span class="ic ic-mute"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z" fill="currentColor"/><path d="M16 9.5l5 5M21 9.5l-5 5"/></svg></span></button></div>
+    <div class="lm-ext"><button class="lm-b vl" data-act="mute" title="Silenciar" aria-label="Silenciar o activar sonido"><span class="ic ic-vol"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z" fill="currentColor"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></svg></span><span class="ic ic-mute"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z" fill="currentColor"/><path d="M16 9.5l5 5M21 9.5l-5 5"/></svg></span></button><input type="range" class="vol-r" data-vol min="0" max="100" step="1" value="100" aria-label="Volumen"></div>
   </div>` };
 SKINS.metal.viz = {
   // Mercurio de fondo: campo de metaballs a baja resolución que se mueve despacio; el audio solo hincha un poco las gotas.
@@ -108,7 +108,7 @@ SKINS.metal.viz.mer.always = true;
 .lm-b.pl svg { width: 40%; height: 40%; filter: none; color: transparent; }
 .lm-b.pl svg path, .lm-b.pl svg rect { fill: url(#lmg); }
 .lm-b.pl:hover::after { content: ""; padding: 2.5px; background: var(--rim); }
-.lm-ext { grid-area: ext; display: none; align-items: center; justify-content: flex-end; }
+.lm-ext { grid-area: ext; display: none; align-items: center; justify-content: flex-end; gap: 6px; --vol-c: #f1f3f6; }
 .lm-b.vl svg { width: 52%; height: 52%; }
 
 /* COMPACTO (base): orbe a la izquierda, datos y controles a la derecha */
@@ -136,6 +136,7 @@ SKINS.metal.viz.mer.always = true;
   .lm-b.bk, .lm-b.fw { display: none; }
 }
 @container (64px <= height < 140px) and (width >= 520px) { .lm-b.bk, .lm-b.fw { display: grid; } }
+@container (64px <= height < 140px) and (width >= 640px) { .lm-wrap { grid-template-columns: var(--os) minmax(0, 1fr) auto auto; grid-template-areas: "orb meta ctl ext" "orb bar ctl ext"; } .lm-ext { display: flex; } }
 @container (64px <= height < 140px) and (width < 330px) { .lm-b.pv, .lm-b.nx { display: none; } }
 
 /* PANORÁMICO */

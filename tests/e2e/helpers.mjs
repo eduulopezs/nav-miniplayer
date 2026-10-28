@@ -79,7 +79,7 @@ const hasClass = (n, c) => (attr(n, 'class') || '').split(/\s+/).includes(c);
 // Selectores del inspector: 'card' (clase), 'act:play' (data-act), 't:title' (data-t), 'v:cur' (data-v) y 'bar' (data-bar).
 const match = (n, sel) => {
   const [k, v] = sel.split(':');
-  if (v === undefined) return sel === 'bar' ? attr(n, 'data-bar') !== null : hasClass(n, sel);
+  if (v === undefined) return sel === 'bar' || sel === 'vol' ? attr(n, 'data-' + sel) !== null : hasClass(n, sel);
   return attr(n, { act: 'data-act', t: 'data-t', v: 'data-v', m: 'data-m' }[k]) === v;
 };
 const text = (n) => (n.children || []).map((c) => c.nodeValue || '').join('');
@@ -143,6 +143,12 @@ export async function openPage(env, server, { art, inpage = true, theme, bare = 
       const { object } = await cdp.send('DOM.resolveNode', { backendNodeId: (await node(cls)).backendNodeId });
       const r = await cdp.send('Runtime.callFunctionOn', { objectId: object.objectId, returnByValue: true, functionDeclaration: `function () { return getComputedStyle(this).getPropertyValue(${JSON.stringify(prop)}); }` });
       return r.result.value;
+    },
+    // Cambia el tamaño de la tarjeta en la página (elige el layout por container queries).
+    async size(w, h) {
+      const { object } = await cdp.send('DOM.resolveNode', { backendNodeId: (await node('card')).backendNodeId });
+      await cdp.send('Runtime.callFunctionOn', { objectId: object.objectId, functionDeclaration: `function () { this.style.width = '${w}px'; this.style.height = '${h}px'; }` });
+      await sleep(150);
     },
     // Atributo de un elemento del reproductor.
     async attr(sel, name) { const n = await node(sel); return n ? attr(n, name) : null; },

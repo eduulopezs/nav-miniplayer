@@ -6,7 +6,7 @@
 SKINS.glass = { label: 'Glassware', tpl: () => `
   <div class="gl-glow" aria-hidden="true"></div><canvas class="gl-rib" data-viz="rib" aria-hidden="true"></canvas>
   <div class="gl-wrap">
-    <div class="gl-cov" aria-hidden="true"></div>
+    <button class="gl-cov" data-act="cover" aria-pressed="false" aria-label="Difuminar carátula" title="Difuminar carátula"></button>
     <div class="gl-meta"><div class="gl-title" data-t="title"></div><div class="gl-artist" data-t="artist"></div></div>
     <div class="gl-chips"><button data-act="hide" title="Ocultar" aria-label="Ocultar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7l10 10M17 7L7 17"/></svg></button></div>
     <div class="gl-prog"><span class="gl-t" data-v="cur">0:00</span><div class="gl-bar" role="slider" tabindex="0" data-bar aria-label="Progreso" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i></i></div><span class="gl-t r" data-v="dur">0:00</span></div>
@@ -17,7 +17,7 @@ SKINS.glass = { label: 'Glassware', tpl: () => `
       <button class="gl-b fw" data-act="fwd" title="Avanzar 10 s" aria-label="Avanzar 10 segundos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12a8 8 0 1 1 8 8"/><path d="M12 17l-3.4 3 3.4 3z" fill="currentColor" stroke-width="1"/><text class="gl-t10" data-skn="" x="12" y="14.6" text-anchor="middle" stroke="none">10</text></svg></button>
       <button class="gl-b nx" data-act="next" title="Siguiente" aria-label="Siguiente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 5.5v13" /><path d="M5 6v12l9.5-6z" fill="currentColor"/></svg></button>
     </div>
-    <div class="gl-ext"><button class="gl-b vl" data-act="mute" title="Silenciar" aria-label="Silenciar o activar sonido"><span class="ic ic-vol"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z" fill="currentColor"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></svg></span><span class="ic ic-mute"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z" fill="currentColor"/><path d="M16 9.5l5 5M21 9.5l-5 5"/></svg></span></button></div>
+    <div class="gl-ext"><button class="gl-b vl" data-act="mute" title="Silenciar" aria-label="Silenciar o activar sonido"><span class="ic ic-vol"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z" fill="currentColor"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></svg></span><span class="ic ic-mute"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z" fill="currentColor"/><path d="M16 9.5l5 5M21 9.5l-5 5"/></svg></span></button><input type="range" class="vol-r" data-vol min="0" max="100" step="1" value="100" aria-label="Volumen"></div>
   </div>` };
 const hexA = (h, a) => { const n = parseInt(h.slice(1), 16); return `rgba(${n >> 16},${n >> 8 & 255},${n & 255},${a})`; };
 SKINS.glass.viz = {
@@ -90,7 +90,7 @@ SKINS.glass.viz = {
 .gl-b.pl:hover { background: linear-gradient(180deg, #fff, #eef2ff); }
 .gl-b.pl svg { width: 46%; height: 46%; }
 .gl-t10 { font: 700 8.2px "Figtree", sans-serif; fill: currentColor; }
-.gl-ext { grid-area: ext; display: none; align-items: center; justify-content: center; }
+.gl-ext { grid-area: ext; display: none; align-items: center; justify-content: center; gap: 6px; --vol-c: #fff; }
 
 /* COMPACTO (base): la portada va a sangre en el borde izquierdo y se funde con el cristal */
 .gl-wrap { --cw: min(100cqh, 34cqw); --bs: min(36px, calc((100cqw - var(--cw) - 2 * var(--pad) - 4 * 6px) / 5.2));
@@ -118,6 +118,7 @@ SKINS.glass.viz = {
 }
 @container (64px <= height < 140px) and (width >= 540px) { .gl-b.bk, .gl-b.fw { display: grid; } }
 @container (64px <= height < 140px) and (width < 460px) { .gl-t { display: none; } }
+@container (64px <= height < 140px) and (width >= 640px) { .gl-wrap { grid-template-columns: calc(var(--cw) - var(--pad)) minmax(0, 1fr) auto auto; grid-template-areas: "cov meta ctl ext" "cov prog ctl ext"; } .gl-ext { display: flex; } }
 @container (64px <= height < 84px) { .gl-artist { display: none; } }
 @container (64px <= height < 140px) and (width < 330px) { .gl-b.pv, .gl-b.nx { display: none; } }
 
