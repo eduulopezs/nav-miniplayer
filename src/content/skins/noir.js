@@ -119,6 +119,7 @@ SKINS.noir.viz = {
 .nr-ext { grid-area: ext; display: none; gap: 6px; }
 .nr-ext .nr-b { width: auto; min-width: var(--bs, 30px); padding: 0 10px; }
 .nr-vol { display: flex; align-items: center; gap: 6px; } .nr-vol svg { width: 13px; height: 13px; }
+.card:not(.muted) .nr-vol .ic-mute svg, .card.muted .nr-vol .ic-vol svg { position: absolute; }
 .nr-vol em { font-style: normal; width: 34px; height: 4px; background: linear-gradient(90deg, var(--pp) 70%, rgba(236,232,220,.25) 70%); } .muted .nr-vol em { background: rgba(236,232,220,.25); }
 .nr-stripes { display: none; position: absolute; top: 0; right: 22%; width: 18%; height: 6px; background: repeating-linear-gradient(135deg, var(--pp) 0 2px, transparent 2px 5px); z-index: 3; }
 

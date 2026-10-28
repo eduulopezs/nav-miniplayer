@@ -144,6 +144,7 @@ SKINS.crt.viz.scr.always = false;
 .cr-vol { display: flex; gap: 2px; align-items: center; }
 .cr-vol i { width: 4px; height: 10px; background: var(--m); } .cr-vol i:nth-child(n+5) { background: rgba(255,174,44,.2); } .muted .cr-vol i { background: rgba(255,174,44,.2); }
 .cr-vol svg { width: 12px; height: 12px; margin-right: 4px; }
+.card:not(.muted) .cr-vol .ic-mute svg, .card.muted .cr-vol .ic-vol svg { position: absolute; }
 .cr-wrap { --bs: 30px; }
 
 /* COMPACTO (base) */

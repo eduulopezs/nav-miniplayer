@@ -209,7 +209,7 @@ ${NMP.menuCss}
     if (fn) { fn(); render(); if (a.dataset.act === 'back' || a.dataset.act === 'fwd') restart(a, 'nudge'); }
   });
   // Reinicia una animación de un solo uso: quita la clase, fuerza el reflujo y la vuelve a poner.
-  const restart = (el, cls) => { el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); };
+  const restart = (el, cls) => { el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); el.addEventListener('animationend', () => el.classList.remove(cls), { once: true }); };
 
   // Teclado con el reproductor enfocado (Tab): Espacio/K play-pausa, ←/→ ±salto, Esc oculta.
   // Sobre un botón, Espacio/Intro los gestiona el propio botón.
@@ -473,7 +473,7 @@ ${NMP.menuCss}
   function loadPalette(src) {
     setPalette(DEFAULT_PAL);
     if (!src) return;
-    const done = (im) => { if (curImg !== src) return; const p = palette(im, NMP.tokens.theme.glass['bg-b']); if (p) setPalette(p); };
+    const done = (im) => { if (curImg !== src) return; const p = palette(im, NMP.tokens.theme[theme]['mini-bg-b'] ?? NMP.tokens.theme[theme]['bg-b']); if (p) setPalette(p); };
     const load = (u, cors, fail) => { const im = new Image(); if (cors) im.crossOrigin = 'anonymous'; im.onload = () => done(im); im.onerror = fail; im.src = u; };
     load(src, true, () => {
       if (vp.active || vp.starting) return; // Mini pide la misma carátula al service worker y solo atiende una descarga a la vez
@@ -521,7 +521,7 @@ ${NMP.menuCss}
       card.style.setProperty('--art', url);
       card.style.setProperty('--bars', barcode(strSeed(title)));
       if (imgChanged) { loadPalette(img); if (lastKeyHadArt) restart(card, 'swap'); }
-      lastKeyHadArt = true;
+      if (img) lastKeyHadArt = true;
     }
 
     const live = media.duration === Infinity, dur = isFinite(media.duration) ? media.duration : 0, ct = media.currentTime || 0;
