@@ -461,7 +461,7 @@ ${NMP.menuCss}
   const SB_RECHECK_MS = 4000, SB_CACHE = 6, SB_RETRY_MS = 10000, SB_MIN_H = 36, SB_GAP = 8, SB_EDGE = 4;
   const SB = NMP.storyboard;
   const YT_HOST = /(^|\.)youtube\.com$/;
-  let sb = null, sbId = '', sbAskedAt = 0;
+  let sb = null, sbId = '', sbAskedAt = 0, sbPaint = ''; // sbPaint: lo último pintado en el fondo, para no reasignar la hoja en cada movimiento
   const sbSheets = new Map(), sbBusy = new Set(), sbFailed = new Map(); // url -> data URL | url -> instante del fallo
   document.addEventListener('__mp_sb', (e) => {
     if (!inpage && !YT_HOST.test(location.hostname)) return; // el puente solo existe en YouTube: en otras páginas el evento sería de la propia página (salvo en las pruebas)
@@ -488,7 +488,7 @@ ${NMP.menuCss}
         try {
           chrome.runtime.sendMessage({ type: 'sb', url }, (r) => {
             void chrome.runtime.lastError; sbBusy.delete(url);
-            if (r && r.busy) { /* el worker iba ocupado con otra hoja: no es un fallo */ } else if (r && r.data) { sbSheets.set(url, r.data); if (sbSheets.size > SB_CACHE) sbSheets.delete(sbSheets.keys().next().value); if (sbPtr) showThumb(sbPtr.e, sbPtr.b, sbPtr.t); } else sbFailed.set(url, Date.now());
+            if (r && r.busy) { /* el worker iba ocupado con otra hoja: no es un fallo */ } else if (r && r.data) { sbSheets.set(url, r.data); if (sbSheets.size > SB_CACHE) sbSheets.delete(sbSheets.keys().next().value); if (sbPtr) showThumb(sbPtr.e, sbPtr.b, sbPtr.t); } else { sbFailed.set(url, Date.now()); if (sbFailed.size > SB_CACHE * 8) sbFailed.delete(sbFailed.keys().next().value); }
           });
         } catch (_) { sbBusy.delete(url); }
       }
@@ -500,8 +500,10 @@ ${NMP.menuCss}
     if (!(h * s >= SB_MIN_H)) return hideThumb(), false;
     const tw = Math.round(w * s), th = Math.round(h * s);
     sbEl.style.cssText = `width:${tw}px;height:${th}px;left:${clamp(e.clientX - cr.left - tw / 2, SB_EDGE, cr.width - tw - SB_EDGE)}px;top:${barTop - SB_GAP - th}px;`;
-    sbEl.firstElementChild.style.cssText = `background:url(${data}) -${pos.col * tw}px -${pos.row * th}px / ${c * tw}px ${r * th}px`;
-    sbEl.lastElementChild.textContent = fmt(t);
+    const paint = `${url}|${pos.col}|${pos.row}|${tw}|${th}`;
+    if (paint !== sbPaint) { sbPaint = paint; sbEl.firstElementChild.style.cssText = `background:url(${data}) -${pos.col * tw}px -${pos.row * th}px / ${c * tw}px ${r * th}px`; }
+    const label = fmt(t);
+    if (sbEl.lastElementChild.textContent !== label) sbEl.lastElementChild.textContent = label;
     sbEl.classList.add('on');
     return true;
   }
