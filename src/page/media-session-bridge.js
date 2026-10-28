@@ -68,7 +68,7 @@
   const schedule = () => { if (!queued) { queued = true; queueMicrotask(publish); } };
   function track(el) {
     if (!(el instanceof HTMLMediaElement) || ids.has(el) || !hidden(el)) return;
-    if (tracked.size >= MAX_TRACKED) tracked.delete(tracked.keys().next().value);
+    if (tracked.size >= MAX_TRACKED) { const [oldId, ref] = tracked.entries().next().value; const old = ref.deref(); if (old) ids.delete(old); tracked.delete(oldId); }
     const id = nextId++;
     ids.set(el, id); tracked.set(id, new WeakRef(el));
     ['play', 'pause', 'ended', 'loadedmetadata', 'durationchange', 'emptied', 'seeked', 'volumechange'].forEach((ev) => el.addEventListener(ev, schedule));

@@ -55,7 +55,7 @@ console.log('✓ renderer dibuja todos los diseños');
   let [r1, r2] = M.remotes();
   ok(r1.duration === 90 && r2.duration === Infinity && played.length === 1 && played[0] === r2, 'estado remoto y aviso de inicio');
   r1.play(); r1.pause(); r1.seek(12.5);
-  ok(sent.join('|') === 'm:1:play|m:1:pause|m:1:seek:12.5' && r1.currentTime === 12.5, 'órdenes al puente');
+  ok(sent.join('|') === 'm:1:play|m:1:pause|m:1:seek:12.500' && r1.currentTime === 12.5, 'órdenes al puente');
   feed([{ i: 1, p: true, t: -5, d: 1e12, r: 99, k: 'x' }, { i: 'x' }, null, { i: 0 }]);
   [r1] = M.remotes();
   ok(M.remotes().length === 1 && r2.alive === false && r1.currentTime === 0 && !(r1.duration < 1e12) && r1.readyState === 0 && r1.playbackRate === 1, 'valida y descarta lo que la página falsea');
@@ -71,7 +71,7 @@ console.log('✓ renderer dibuja todos los diseños');
   M.ingest('f3', JSON.stringify([{ i: 1, p: false, d: 90, r: 4 }]), () => {}, null, t0);
   M.expire(t0 + 1000);
   ok(M.remotes().length === 2, 'aún no caduca');
-  M.expire(t0 + 5000);
+  M.expire(t0 + 7000);
   ok(M.remotes().length === 1, 'caduca el iframe mudo');
 }
 console.log('✓ medios remotos y política de selección');

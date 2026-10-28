@@ -91,8 +91,9 @@ ${NMP.menuCss}
   try {
     chrome.runtime.onMessage.addListener((m, sender) => {
       if (sender.id !== chrome.runtime.id || !m || m.type !== 'mp-frame' || !Number.isInteger(m.frame) || m.frame < 1) return;
+      const antes = MEDIA.remotes().length;
       MEDIA.ingest('f' + m.frame, m.list, (cmd) => { try { chrome.runtime.sendMessage({ type: 'mp-cmd', frame: m.frame, cmd }); } catch (_) { /* contexto invalidado */ } }, remotePlay);
-      scanDirty = true;
+      if (MEDIA.remotes().length !== antes) scanDirty = true; // el latido del agente no debe forzar un reescaneo cada vez
     });
   } catch (_) { /* contexto invalidado */ }
   document.dispatchEvent(new CustomEvent('__mp_query'));
