@@ -9,7 +9,7 @@ SKINS.metal = { label: 'Liquid Metal', tpl: () => `
   <div class="lm-wrap">
     <div class="lm-orb" aria-hidden="true"><div class="lm-cov"></div></div>
     <div class="lm-meta"><div class="lm-title" data-t="title"></div><div class="lm-artist" data-t="artist"></div></div>
-    <div class="lm-chips"><button data-act="mode" title="Pasar a Mini" aria-label="Pasar a Mini"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"/><rect x="12" y="11" width="6" height="5" rx="1.2" fill="currentColor" stroke="none"/></svg></button><button data-act="hide" title="Ocultar" aria-label="Ocultar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7l10 10M17 7L7 17"/></svg></button></div>
+    <div class="lm-chips"><button data-act="hide" title="Ocultar" aria-label="Ocultar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7l10 10M17 7L7 17"/></svg></button></div>
     <div class="lm-time"><span data-v="cur">0:00</span><i data-v="dur">0:00</i></div>
     <div class="lm-bar" role="slider" tabindex="0" data-bar aria-label="Progreso" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i></i></div>
     <div class="lm-ctl">

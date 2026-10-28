@@ -1,4 +1,4 @@
-// Prueba de humo sin navegador: carga los módulos del content script con un DOM falso y dibuja el lienzo de Mini con cada diseño.
+// Prueba de humo sin navegador: carga los módulos del content script con un DOM falso.
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -21,17 +21,6 @@ if (count.scans !== 0) throw new Error(`oculto por defecto no debe buscar medios
 console.log('✓ carga sin errores; módulos:', Object.keys(ctx.__NMP).join(', '));
 const html = ctx.__NMP.css; if (!html.includes('.card')) throw new Error('css vacío');
 const N = ctx.__NMP;
-const c2d = new Proxy({}, { get: (t, k) => k === 'measureText' ? () => ({ width: 500 }) : k.startsWith('create') ? () => ({ addColorStop() {} }) : typeof t[k] !== 'undefined' ? t[k] : () => {}, set: () => true });
-ctx.document.createElement = () => ({ getContext: () => c2d, width: 0, height: 0 });
-for (const th of Object.keys(N.themes)) {
-  const r = N.createRenderer(() => ({ theme: th, title: 'Título largo '.repeat(5), artist: 'Artista', art: '', media: { duration: 100, currentTime: 30 } }));
-  r.attach(c2d); r.draw(); r.setDpr(4); r.draw(); r.invalidate(); r.draw(); r.release();
-  for (const media of [{ duration: 100, currentTime: 30, paused: true }, { duration: Infinity, currentTime: 30, paused: false }, null]) { // pausa, directo y sin medio
-    const r2 = N.createRenderer(() => ({ theme: th, title: 'T', artist: 'A', art: '', media }));
-    r2.attach(c2d); r2.draw(); r2.release();
-  }
-}
-console.log('✓ renderer dibuja todos los diseños');
 
 // Medios remotos y política de selección.
 {

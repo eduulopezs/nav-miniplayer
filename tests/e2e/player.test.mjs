@@ -118,72 +118,14 @@ test('teclado: Espacio, flechas y Esc con el reproductor enfocado', async () => 
   await p.page.close();
 });
 
-test('se ajusta al tamaño: arrastrar una esquina cambia ancho y alto', async () => {
-  const p = await openPage(env, server);
-  await p.toggle();
-  const before = await p.box('card');
-  const g = await p.box('br');
-  await p.page.mouse.move(g.x + g.w / 2, g.y + g.h / 2);
-  await p.page.mouse.down();
-  await p.page.mouse.move(g.x + g.w / 2 - 60, g.y + g.h / 2 - 30, { steps: 5 });
-  await p.page.mouse.up();
-  const after = await p.box('card');
-  near(after.w, before.w - 60, 2, 'ancho');
-  near(after.h, before.h - 30, 2, 'alto');
+test('sin la bandera de pruebas la tarjeta no se pinta en la página y un modo guardado no estorba', async () => {
+  const p = await openPage(env, server, { inpage: false });
+  await env.sw.evaluate(() => chrome.storage.local.set({ mp_mode: 'card', mp_pos: { x: 1, y: 1 }, mp_size: { w: 300, h: 100 } }));
+  await p.page.reload();
+  await sleep(500);
+  assert.equal((await p.read()).shown, false);
   await p.page.close();
-});
-
-// Arrastra la tarjeta por el título (lejos del borde, que es la barra de progreso).
-async function dragCard(p, dx, dy) {
-  const t = await p.box('t:title');
-  const x = t.x + 4, y = t.y + t.h / 2;
-  await p.page.mouse.move(x, y);
-  await p.page.mouse.down();
-  await p.page.mouse.move(x + dx, y + dy, { steps: 6 });
-  await p.page.mouse.up();
-}
-
-test('la posición se conserva al recargar la página', async () => {
-  await env.sw.evaluate(() => chrome.storage.local.remove(['mp_size', 'mp_pos']));
-  const p = await openPage(env, server);
-  await p.toggle();
-  const start = await p.box('card');
-  await dragCard(p, -150, -80);
-  const moved = await p.box('card');
-  near(moved.x, start.x - 150, 3, 'x tras arrastrar');
-  near(moved.y, start.y - 80, 3, 'y tras arrastrar');
-  await p.waitFor(() => env.sw.evaluate(async () => !!(await chrome.storage.local.get('mp_pos')).mp_pos));
-  await p.page.close();
-  const q = await openPage(env, server);
-  await q.toggle();
-  const again = await q.box('card');
-  near(again.x, moved.x, 2, 'x tras recargar');
-  near(again.y, moved.y, 2, 'y tras recargar');
-  await env.sw.evaluate(() => chrome.storage.local.remove('mp_pos'));
-  await q.page.close();
-});
-
-test('el tamaño se conserva al recargar la página', async () => {
-  await env.sw.evaluate(() => chrome.storage.local.remove(['mp_size', 'mp_pos']));
-  const p = await openPage(env, server);
-  await p.toggle();
-  const before = await p.box('card');
-  const g = await p.box('br');
-  await p.page.mouse.move(g.x + g.w / 2, g.y + g.h / 2);
-  await p.page.mouse.down();
-  await p.page.mouse.move(g.x + g.w / 2 - 40, g.y + g.h / 2 - 20, { steps: 5 });
-  await p.page.mouse.up();
-  const resized = await p.box('card');
-  assert.ok(resized.w < before.w - 30, 'la tarjeta no se ha encogido');
-  await p.waitFor(() => env.sw.evaluate(async () => !!(await chrome.storage.local.get('mp_size')).mp_size));
-  await p.page.close();
-  const q = await openPage(env, server);
-  await q.toggle();
-  const again = await q.box('card');
-  near(again.w, resized.w, 2, 'ancho tras recargar');
-  near(again.h, resized.h, 2, 'alto tras recargar');
-  await env.sw.evaluate(() => chrome.storage.local.remove(['mp_size', 'mp_pos']));
-  await q.page.close();
+  await env.sw.evaluate(() => chrome.storage.local.remove(['mp_mode', 'mp_pos', 'mp_size']));
 });
 
 test('prefers-reduced-motion: sin transiciones ni animaciones', async () => {

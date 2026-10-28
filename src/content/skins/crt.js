@@ -6,7 +6,7 @@
 SKINS.crt = { label: 'Terminal CRT', tpl: () => `
   <div class="cr-wrap">
     <div class="cr-head"><span class="tag">NTT-7 MEDIA</span><span class="idx" data-t="idx">01/04</span><i class="rule"></i><span class="cr-state"></span>
-      <button class="cr-hb" data-act="mode" title="Pasar a Mini" aria-label="Pasar a Mini"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><rect x="3" y="5" width="18" height="14"/><rect x="12" y="11" width="6" height="5" fill="currentColor"/></svg></button><button class="cr-hb" data-act="hide" title="Ocultar" aria-label="Ocultar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+      <button class="cr-hb" data-act="hide" title="Ocultar" aria-label="Ocultar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
     <div class="cr-art" aria-hidden="true"><canvas class="cr-scr" data-viz="scr"></canvas><div class="cr-corners"></div></div>
     <div class="cr-meta">
       <div class="cr-kv ttl"><b>TRK</b><span data-t="title"></span></div>

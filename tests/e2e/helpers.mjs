@@ -76,7 +76,7 @@ export async function launch({ capture = false } = {}) {
 const find = (n, pred, out = []) => { if (pred(n)) out.push(n); for (const c of [...(n.children || []), ...(n.shadowRoots || [])]) find(c, pred, out); return out; };
 const attr = (n, k) => { const a = n.attributes || []; const i = a.indexOf(k); return i >= 0 ? a[i + 1] : null; };
 const hasClass = (n, c) => (attr(n, 'class') || '').split(/\s+/).includes(c);
-// Selectores del inspector: 'card' / 'br' (clase), 'act:play' (data-act), 't:title' (data-t), 'v:cur' (data-v) y 'bar' (data-bar).
+// Selectores del inspector: 'card' (clase), 'act:play' (data-act), 't:title' (data-t), 'v:cur' (data-v) y 'bar' (data-bar).
 const match = (n, sel) => {
   const [k, v] = sel.split(':');
   if (v === undefined) return sel === 'bar' ? attr(n, 'data-bar') !== null : hasClass(n, sel);
@@ -85,10 +85,11 @@ const match = (n, sel) => {
 const text = (n) => (n.children || []).map((c) => c.nodeValue || '').join('');
 
 // Abre una página de pruebas y devuelve un inspector del reproductor.
+// `inpage`: la tarjeta se pinta en la página (bandera solo de pruebas; en producción solo vive dentro de la ventana con marco).
 // `bare`: página sin el <audio id=a> (cada prueba crea el medio a su manera).
-export async function openPage(env, server, { art, mode = 'card', theme, bare = false, title } = {}) {
+export async function openPage(env, server, { art, inpage = true, theme, bare = false, title } = {}) {
   const { ctx, sw } = env;
-  await sw.evaluate((v) => chrome.storage.local.set(v), { mp_mode: mode, ...(theme ? { mp_theme: theme } : {}) });
+  await sw.evaluate((v) => chrome.storage.local.set(v), { mp_inpage: inpage, ...(theme ? { mp_theme: theme } : {}) });
   const page = await ctx.newPage();
   const q = new URLSearchParams(); if (art) q.set('art', art); if (bare) q.set('bare', '1'); if (title) q.set('title', title);
   await page.goto(`${server.base}/${q.size ? '?' + q : ''}`);
