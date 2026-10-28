@@ -44,9 +44,9 @@ test('clic derecho abre el menú: velocidad, salto y volumen recordado por sitio
   // volumen: se guarda por sitio y se aplica al abrir otra pestaña del mismo sitio
   await p.page.mouse.move(b.x + b.w / 2, b.y + b.h / 2);
   for (let i = 0; i < 4; i++) await p.page.mouse.wheel(0, 100);
-  await p.waitFor(() => env.sw.evaluate(async () => !!(await chrome.storage.local.get('mp_vol')).mp_vol?.['127.0.0.1']));
-  const saved = await env.sw.evaluate(async () => (await chrome.storage.local.get('mp_vol')).mp_vol['127.0.0.1']);
-  near(saved, 0.8, 0.001, 'volumen guardado');
+  // Los pasos de la rueda se procesan de forma asíncrona: se espera al valor final, no a que exista la clave (con el primer paso ya existe).
+  const savedVol = () => env.sw.evaluate(async () => (await chrome.storage.local.get('mp_vol')).mp_vol?.['127.0.0.1']);
+  await p.waitFor(async () => Math.abs((await savedVol()) - 0.8) < 0.001);
   await p.page.close();
   const q = await openPage(env, server);
   await q.toggle();
