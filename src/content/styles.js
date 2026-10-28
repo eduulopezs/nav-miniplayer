@@ -50,6 +50,9 @@
   .hint { display: none; position: absolute; left: 50%; top: 6px; transform: translateX(-50%); z-index: 9; max-width: calc(100% - 16px); padding: 3px 10px; border-radius: 999px; pointer-events: none;
     font: 600 11px/1.3 system-ui, sans-serif; color: #fff; background: rgba(8, 8, 12, .78); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .card.pending .hint { display: block; }
+  .toast { display: none; position: absolute; left: 50%; bottom: 6px; transform: translateX(-50%); z-index: 9; padding: 3px 10px; border-radius: 999px; pointer-events: none; white-space: nowrap;
+    font: 600 11px/1.3 "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif; color: #fff; background: rgba(0, 0, 0, .72); }
+  .card.tst .toast { display: block; }
   @media (prefers-reduced-motion: reduce) {
     .card, .card.show { transition: none; }
     .card { transform: none; }

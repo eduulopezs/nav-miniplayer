@@ -3,7 +3,7 @@
   window.__glassMiniPlayer = true;
 
   const NMP = globalThis.__NMP;
-  const { SKIP, MIN_DURATION, MARGIN, POS_KEY, SIZE_KEY, THEME_KEY, MODE_KEY, MIN, MAX, CW, CH, DPR0, SITE_BUTTONS } = NMP.cfg;
+  const { MIN_DURATION, MARGIN, POS_KEY, SIZE_KEY, THEME_KEY, MODE_KEY, PREFS_KEY, VOL_KEY, MIN, MAX, CW, CH, DPR0, SITE_BUTTONS } = NMP.cfg;
   const { clamp, fmt, fmt2, pad2, strSeed, barcode, palette, DEFAULT_PAL } = NMP.util;
   const { themes: TH, skins: SK, viz, media: MEDIA } = NMP;
 
@@ -16,15 +16,16 @@
   root.innerHTML = `
 <style>
 ${NMP.css}
+${NMP.menuCss}
 </style>
 <div class="card" role="region" aria-label="Minirreproductor" tabindex="0" aria-keyshortcuts="Space ArrowLeft ArrowRight Escape">
-  <div class="hint" aria-hidden="true"></div>
+  <div class="hint" aria-hidden="true"></div><div class="toast" role="status" aria-live="polite"></div>
   <div class="grip tl"></div><div class="grip tr"></div><div class="grip bl"></div><div class="grip br"></div>
 </div>`;
 
   const $ = (s) => root.querySelector(s);
   const grips = root.querySelectorAll('.grip');
-  const card = $('.card'), hintEl = $('.hint');
+  const card = $('.card'), hintEl = $('.hint'), toastEl = $('.toast');
   const qa = (sel) => card.querySelectorAll(sel);
 
   // ---------- Estado ----------
@@ -44,10 +45,11 @@ ${NMP.css}
     theme = t; vizCtx.skin = t;
     if (vizCtx._ro) { vizCtx._ro.disconnect(); vizCtx._ro = null; }
     vizCtx._kv = vizCtx._lv = undefined;
-    for (const n of [...card.children]) if (!n.classList.contains('grip') && !n.classList.contains('hint')) n.remove();
+    for (const n of [...card.children]) if (!n.classList.contains('grip') && !n.classList.contains('hint') && !n.classList.contains('toast')) n.remove();
     card.classList.forEach((c) => { if (c.startsWith('sk-')) card.classList.remove(c); });
     card.classList.add('sk-' + t);
     card.insertAdjacentHTML('afterbegin', SK[t].tpl() + '<i class="probe" aria-hidden="true"></i>');
+    applySkip();
     if (SK[t].setup) SK[t].setup(vizCtx);
     fontSkin = ''; // se cargan al mostrarse, no al arrancar la página
     lastKey = ''; lastPlaying = null; lastP = -1; lastHint = null; pending = null; // la plantilla es nueva: se vuelve a rellenar todo
@@ -76,12 +78,14 @@ ${NMP.css}
   }
 
 
-  document.addEventListener('play', (e) => { if (e.target instanceof HTMLMediaElement) lastPlayed = e.target; }, true);
+  document.addEventListener('play', (e) => { if (e.target instanceof HTMLMediaElement) { lastPlayed = e.target; autoShow(); } }, true);
   // El puente corre en el mundo de la página, así que lo que anuncia puede estar falseado: solo se aceptan nombres conocidos.
   const KNOWN_ACTIONS = new Set(['play', 'pause', 'stop', 'seekbackward', 'seekforward', 'seekto', 'previoustrack', 'nexttrack', '@pip']);
   document.addEventListener('__mp_actions', (e) => { actions = new Set(String(e.detail).split(',').filter((n) => KNOWN_ACTIONS.has(n))); });
+  // Opcional: al empezar a sonar un medio, la tarjeta se muestra sola (si estaba oculta).
+  function autoShow() { if (prefs.autoshow && dismissed && !document.hidden) { dismissed = false; render(); startFloat(); } }
   // Medios fuera del alcance del documento (sin insertar, en un shadow DOM): el puente manda su estado y recibe las órdenes.
-  const remotePlay = (m) => { lastPlayed = m; scanDirty = true; };
+  const remotePlay = (m) => { lastPlayed = m; scanDirty = true; autoShow(); };
   document.addEventListener('__mp_media', (e) => MEDIA.ingest('p', e.detail, send, remotePlay));
   // Medios en iframes: los agentes de los subframes informan por el service worker, que también les lleva las órdenes.
   try {
@@ -146,11 +150,48 @@ ${NMP.css}
     if (media.seek) media.seek(t); else media.currentTime = t; // los remotos mandan la orden al puente
   };
 
+  // ---------- Preferencias ----------
+  // skip: segundos de los saltos; autoshow: mostrar al empezar a sonar; autohide: minutos en pausa antes de ocultar (0 = nunca).
+  const prefs = { skip: 10, autoshow: false, autohide: 0 };
+  let volByHost = {}; // volumen recordado por sitio
+  const HOST_KEY = location.hostname;
+  const applyPrefs = (v) => {
+    if (!v || typeof v !== 'object') return;
+    if ([5, 10, 15, 30].includes(v.skip)) prefs.skip = v.skip;
+    if (typeof v.autoshow === 'boolean') prefs.autoshow = v.autoshow;
+    if ([0, 1, 5, 10, 30].includes(v.autohide)) prefs.autohide = v.autohide;
+    applySkip();
+  };
+  const setPref = (k, v) => { prefs[k] = v; applySkip(); try { chrome.storage.local.set({ [PREFS_KEY]: { ...prefs } }); } catch (_) { /* contexto invalidado */ } };
+  // Los botones de salto de cada diseño muestran los segundos (data-skn) y los dicen en su etiqueta.
+  function applySkip() {
+    const n = prefs.skip;
+    qa('[data-skn]').forEach((e) => { e.textContent = (e.dataset.skn || '') + n; });
+    qa('[data-act=back]').forEach((b) => { b.title = `Retroceder ${n} s`; b.setAttribute('aria-label', `Retroceder ${n} segundos`); });
+    qa('[data-act=fwd]').forEach((b) => { b.title = `Avanzar ${n} s`; b.setAttribute('aria-label', `Avanzar ${n} segundos`); });
+  }
+  let toastT = 0;
+  function toast(text) {
+    toastEl.textContent = text; card.classList.add('tst');
+    clearTimeout(toastT); toastT = setTimeout(() => card.classList.remove('tst'), 1100);
+  }
+  // Volumen y velocidad solo existen en medios del DOM; los remotos (sin insertar, iframes) no los exponen.
+  const tunable = () => !!media && !media.seek && 'volume' in media;
+  function setVolume(v) {
+    if (!tunable()) return;
+    v = clamp(v, 0, 1);
+    media.volume = v; media.muted = v === 0;
+    volByHost[HOST_KEY] = Math.round(v * 100) / 100;
+    try { const keys = Object.keys(volByHost); if (keys.length > 200) delete volByHost[keys[0]]; chrome.storage.local.set({ [VOL_KEY]: volByHost }); } catch (_) { /* contexto invalidado */ }
+  }
+  const setRate = (r) => { if (tunable()) media.playbackRate = clamp(r, 0.25, 4); };
+  const volApplied = new WeakSet();
+
   // Todas las acciones salen de [data-act] (cada diseño pone sus botones donde quiere); el clic se resuelve aquí.
   const ACT = {
     play() { if (!media) return; media.paused ? media.play().catch(() => {}) : media.pause(); },
-    back() { if (media) seekTo(media.currentTime - SKIP); },
-    fwd() { if (media) seekTo(media.currentTime + SKIP); },
+    back() { if (media) seekTo(media.currentTime - prefs.skip); },
+    fwd() { if (media) seekTo(media.currentTime + prefs.skip); },
     prev() {
       if (!media) return;
       if (media.currentTime > 3 || (!actions.has('previoustrack') && !findSiteButton('prev'))) return seekTo(0);
@@ -166,7 +207,7 @@ ${NMP.css}
     if (fn) { fn(); render(); }
   });
 
-  // Teclado con el reproductor enfocado (Tab): Espacio/K play-pausa, ←/→ ±SKIP s, Esc oculta.
+  // Teclado con el reproductor enfocado (Tab): Espacio/K play-pausa, ←/→ ±salto, Esc oculta.
   // Sobre un botón, Espacio/Intro los gestiona el propio botón.
   card.addEventListener('keydown', (e) => {
     if (e.altKey || e.ctrlKey || e.metaKey || !media) return;
@@ -180,6 +221,47 @@ ${NMP.css}
     else return;
     e.preventDefault(); e.stopPropagation(); render();
   });
+
+  // ---------- Menú, rueda y atajos ----------
+  const timeUrl = () => {
+    const t = Math.floor(media.currentTime || 0);
+    try {
+      const u = new URL(location.href);
+      if (/(^|\.)youtube\.com$/.test(u.hostname) || u.hostname === 'youtu.be') u.searchParams.set('t', t + 's');
+      else if (/(^|\.)vimeo\.com$/.test(u.hostname)) u.hash = 't=' + t + 's';
+      return u.href;
+    } catch (_) { return location.href; }
+  };
+  const menu = NMP.createMenu({
+    root, host, card, prefs, setPref, getMedia: () => media, tunable, setVolume, setRate,
+    themes: Object.entries(SK).map(([id, k]) => [id, k.label]),
+    modes: [['pip', 'Mini'], ['win', 'Ventana'], ['card', 'Tarjeta']],
+    getTheme: () => theme, getMode: () => fm,
+    setTheme(id) { try { chrome.storage.local.set({ [THEME_KEY]: id }); } catch (_) { applyTheme(id); } },
+    setMode(id) { try { chrome.storage.local.set({ [MODE_KEY]: id }); } catch (_) { applyMode(id); } },
+    copyLink() {
+      if (!media) return;
+      navigator.clipboard.writeText(timeUrl()).then(() => toast('Enlace copiado'), () => toast('No se pudo copiar'));
+    },
+    isPip: () => pip,
+  });
+  card.addEventListener('contextmenu', (e) => { if (media && menu.open()) e.preventDefault(); });
+  // Rueda sobre la tarjeta: volumen en pasos de 5 %.
+  card.addEventListener('wheel', (e) => {
+    if (!tunable()) return;
+    e.preventDefault();
+    const v = clamp(Math.round(((media.muted ? 0 : media.volume) + (e.deltaY < 0 ? .05 : -.05)) * 100) / 100, 0, 1);
+    setVolume(v); toast('Volumen ' + Math.round(v * 100) + '%'); if (menu.isOpen()) menu.sync();
+  }, { passive: false });
+  // Atajos globales (chrome.commands): los lanza el service worker sobre la pestaña activa.
+  const COMMANDS = { 'play-pause': 'play', 'seek-back': 'back', 'seek-fwd': 'fwd', 'next-track': 'next', 'prev-track': 'prev' };
+  NMP.command = (name) => {
+    const act = Object.hasOwn(COMMANDS, name) && ACT[COMMANDS[name]];
+    if (!act) return;
+    media = pickMedia();
+    if (!media) return;
+    act(); render();
+  };
 
   // Respaldo: ventana flotante con marco (Document PiP), la abre main.js y mueve aquí el host.
   document.addEventListener('__mp_pip', (e) => {
@@ -259,8 +341,8 @@ ${NMP.css}
     v.addEventListener('leavepictureinpicture', () => { releaseVideo(); if (!vp.exiting) dismissed = true; vp.exiting = false; render(); settleSwitch(); });
     setHandler('play', () => media && media.play().catch(() => {}));
     setHandler('pause', () => media && media.pause());
-    setHandler('seekbackward', () => media && seekTo(media.currentTime - SKIP));
-    setHandler('seekforward', () => media && seekTo(media.currentTime + SKIP));
+    setHandler('seekbackward', () => media && seekTo(media.currentTime - prefs.skip));
+    setHandler('seekforward', () => media && seekTo(media.currentTime + prefs.skip));
     setHandler('seekto', (d) => seekTo(d.seekTime));
     setHandler('previoustrack', () => ACT.prev());
     if (actions.has('nexttrack') || findSiteButton('next')) setHandler('nexttrack', () => ACT.next());
@@ -346,7 +428,7 @@ ${NMP.css}
     });
   }
 
-  let lastP = -1;
+  let lastP = -1, pausedAt = 0;
   function render() {
     if (!isActive()) { sleep(); if (dismissed) card.classList.remove('show'); return; }
     if (!loop) loop = setInterval(render, 250);
@@ -359,6 +441,11 @@ ${NMP.css}
       if (fontSkin !== theme) { const t = fontSkin = theme; NMP.loadFonts(t, () => { if (theme === t) requestAnimationFrame(layout); }); }
       if (host.ownerDocument !== document) NMP.syncFonts(host.ownerDocument);
     } else vizStop();
+    if (!visible && !pip) menu.close();
+    // Volumen recordado del sitio: se aplica una vez a cada medio la primera vez que el reproductor lo muestra.
+    if (visible && tunable() && !volApplied.has(media)) { volApplied.add(media); const v = volByHost[HOST_KEY]; if (typeof v === 'number' && v >= 0 && v <= 1) { media.volume = v; } }
+    // Opcional: ocultar tras N minutos en pausa.
+    if (media && prefs.autohide && visible && media.paused && !pip) { pausedAt ||= performance.now(); if (performance.now() - pausedAt > prefs.autohide * 60000) { dismissed = true; pausedAt = 0; } } else pausedAt = 0;
     setPending(visible && !pip && !modeSwitch && !vp.starting && canOpenFloat());
     if (!media) return;
 
@@ -477,7 +564,9 @@ ${NMP.css}
   });
   card.addEventListener('pointermove', (e) => {
     const b = e.target.closest('[data-bar]');
-    if (b && b.classList.contains('drag') && media && isFinite(media.duration)) { seekTo(barFrac(e, b) * media.duration); render(); }
+    if (!b || !media || !isFinite(media.duration)) return;
+    b.title = fmt(barFrac(e, b) * media.duration); // tiempo bajo el puntero
+    if (b.classList.contains('drag')) { seekTo(barFrac(e, b) * media.duration); render(); }
   });
   const endBar = (e) => { const b = e.target.closest('[data-bar]'); if (b) b.classList.remove('drag'); };
   card.addEventListener('pointerup', endBar);
@@ -535,7 +624,9 @@ ${NMP.css}
   window.addEventListener('resize', () => applyPos(savedPos));
 
   try {
-    chrome.storage.local.get([POS_KEY, SIZE_KEY, MODE_KEY, THEME_KEY], (r) => {
+    chrome.storage.local.get([POS_KEY, SIZE_KEY, MODE_KEY, THEME_KEY, PREFS_KEY, VOL_KEY], (r) => {
+      if (r && r[PREFS_KEY]) applyPrefs(r[PREFS_KEY]);
+      if (r && r[VOL_KEY] && typeof r[VOL_KEY] === 'object') volByHost = r[VOL_KEY];
       if (r && r[MODE_KEY]) fm = r[MODE_KEY];
       if (r && r[THEME_KEY]) applyTheme(r[THEME_KEY]);
       if (r && r[SIZE_KEY]) setSize(r[SIZE_KEY].w, r[SIZE_KEY].h);
@@ -545,6 +636,7 @@ ${NMP.css}
       // Si el navegador no deja abrir la ventana sin un gesto, se ve la tarjeta y se abre con el siguiente clic en la página.
       if (c[MODE_KEY] && c[MODE_KEY].newValue) applyMode(c[MODE_KEY].newValue);
       if (c[THEME_KEY] && c[THEME_KEY].newValue) applyTheme(c[THEME_KEY].newValue);
+      if (c[PREFS_KEY]) applyPrefs(c[PREFS_KEY].newValue);
       if (c[SIZE_KEY] && !rs && c[SIZE_KEY].newValue) setSize(c[SIZE_KEY].newValue.w, c[SIZE_KEY].newValue.h);
       if (c[POS_KEY] && mode !== 'drag') { savedPos = c[POS_KEY].newValue; applyPos(savedPos); } });
   } catch (_) { applyPos(null); }

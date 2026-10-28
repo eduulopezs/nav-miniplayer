@@ -1,13 +1,21 @@
 {
   "manifest_version": 3,
   "name": "Nav Miniplayer",
-  "version": "1.7.1",
+  "version": "1.8.0",
   "description": "Minirreproductor flotante con estilo glass para controlar el audio/vídeo de la pestaña: play/pausa, ±10 s, anterior/siguiente y progreso en el borde.",
   "minimum_chrome_version": "116",
   "permissions": ["storage", "contextMenus", "scripting", "tabCapture", "offscreen"],
   "host_permissions": ["<all_urls>"],
   "background": { "service_worker": "src/background/service-worker.js" },
   "action": { "default_title": "Mostrar/ocultar minirreproductor" },
+  "commands": {
+    "_execute_action": { "suggested_key": { "default": "Alt+Shift+M" }, "description": "Mostrar u ocultar el minirreproductor" },
+    "play-pause": { "suggested_key": { "default": "Alt+Shift+P" }, "description": "Reproducir o pausar" },
+    "seek-back": { "suggested_key": { "default": "Alt+Shift+Comma" }, "description": "Retroceder" },
+    "seek-fwd": { "suggested_key": { "default": "Alt+Shift+Period" }, "description": "Avanzar" },
+    "prev-track": { "description": "Pista anterior" },
+    "next-track": { "description": "Pista siguiente" }
+  },
   "icons": { "16": "icons/16.png", "48": "icons/48.png", "128": "icons/128.png" },
   "content_scripts": [
     {
@@ -39,6 +47,7 @@
         "src/content/styles.js",
         "src/content/themes.js",
         "src/content/renderer.js",
+        "src/content/menu.js",
         "src/content/player.js"
       ],
       "run_at": "document_idle"

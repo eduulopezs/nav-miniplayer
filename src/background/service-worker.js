@@ -25,6 +25,18 @@ async function startCapture(tabId) {
   } catch (_) { /* pestaña no capturable (chrome://, ya capturada...): sigue el visualizador simulado */ }
 }
 
+// Atajos de teclado (chrome.commands, configurables en chrome://extensions/shortcuts): se ejecutan sobre la pestaña activa.
+// Mostrar/ocultar (_execute_action) lo gestiona onClicked.
+const COMMANDS = new Set(['play-pause', 'seek-back', 'seek-fwd', 'prev-track', 'next-track']);
+chrome.commands.onCommand.addListener((cmd) => {
+  if (!COMMANDS.has(cmd)) return;
+  chrome.tabs.query({ active: true, lastFocusedWindow: true }, (tabs) => {
+    const tab = tabs && tabs[0];
+    if (!tab || tab.id == null) return;
+    chrome.scripting.executeScript({ target: { tabId: tab.id }, args: [cmd], func: (c) => { const n = globalThis.__NMP; if (n && typeof n.command === 'function') n.command(c); } }).catch(() => {});
+  });
+});
+
 // Descarga una carátula y la devuelve como data URL: así el canvas del PiP no queda "contaminado" por CORS.
 // La URL la elige la página, por lo que se restringe a http(s) público (net-guard.js), sin cookies, sin redirecciones,
 // con tope de tamaño y de tiempo, y el tipo se decide por los bytes reales de la imagen.
