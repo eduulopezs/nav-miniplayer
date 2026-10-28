@@ -179,7 +179,7 @@ ${NMP.menuCss}
     },
     next() { if (actions.has('nexttrack')) send('nexttrack'); else findSiteButton('next')?.click(); },
     cover() { setPref('blur', !prefs.blur); },
-    mute() { if (media) { media.muted = !media.muted; render(); } },
+    mute() { if (media) { media.muted = !media.muted; if (!media.muted && media.volume === 0) setVolume(0.5); render(); } }, // salir del silencio desde 0 % no deja el medio mudo
     hide() { if (pip) send('__pip'); else { dismissed = true; render(); } },
   };
   card.addEventListener('click', (e) => {
@@ -194,7 +194,7 @@ ${NMP.menuCss}
   card.addEventListener('keydown', (e) => {
     if (e.altKey || e.ctrlKey || e.metaKey || !media) return;
     const tag = e.composedPath()[0].tagName;
-    if (tag === 'INPUT' && e.key !== 'Escape') return; // el regulador de volumen usa las flechas
+    if (tag === 'INPUT' && /^(Arrow|Home$|End$|Page)/.test(e.key)) return; // el regulador de volumen se maneja con estas teclas
     const onButton = tag === 'BUTTON'; // sin instanceof: en la ventana flotante es otro documento
     if ((e.key === ' ' || e.key === 'Enter') && onButton) return;
     const live = media.duration === Infinity;
