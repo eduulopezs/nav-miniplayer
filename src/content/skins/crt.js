@@ -134,8 +134,8 @@ SKINS.crt.viz.scr.always = false;
 .cr-ctl { grid-area: ctl; display: flex; align-items: center; justify-content: center; gap: 6px; }
 .cr-b { width: var(--bs); height: var(--bs); flex: none; display: grid; place-items: center; color: var(--m); box-shadow: inset 0 0 0 1px var(--mdim); font: 700 10px/1 "JetBrains Mono", monospace; letter-spacing: .02em; transition: background .1s; }
 .cr-b:hover { background: rgba(255,174,44,.16); box-shadow: inset 0 0 0 1px var(--m); }
-.cr-b:active { transform: translateY(1px); }
-.cr-b[disabled] { opacity: .3; pointer-events: none; }
+.cr-b:active { transform: translateY(var(--press-shift)); }
+.cr-b[disabled] { opacity: var(--opacity-disabled); pointer-events: none; }
 .cr-b svg { width: 52%; height: 52%; }
 .cr-b.pl { background: var(--m); color: var(--bg); box-shadow: none; clip-path: polygon(7px 0, 100% 0, 100% calc(100% - 7px), calc(100% - 7px) 100%, 0 100%, 0 7px); width: calc(var(--bs) * 1.35); }
 .cr-b.pl:hover { background: #ffd48a; }

@@ -111,8 +111,8 @@ SKINS.noir.viz = {
 .nr-ctl { display: flex; align-items: center; gap: 4px; }
 .nr-b { width: var(--bs, 30px); height: var(--bs, 30px); flex: none; display: grid; place-items: center; color: var(--pp); box-shadow: inset 0 0 0 1px var(--ln); font: 700 9px/1 "Space Mono", monospace; letter-spacing: .02em; transition: background .1s, color .1s; }
 .nr-b:hover { background: rgba(255,42,42,.18); box-shadow: inset 0 0 0 1px var(--rd); }
-.nr-b:active { transform: translateY(1px); }
-.nr-b[disabled] { opacity: .3; pointer-events: none; }
+.nr-b:active { transform: translateY(var(--press-shift)); }
+.nr-b[disabled] { opacity: var(--opacity-disabled); pointer-events: none; }
 .nr-b svg { width: 50%; height: 50%; }
 .nr-b.pl { background: var(--rd); color: var(--bk); box-shadow: none; width: calc(var(--bs, 30px) * 1.3); clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px)); }
 .nr-b.pl:hover { background: #ff5a5a; }

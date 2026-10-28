@@ -83,8 +83,8 @@ SKINS.glass.viz = {
 .gl-ctl { grid-area: ctl; display: flex; align-items: center; justify-content: center; gap: 6px; }
 .gl-b { width: var(--bs); height: var(--bs); flex: none; border-radius: 50%; display: grid; place-items: center; color: #fff; transition: background .15s, transform .12s; }
 .gl-b:hover { background: rgba(255,255,255,.2); }
-.gl-b:active { transform: scale(.92); }
-.gl-b[disabled] { opacity: .35; pointer-events: none; }
+.gl-b:active { transform: scale(var(--press-scale)); }
+.gl-b[disabled] { opacity: var(--opacity-disabled); pointer-events: none; }
 .gl-b.pl { width: calc(var(--bs) * 1.2); height: calc(var(--bs) * 1.2); background: linear-gradient(180deg, #fff, #dde5f6); color: #1b1f3a;
   box-shadow: 0 8px 20px rgba(0,0,0,.35), inset 0 -3px 6px rgba(110,125,210,.3), inset 0 1px 0 #fff; }
 .gl-b.pl:hover { background: linear-gradient(180deg, #fff, #eef2ff); }

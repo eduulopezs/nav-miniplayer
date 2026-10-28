@@ -41,6 +41,7 @@ const body = `// GENERADO por scripts/build-tokens.mjs desde design/tokens.json:
 
   NMP.tokens = {
     css: ${JSON.stringify('\n  ' + css + '\n')},
+    shared: ${JSON.stringify(shared, null, 2).replace(/\n/g, '\n    ')},
     theme: ${JSON.stringify(themes, null, 2).replace(/\n/g, '\n    ')},
   };
 })();
