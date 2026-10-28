@@ -174,6 +174,7 @@ SKINS.crt.viz.scr.always = false;
 }
 @container (64px <= height < 140px) and (width >= 520px) { .cr-b.bk, .cr-b.fw { display: grid; } }
 @container (64px <= height < 140px) and (width < 330px) { .cr-b.pv, .cr-b.nx { display: none; } }
+@container (64px <= height < 140px) and (width < 300px) { .cr-b.pl { width: var(--bs); clip-path: polygon(5px 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%, 0 5px); } }
 
 /* PANORÁMICO */
 @container (height >= 140px) and (width >= 400px) and (aspect-ratio > 21 / 10) {
