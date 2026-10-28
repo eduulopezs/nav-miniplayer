@@ -23,12 +23,12 @@
     }
     play() { this.send(`m:${this.id}:play`); return Promise.resolve(); }
     pause() { this.send(`m:${this.id}:pause`); }
-    seek(t) { this.currentTime = t; this.send(`m:${this.id}:seek:${t}`); } // el puente lo aplica; hasta su siguiente estado se ve ya
+    seek(t) { this.currentTime = t; this.send(`m:${this.id}:seek:${Math.max(0, t).toFixed(3)}`); } // el puente lo aplica; hasta su siguiente estado se ve ya
   }
 
   // Cada origen (el puente de la página, o un iframe) publica su lista completa; las claves llevan el origen delante.
   const remotes = new Map(); // `${origen}:${id}` -> RemoteMedia
-  const STALE_MS = 3000; // un iframe que dice estar sonando y deja de dar señales (se cerró) se descarta
+  const STALE_MS = 6000; // un iframe que deja de dar señales (se cerró o se descargó) se descarta; el agente avisa cada 2 s como mucho
   // `send(orden)` manda una orden al origen; `onPlay(m)` avisa de un medio remoto que acaba de empezar a sonar.
   function ingest(source, detail, send, onPlay, now = Date.now()) {
     let list;
@@ -47,7 +47,7 @@
     for (const [key, m] of remotes) if (key.startsWith(source + ':') && !seen.has(key)) { m.alive = false; remotes.delete(key); }
   }
   function expire(now = Date.now()) {
-    for (const [key, m] of remotes) if (!m.paused && !m.ended && now - m.at > STALE_MS && !key.startsWith('p:')) { m.alive = false; remotes.delete(key); }
+    for (const [key, m] of remotes) if (now - m.at > STALE_MS && !key.startsWith('p:')) { m.alive = false; remotes.delete(key); }
   }
 
   // Un medio cuenta si ya tiene datos, dura lo bastante (o es un directo) y no es un vídeo de fondo (silenciado y en bucle).

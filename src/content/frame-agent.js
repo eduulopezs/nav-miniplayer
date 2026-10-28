@@ -6,7 +6,7 @@
 
   const MAX = 8;
   const ids = new WeakMap(), byId = new Map(); // elemento <-> id local
-  let nextId = 1, timer = 0, queued = false, last = '';
+  let nextId = 1, timer = 0, period = 0, queued = false;
   // Medios que el puente del mundo de la página ve y este agente no (sin insertar, en shadow DOM): llegan por evento y sus ids se desplazan
   // para no chocar con los del DOM normal.
   const BRIDGE = 1e6;
@@ -28,11 +28,10 @@
   function publish() {
     queued = false;
     const list = [...document.querySelectorAll('video,audio')].filter((el) => el.readyState > 0).slice(0, MAX).map(snap).concat(bridged);
-    const playing = list.some((s) => !s.p && !s.e);
-    if (!playing) { clearInterval(timer); timer = 0; } else if (!timer) timer = setInterval(publish, 500);
+    // Sonando: cada 500 ms. Con medios en pausa: un latido cada 2 s, para que un marco superior que llega tarde los vea y no caduquen.
+    const want = list.some((s) => !s.p && !s.e) ? 500 : list.length ? 2000 : 0;
+    if (want !== period) { clearInterval(timer); timer = want ? setInterval(publish, want) : 0; period = want; }
     const json = JSON.stringify(list);
-    if (json === last && !playing) return;
-    last = json;
     try { chrome.runtime.sendMessage({ type: 'mp-frame', list: json }); } catch (_) { /* contexto invalidado */ }
   }
   const schedule = () => { if (!queued) { queued = true; queueMicrotask(publish); } };
