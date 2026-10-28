@@ -7,7 +7,7 @@ SKINS.crt = { label: 'Terminal CRT', tpl: () => `
   <div class="cr-wrap">
     <div class="cr-head"><span class="tag">NTT-7 MEDIA</span><span class="idx" data-t="idx">01/04</span><i class="rule"></i><span class="cr-state"></span>
       <button class="cr-hb" data-act="hide" title="Ocultar" aria-label="Ocultar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
-    <div class="cr-art" aria-hidden="true"><canvas class="cr-scr" data-viz="scr"></canvas><div class="cr-corners"></div></div>
+    <button class="cr-art" data-act="cover" aria-pressed="false" aria-label="Difuminar carátula" title="Difuminar carátula"><canvas class="cr-scr" data-viz="scr"></canvas><div class="cr-corners"></div></button>
     <div class="cr-meta">
       <div class="cr-kv ttl"><b>TRK</b><span data-t="title"></span></div>
       <div class="cr-kv art"><b>ART</b><span data-t="artist"></span></div>
@@ -22,7 +22,8 @@ SKINS.crt = { label: 'Terminal CRT', tpl: () => `
       <button class="cr-b nx" data-act="next" title="Siguiente" aria-label="Siguiente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="M18 5v14M5 5.5v13L15 12z"/></svg></button>
     </div>
     <div class="cr-ext">
-      <button class="cr-b vl" data-act="mute" title="Silenciar" aria-label="Silenciar o activar sonido"><span class="cr-vol"><span class="ic ic-vol"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z" fill="currentColor"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></svg></span><span class="ic ic-mute"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z" fill="currentColor"/><path d="M16 9.5l5 5M21 9.5l-5 5"/></svg></span><i></i><i></i><i></i><i></i><i></i><i></i></span></button>
+      <button class="cr-b vl" data-act="mute" title="Silenciar" aria-label="Silenciar o activar sonido"><span class="cr-vol"><span class="ic ic-vol"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z" fill="currentColor"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></svg></span><span class="ic ic-mute"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z" fill="currentColor"/><path d="M16 9.5l5 5M21 9.5l-5 5"/></svg></span></span></button>
+      <input type="range" class="vol-r" data-vol min="0" max="100" step="1" value="100" aria-label="Volumen">
     </div>
   </div>` };
 SKINS.crt.viz = {
@@ -139,10 +140,9 @@ SKINS.crt.viz.scr.always = false;
 .cr-b svg { width: 52%; height: 52%; }
 .cr-b.pl { background: var(--m); color: var(--bg); box-shadow: none; clip-path: polygon(7px 0, 100% 0, 100% calc(100% - 7px), calc(100% - 7px) 100%, 0 100%, 0 7px); width: calc(var(--bs) * 1.35); }
 .cr-b.pl:hover { background: #ffd48a; }
-.cr-ext { grid-area: ext; display: none; align-items: center; justify-content: flex-end; gap: 8px; }
+.cr-ext { grid-area: ext; display: none; align-items: center; justify-content: flex-end; gap: 8px; --vol-c: var(--m); }
 .cr-ext .cr-b { width: auto; min-width: var(--bs); padding: 0 8px; }
 .cr-vol { display: flex; gap: 2px; align-items: center; }
-.cr-vol i { width: 4px; height: 10px; background: var(--m); } .cr-vol i:nth-child(n+5) { background: rgba(255,174,44,.2); } .muted .cr-vol i { background: rgba(255,174,44,.2); }
 .cr-vol svg { width: 12px; height: 12px; margin-right: 4px; }
 .card:not(.muted) .cr-vol .ic-mute svg, .card.muted .cr-vol .ic-vol svg { position: absolute; }
 .cr-wrap { --bs: 30px; }
@@ -174,6 +174,7 @@ SKINS.crt.viz.scr.always = false;
   .cr-b.bk, .cr-b.fw { display: none; }
 }
 @container (64px <= height < 140px) and (width >= 520px) { .cr-b.bk, .cr-b.fw { display: grid; } }
+@container (64px <= height < 140px) and (width >= 640px) { .cr-wrap { grid-template-columns: var(--cv) minmax(0, 1fr) auto auto; grid-template-areas: "art meta ctl ext" "art bar ctl ext"; } .cr-ext { display: flex; } }
 @container (64px <= height < 140px) and (width < 330px) { .cr-b.pv, .cr-b.nx { display: none; } }
 @container (64px <= height < 140px) and (width < 300px) { .cr-b.pl { width: var(--bs); clip-path: polygon(5px 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%, 0 5px); } }
 
