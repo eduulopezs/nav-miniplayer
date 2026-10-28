@@ -461,7 +461,7 @@ ${NMP.menuCss}
   const SB_RECHECK_MS = 4000, SB_CACHE = 6, SB_RETRY_MS = 10000, SB_MIN_H = 36, SB_GAP = 8, SB_EDGE = 4;
   const SB = NMP.storyboard;
   const YT_HOST = /(^|\.)youtube\.com$/;
-  let sb = null, sbId = '', sbAskedAt = 0, sbPaint = ''; // sbPaint: lo último pintado en el fondo, para no reasignar la hoja en cada movimiento
+  let sb = null, sbId = '', sbAskedAt = 0, sbPaint = '', sbSize = ''; // sbPaint: lo último pintado en el fondo, para no reasignar la hoja en cada movimiento
   const sbSheets = new Map(), sbBusy = new Set(), sbFailed = new Map(); // url -> data URL | url -> instante del fallo
   document.addEventListener('__mp_sb', (e) => {
     if (!inpage && !YT_HOST.test(location.hostname)) return; // el puente solo existe en YouTube: en otras páginas el evento sería de la propia página (salvo en las pruebas)
@@ -469,7 +469,7 @@ ${NMP.menuCss}
     try { d = JSON.parse(String(e.detail)); } catch (_) { /* sin storyboard */ }
     const ok = d && typeof d.id === 'string' && /^[\w-]{1,20}$/.test(d.id) && SB.parse(d.spec);
     if (!ok) { sb = null; sbId = ''; return; }
-    if (d.id !== sbId) { sbSheets.clear(); sbFailed.clear(); }
+    if (d.id !== sbId) { sbSheets.clear(); sbFailed.clear(); sbPaint = ''; sbSize = ''; }
     sbId = d.id; sb = ok;
   });
   let sbPtr = null; // último puntero sobre la barra: al llegar la hoja se pinta sin esperar a otro movimiento
@@ -488,7 +488,7 @@ ${NMP.menuCss}
         try {
           chrome.runtime.sendMessage({ type: 'sb', url }, (r) => {
             void chrome.runtime.lastError; sbBusy.delete(url);
-            if (r && r.busy) { /* el worker iba ocupado con otra hoja: no es un fallo */ } else if (r && r.data) { sbSheets.set(url, r.data); if (sbSheets.size > SB_CACHE) sbSheets.delete(sbSheets.keys().next().value); if (sbPtr) showThumb(sbPtr.e, sbPtr.b, sbPtr.t); } else { sbFailed.set(url, Date.now()); if (sbFailed.size > SB_CACHE * 8) sbFailed.delete(sbFailed.keys().next().value); }
+            if (r && r.busy) { /* el worker iba ocupado con otra hoja: no es un fallo */ } else if (r && r.data) { sbSheets.set(url, r.data); if (sbSheets.size > SB_CACHE) sbSheets.delete(sbSheets.keys().next().value); if (sbPtr) showThumb(sbPtr.e, sbPtr.b, sbPtr.t); } else { sbFailed.delete(url); sbFailed.set(url, Date.now()); if (sbFailed.size > SB_CACHE * 8) sbFailed.delete(sbFailed.keys().next().value); }
           });
         } catch (_) { sbBusy.delete(url); }
       }
@@ -499,11 +499,13 @@ ${NMP.menuCss}
     const barTop = br.top - cr.top, s = Math.min(1, (barTop - SB_GAP - SB_EDGE) / h, (cr.width - 2 * SB_EDGE) / w);
     if (!(h * s >= SB_MIN_H)) return hideThumb(), false;
     const tw = Math.round(w * s), th = Math.round(h * s);
-    sbEl.style.cssText = `width:${tw}px;height:${th}px;left:${clamp(e.clientX - cr.left - tw / 2, SB_EDGE, cr.width - tw - SB_EDGE)}px;top:${barTop - SB_GAP - th}px;`;
-    const paint = `${url}|${pos.col}|${pos.row}|${tw}|${th}`;
+    const size = `${tw}|${th}`;
+    if (size !== sbSize) { sbSize = size; sbEl.style.width = tw + 'px'; sbEl.style.height = th + 'px'; }
+    sbEl.style.left = clamp(e.clientX - cr.left - tw / 2, SB_EDGE, cr.width - tw - SB_EDGE) + 'px';
+    sbEl.style.top = barTop - SB_GAP - th + 'px';
+    const paint = `${url}|${c}|${r}|${pos.col}|${pos.row}|${tw}|${th}`;
     if (paint !== sbPaint) { sbPaint = paint; sbEl.firstElementChild.style.cssText = `background:url(${data}) -${pos.col * tw}px -${pos.row * th}px / ${c * tw}px ${r * th}px`; }
-    const label = fmt(t);
-    if (sbEl.lastElementChild.textContent !== label) sbEl.lastElementChild.textContent = label;
+    sbEl.lastElementChild.textContent = fmt(t);
     sbEl.classList.add('on');
     return true;
   }
