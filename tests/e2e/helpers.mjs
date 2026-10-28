@@ -3,6 +3,7 @@
 import { createRequire } from 'node:module';
 import http from 'node:http';
 import fs from 'node:fs';
+import { createHash } from 'node:crypto';
 import os from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -60,11 +61,13 @@ export async function startServer() {
 }
 
 // Chromium con la extensión cargada (el nuevo modo headless admite extensiones).
-export async function launch() {
+// `capture: true` permite a la extensión usar tabCapture sin el clic en el icono (bandera de pruebas de Chromium), para poder probar la captura real.
+export async function launch({ capture = false } = {}) {
+  const extId = capture ? createHash('sha256').update(fs.realpathSync(EXT)).digest('hex').slice(0, 32).replace(/./g, (c) => 'abcdefghijklmnop'[parseInt(c, 16)]) : '';
   const dir = fs.mkdtempSync(join(os.tmpdir(), 'nmp-e2e-'));
   const ctx = await chromium.launchPersistentContext(dir, {
     headless: false, viewport: { width: 900, height: 500 },
-    args: ['--headless=new', '--autoplay-policy=no-user-gesture-required', `--disable-extensions-except=${EXT}`, `--load-extension=${EXT}`],
+    args: ['--headless=new', '--autoplay-policy=no-user-gesture-required', `--disable-extensions-except=${EXT}`, `--load-extension=${EXT}`, ...(capture ? [`--allowlisted-extension-id=${extId}`] : [])],
   });
   const sw = ctx.serviceWorkers()[0] || await ctx.waitForEvent('serviceworker', { timeout: 20000 });
   return { ctx, sw, close: async () => { await ctx.close(); fs.rmSync(dir, { recursive: true, force: true }); } };
