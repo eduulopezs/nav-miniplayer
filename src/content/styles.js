@@ -9,7 +9,7 @@
   .card {
     --art: none;
     position: relative; container-type: size; width: 340px; height: 156px; overflow: hidden;
-    user-select: none; -webkit-user-select: none; touch-action: none; cursor: grab;
+    user-select: none; -webkit-user-select: none; touch-action: none;
     opacity: 0; transform: translateY(var(--space-4)) scale(.96); pointer-events: none;
     transition: opacity var(--dur-out) var(--ease-in), transform var(--dur-out) var(--ease-in); /* salir es más rápido que entrar */
   }

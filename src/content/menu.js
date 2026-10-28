@@ -19,7 +19,7 @@
   .menu .vol { display: flex; align-items: center; gap: 8px; }
   .menu input[type=range] { flex: 1; min-width: 0; accent-color: #f2f2f6; }
   .menu output { width: 34px; text-align: right; font-variant-numeric: tabular-nums; }
-    .menu .sep { height: 1px; background: rgba(255, 255, 255, .12); }
+  .menu .sep { height: 1px; background: rgba(255, 255, 255, .12); }
   .menu [disabled], .menu .off { opacity: .4; pointer-events: none; }
   @media (prefers-reduced-motion: reduce) { .menu * { transition: none; } }
   `;
@@ -66,7 +66,7 @@
 
     let isOpen = false;
     function open() {
-      if (o.isPip()) return false; // la ventana flotante es demasiado pequeña: se queda el menú del navegador
+      if (o.isPip()) return false; // la ventana con marco es demasiado pequeña: se queda el menú del navegador
       sync(); menu.classList.add('open'); isOpen = true;
       const cw = o.card.offsetWidth, ch = o.card.offsetHeight, mw = menu.offsetWidth, mh = menu.offsetHeight, r = o.card.getBoundingClientRect(), x = r.left, y = r.top, G = 8;
       // Coordenadas de la ventana: debajo de la tarjeta si cabe, si no encima y, si tampoco, pegado al borde; siempre dentro de la ventana.

@@ -292,7 +292,7 @@ ${NMP.menuCss}
   const openWindowFallback = () => { try { chrome.runtime.sendMessage({ type: 'open-window' }); } catch (_) { /* sin background */ } };
   document.addEventListener('__mp_pip', (e) => {
     const d = String(e.detail);
-    if (d === 'open' ? !pipAsked : d === 'closed' ? !pip : !d.startsWith('error:')) return; // evento no pedido o falso
+    if (d === 'closed' ? !pip : !pipAsked || !(d === 'open' || d.startsWith('error:'))) return; // evento no pedido o falso
     pipAsked = false;
     if (d === 'open') {
       pip = true;
