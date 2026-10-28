@@ -2,14 +2,14 @@
 // El audio no sale de aquí: se devuelve a los altavoces tal cual (la captura silencia la pestaña si no se reconecta) y a la página
 // solo llegan números (bandas de frecuencia y forma de onda), por un puerto que solo existe entre la extensión y su content script.
 const caps = new Map(); // tabId -> { stream, ctx, an, ports:Set, timer }
-const FFT = 512, FPS = 30;
+const FFT = 2048, FPS = 30; // 2048 da bandas de ~23 Hz: separa bien los graves, que con 512 caían todos en los primeros contenedores
 
 async function start(tabId, streamId) {
   if (caps.has(tabId)) return;
   const stream = await navigator.mediaDevices.getUserMedia({ audio: { mandatory: { chromeMediaSource: 'tab', chromeMediaSourceId: streamId } }, video: false });
   const ctx = new AudioContext();
   const src = ctx.createMediaStreamSource(stream), an = ctx.createAnalyser();
-  an.fftSize = FFT; an.smoothingTimeConstant = 0.6;
+  an.fftSize = FFT; an.smoothingTimeConstant = 0.3; // el suavizado fino lo hace el motor del visualizador; aquí se deja reaccionar rápido
   src.connect(an); src.connect(ctx.destination);
   const cap = { stream, ctx, an, ports: new Set(), timer: 0 };
   const f = new Uint8Array(an.frequencyBinCount), t = new Uint8Array(an.fftSize);
