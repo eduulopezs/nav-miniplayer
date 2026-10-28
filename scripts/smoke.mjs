@@ -75,3 +75,14 @@ console.log('✓ renderer dibuja todos los diseños');
   ok(M.remotes().length === 1, 'caduca el iframe mudo');
 }
 console.log('✓ medios remotos y política de selección');
+
+// Paleta de la carátula: el ajuste de contraste lleva cualquier color a 3:1 como mínimo y no toca los que ya cumplen.
+{
+  const { util: U, tokens: T } = ctx.__NMP;
+  const bg = U.rgbOf(T.theme.glass['bg-b']);
+  const ok = (c, m) => { if (!c) throw new Error('paleta: ' + m); };
+  for (const c of [[10, 10, 40], [0, 0, 0], [27, 27, 36], [120, 40, 200]]) ok(U.contrast(U.ensureContrast(c, bg), bg) >= 3, `${c} queda por debajo de 3:1`);
+  ok(U.ensureContrast([255, 179, 107], bg).join() === '255,179,107', 'un color que ya cumple no cambia');
+  for (const h of U.DEFAULT_PAL) ok(U.contrast(U.rgbOf(h), bg) >= 3, `la paleta por defecto ${h} no llega a 3:1`);
+  console.log('✓ paleta de la carátula: contraste mínimo 3:1');
+}

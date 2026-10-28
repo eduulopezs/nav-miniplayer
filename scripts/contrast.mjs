@@ -9,7 +9,7 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const ctx = vm.createContext({});
 ctx.globalThis = ctx;
 vm.runInContext(readFileSync(join(root, 'src/content/tokens.js'), 'utf8'), ctx);
-const K = ctx.__NMP.tokens.theme;
+const { theme: K, shared: S } = ctx.__NMP.tokens;
 
 const parse = (c) => {
   const m = /^#([0-9a-f]{6})$/i.exec(c);
@@ -32,15 +32,24 @@ const pairs = [
   ['metal', 'título', 'mini-fg', 'mini-bg-a', 4.5], ['metal', 'artista', 'mini-fg-2', 'mini-bg-a', 4.5], ['metal', 'tiempo', 'mini-time', 'mini-bg-a', 4.5],
 ];
 
+// Pares de los tokens compartidos: anillo de foco (componente de interfaz, 3:1; WCAG 1.4.11 y 2.4.11) y texto del aviso y del toast sobre su velo, que se compone sobre el fondo del diseño.
+const base = (k) => k['mini-bg-a'] ?? k['bg-a'];
+const veil = (key) => (k) => hex(over(k[key], base(k)));
+for (const th of ['glass', 'noir', 'crt', 'metal']) {
+  pairs.push([th, 'foco', 'focus', base, 3]);
+  pairs.push([th, 'aviso', 'on-overlay', veil('scrim-hint'), 4.5]);
+  pairs.push([th, 'toast', 'on-overlay', veil('scrim-toast'), 4.5]);
+}
+
 let fails = 0;
 for (const [theme, what, fgKey, bgKey, min] of pairs) {
-  const k = { ...K.glass, ...K[theme] }; // los diseños heredan de Glass lo que no definen (p. ej. el título usa --text)
+  const k = { ...S, ...K.glass, ...K[theme] }; // los diseños heredan de Glass lo que no definen (p. ej. el título usa --text)
   const bg = typeof bgKey === 'function' ? bgKey(k) : k[bgKey];
   const fg = k[fgKey];
   const r = ratio(fg, bg);
   const ok = r >= min;
   if (!ok) fails++;
-  console.log(`${ok ? '✓' : '✗'} ${theme.padEnd(6)} ${what.padEnd(11)} ${fgKey.padEnd(9)} sobre ${(typeof bgKey === 'function' ? 'fondo' : bgKey).padEnd(8)} ${r.toFixed(2).padStart(5)}:1 (mín ${min})`);
+  console.log(`${ok ? '✓' : '✗'} ${theme.padEnd(6)} ${what.padEnd(11)} ${fgKey.padEnd(9)} sobre ${(typeof bgKey === "function" ? "fondo" : bgKey).padEnd(8)} ${r.toFixed(2).padStart(5)}:1 (mín ${min})`);
 }
 console.log(fails ? `\n${fails} par(es) por debajo del mínimo WCAG` : '\n✓ todos los pares cumplen WCAG');
 if (fails && process.argv.includes('--strict')) process.exit(1);

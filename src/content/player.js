@@ -15,6 +15,7 @@
 
   root.innerHTML = `
 <style>
+${NMP.tokens.css}
 ${NMP.css}
 ${NMP.menuCss}
 </style>
@@ -31,7 +32,7 @@ ${NMP.menuCss}
   // ---------- Estado ----------
   let modeSwitch = false; // cambiando de tipo de ventana, esperando a que se cierre la anterior
   let media = null, lastPlayed = null, dismissed = true, actions = new Set();
-  let lastKey = '', lastPlaying = null, pip = false, curTitle = '', curArtist = '', curImg = '', lastTrack = '', trackNo = 0;
+  let lastKey = '', lastKeyHadArt = false, lastPlaying = null, pip = false, curTitle = '', curArtist = '', curImg = '', lastTrack = '', trackNo = 0;
   let fm = 'pip';
   let theme = 'glass';
   // Diseño activo: cada diseño trae su plantilla, su CSS y su visualizador (skins/*.js). Los nombres antiguos se reasignan al más parecido.
@@ -52,7 +53,7 @@ ${NMP.menuCss}
     applySkip();
     if (SK[t].setup) SK[t].setup(vizCtx);
     fontSkin = ''; // se cargan al mostrarse, no al arrancar la página
-    lastKey = ''; lastPlaying = null; lastP = -1; lastHint = null; pending = null; // la plantilla es nueva: se vuelve a rellenar todo
+    lastKey = ''; lastKeyHadArt = false; lastPlaying = null; lastP = -1; lastHint = null; pending = null; // la plantilla es nueva: se vuelve a rellenar todo
     renderer.invalidate(); render();
   }
   const setMode = (v) => { applyMode(v); try { chrome.storage.local.set({ [MODE_KEY]: v }); } catch (_) { /* contexto invalidado */ } };
@@ -205,8 +206,10 @@ ${NMP.menuCss}
   };
   card.addEventListener('click', (e) => {
     const a = e.target.closest('[data-act]'), fn = a && !a.disabled && Object.hasOwn(ACT, a.dataset.act) && ACT[a.dataset.act];
-    if (fn) { fn(); render(); }
+    if (fn) { fn(); render(); if (a.dataset.act === 'back' || a.dataset.act === 'fwd') restart(a, 'nudge'); }
   });
+  // Reinicia una animación de un solo uso: quita la clase, fuerza el reflujo y la vuelve a poner.
+  const restart = (el, cls) => { el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); el.addEventListener('animationend', () => el.classList.remove(cls), { once: true }); };
 
   // Teclado con el reproductor enfocado (Tab): Espacio/K play-pausa, ←/→ ±salto, Esc oculta.
   // Sobre un botón, Espacio/Intro los gestiona el propio botón.
@@ -470,7 +473,7 @@ ${NMP.menuCss}
   function loadPalette(src) {
     setPalette(DEFAULT_PAL);
     if (!src) return;
-    const done = (im) => { if (curImg !== src) return; const p = palette(im); if (p) setPalette(p); };
+    const done = (im) => { if (curImg !== src) return; const p = palette(im, NMP.tokens.theme[theme]['mini-bg-b'] ?? NMP.tokens.theme[theme]['bg-b']); if (p) setPalette(p); };
     const load = (u, cors, fail) => { const im = new Image(); if (cors) im.crossOrigin = 'anonymous'; im.onload = () => done(im); im.onerror = fail; im.src = u; };
     load(src, true, () => {
       if (vp.active || vp.starting) return; // Mini pide la misma carátula al service worker y solo atiende una descarga a la vez
@@ -517,7 +520,8 @@ ${NMP.menuCss}
       const url = img ? `url("${img.replace(/["\\\n\r]/g, (c) => '%' + c.charCodeAt(0).toString(16).toUpperCase().padStart(2, '0'))}")` : 'none';
       card.style.setProperty('--art', url);
       card.style.setProperty('--bars', barcode(strSeed(title)));
-      if (imgChanged) loadPalette(img);
+      if (imgChanged) { loadPalette(img); if (lastKeyHadArt) restart(card, 'swap'); }
+      if (img) lastKeyHadArt = true;
     }
 
     const live = media.duration === Infinity, dur = isFinite(media.duration) ? media.duration : 0, ct = media.currentTime || 0;

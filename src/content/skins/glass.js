@@ -76,15 +76,15 @@ SKINS.glass.viz = {
 .gl-bar { position: relative; flex: 1; height: 18px; cursor: pointer; touch-action: none; }
 .gl-bar::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 4px; margin-top: -2px; border-radius: 4px; background: rgba(255,255,255,.26); box-shadow: inset 0 1px 1px rgba(0,0,0,.2); }
 .gl-bar i { position: absolute; left: 0; top: 50%; height: 4px; margin-top: -2px; width: calc(var(--p, 0) * 100%); border-radius: 4px; background: linear-gradient(90deg, rgba(255,255,255,.7), #fff); box-shadow: 0 0 12px rgba(255,255,255,.7); }
-.gl-bar::after { content: ""; position: absolute; top: 50%; left: calc(var(--p, 0) * 100%); width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,.35), 0 0 0 3px rgba(255,255,255,.22); transform: scale(.8); transition: transform .15s; }
+.gl-bar::after { content: ""; position: absolute; top: 50%; left: calc(var(--p, 0) * 100%); width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,.35), 0 0 0 3px rgba(255,255,255,.22); transform: scale(.8); transition: transform var(--dur-fast); }
 .gl-bar:hover::after, .gl-bar:focus-visible::after, .gl-bar.drag::after { transform: scale(1.15); }
 .live-badge .gl-bar { pointer-events: none; } .live-badge .gl-bar::after { display: none; } .live-badge .gl-bar i { width: 100%; animation: glpulse 1.6s ease-in-out infinite; }
 @keyframes glpulse { 50% { opacity: .35; } }
 .gl-ctl { grid-area: ctl; display: flex; align-items: center; justify-content: center; gap: 6px; }
-.gl-b { width: var(--bs); height: var(--bs); flex: none; border-radius: 50%; display: grid; place-items: center; color: #fff; transition: background .15s, transform .12s; }
+.gl-b { width: var(--bs); height: var(--bs); flex: none; border-radius: 50%; display: grid; place-items: center; color: #fff; transition: background var(--dur-fast), transform .12s; }
 .gl-b:hover { background: rgba(255,255,255,.2); }
-.gl-b:active { transform: scale(.92); }
-.gl-b[disabled] { opacity: .35; pointer-events: none; }
+.gl-b:active { transform: scale(var(--press-scale)); }
+.gl-b[disabled] { opacity: var(--opacity-disabled); pointer-events: none; }
 .gl-b.pl { width: calc(var(--bs) * 1.2); height: calc(var(--bs) * 1.2); background: linear-gradient(180deg, #fff, #dde5f6); color: #1b1f3a;
   box-shadow: 0 8px 20px rgba(0,0,0,.35), inset 0 -3px 6px rgba(110,125,210,.3), inset 0 1px 0 #fff; }
 .gl-b.pl:hover { background: linear-gradient(180deg, #fff, #eef2ff); }

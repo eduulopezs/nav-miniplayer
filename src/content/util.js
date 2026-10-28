@@ -27,9 +27,24 @@
 
   // Tres colores dominantes de una carátula (vivos y distintos entre sí) para teñir los diseños. Devuelve null si el canvas está contaminado.
   const DEFAULT_PAL = ['#ffb36b', '#e0475b', '#7c5cff'];
-  function palette(img) {
+
+  // Contraste WCAG entre dos colores [r,g,b] opacos, y ajuste de un color hasta alcanzar un mínimo contra un fondo (se aclara sobre fondo oscuro y se oscurece sobre fondo claro).
+  const lum = ([r, g, b]) => { const f = (v) => { v /= 255; return v <= .03928 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4; }; return .2126 * f(r) + .7152 * f(g) + .0722 * f(b); };
+  const contrast = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p); return (x + .05) / (y + .05); };
+  const rgbOf = (hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+  function ensureContrast(rgb, bg, min = 3) {
+    const to = lum(bg) < .5 ? 255 : 0;
+    for (let t = 0; t <= 1.001; t += .05) {
+      const c = rgb.map((v) => Math.round(v + (to - v) * t));
+      if (contrast(c, bg) >= min) return c;
+    }
+    return [to, to, to];
+  }
+
+  // bg: fondo (#rrggbb) sobre el que se dibujan los colores; si se da, cada uno se ajusta a 3:1 como mínimo.
+  function palette(img, bg) {
     try {
-      const c = document.createElement('canvas'); c.width = c.height = 16;
+      const c = typeof OffscreenCanvas === 'function' ? new OffscreenCanvas(16, 16) : Object.assign(document.createElement('canvas'), { width: 16, height: 16 });
       const g = c.getContext('2d', { willReadFrequently: true }); g.drawImage(img, 0, 0, 16, 16);
       const d = g.getImageData(0, 0, 16, 16).data, px = [];
       for (let i = 0; i < d.length; i += 4) {
@@ -41,12 +56,13 @@
       px.sort((a, b) => b.score - a.score);
       const pick = [px[0]], hd = (a, b) => Math.min(Math.abs(a - b), 360 - Math.abs(a - b));
       for (const p of px) { if (pick.length >= 3) break; if (pick.every((q) => hd(q.h, p.h) > 35)) pick.push(p); }
-      const hex = (p) => '#' + p.c.map((v) => v.toString(16).padStart(2, '0')).join('');
+      const back = bg && rgbOf(bg);
+      const hex = (p) => '#' + (back ? ensureContrast(p.c, back) : p.c).map((v) => v.toString(16).padStart(2, '0')).join('');
       const out = pick.map(hex);
       while (out.length < 3) out.push(DEFAULT_PAL[out.length]);
       return out;
     } catch (_) { return null; }
   }
 
-  NMP.util = { clamp, fmt, fmt2, pad2, hash, strSeed, barcode, palette, DEFAULT_PAL };
+  NMP.util = { clamp, fmt, fmt2, pad2, hash, strSeed, barcode, palette, DEFAULT_PAL, contrast, ensureContrast, rgbOf };
 })();

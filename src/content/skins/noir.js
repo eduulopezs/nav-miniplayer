@@ -14,21 +14,21 @@ SKINS.noir = { label: 'Noir', tpl: () => `
         <div class="nr-cell"><label>Pista</label><b class="nr-title" data-t="title"></b></div>
         <div class="nr-cell"><label>Artista</label><span class="nr-artist" data-t="artist"></span></div>
       </div>
-      <div class="nr-chips"><button data-act="mode" title="Pasar a Mini" aria-label="Pasar a Mini"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><rect x="3" y="5" width="18" height="14"/><rect x="12" y="11" width="6" height="5" fill="currentColor"/></svg></button><button data-act="hide" title="Ocultar" aria-label="Ocultar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+      <div class="nr-chips"><button data-act="mode" title="Pasar a Mini" aria-label="Pasar a Mini"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><rect x="3" y="5" width="18" height="14"/><rect x="12" y="11" width="6" height="5" fill="currentColor"/></svg></button><button data-act="hide" title="Ocultar" aria-label="Ocultar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
       <div class="nr-cells"><div class="nr-cell"><label>N°</label><span data-t="idx">01/04</span></div><div class="nr-cell"><label>Restante</label><span data-v="rem2">-00:00</span></div><div class="nr-cell"><label>Avance</label><span data-v="pct">0%</span></div></div>
       <div class="nr-code" role="slider" tabindex="0" data-bar aria-label="Progreso" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i></i></div>
       <div class="nr-foot">
         <div class="nr-time"><b data-v="curd">00.00</b><i data-v="durd">/ 0:00</i></div>
         <div class="nr-ctl">
-          <button class="nr-b pv" data-act="prev" title="Anterior" aria-label="Anterior"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="M6 5v14M19 5.5v13L9 12z"/></svg></button>
+          <button class="nr-b pv" data-act="prev" title="Anterior" aria-label="Anterior"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="M6 5v14M19 5.5v13L9 12z"/></svg></button>
           <button class="nr-b bk" data-act="back" title="Retroceder 10 s" aria-label="Retroceder 10 segundos"><span data-skn="-">-10</span></button>
-          <button class="nr-b pl" data-act="play" title="Pausar" aria-label="Pausar"><span class="ic ic-pause"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="M8 5v14M16 5v14" stroke-width="3.6"/></svg></span><span class="ic ic-play"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="M7 4.5v15L20 12z" fill="currentColor"/></svg></span></button>
+          <button class="nr-b pl" data-act="play" title="Pausar" aria-label="Pausar"><span class="ic ic-pause"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="M8 5v14M16 5v14" stroke-width="3.4"/></svg></span><span class="ic ic-play"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="M7 4.5v15L20 12z" fill="currentColor"/></svg></span></button>
           <button class="nr-b fw" data-act="fwd" title="Avanzar 10 s" aria-label="Avanzar 10 segundos"><span data-skn="+">+10</span></button>
-          <button class="nr-b nx" data-act="next" title="Siguiente" aria-label="Siguiente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="M18 5v14M5 5.5v13L15 12z"/></svg></button>
+          <button class="nr-b nx" data-act="next" title="Siguiente" aria-label="Siguiente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="M18 5v14M5 5.5v13L15 12z"/></svg></button>
         </div>
       </div>
       <div class="nr-ext">
-        <button class="nr-b vl" data-act="mute" title="Silenciar" aria-label="Silenciar o activar sonido"><span class="nr-vol"><span class="ic ic-vol"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z" fill="currentColor"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></svg></span><span class="ic ic-mute"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z" fill="currentColor"/><path d="M16 9.5l5 5M21 9.5l-5 5"/></svg></span><em></em></span></button>
+        <button class="nr-b vl" data-act="mute" title="Silenciar" aria-label="Silenciar o activar sonido"><span class="nr-vol"><span class="ic ic-vol"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z" fill="currentColor"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></svg></span><span class="ic ic-mute"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z" fill="currentColor"/><path d="M16 9.5l5 5M21 9.5l-5 5"/></svg></span><em></em></span></button>
       </div>
     </div>
   </div>` };
@@ -111,14 +111,15 @@ SKINS.noir.viz = {
 .nr-ctl { display: flex; align-items: center; gap: 4px; }
 .nr-b { width: var(--bs, 30px); height: var(--bs, 30px); flex: none; display: grid; place-items: center; color: var(--pp); box-shadow: inset 0 0 0 1px var(--ln); font: 700 9px/1 "Space Mono", monospace; letter-spacing: .02em; transition: background .1s, color .1s; }
 .nr-b:hover { background: rgba(255,42,42,.18); box-shadow: inset 0 0 0 1px var(--rd); }
-.nr-b:active { transform: translateY(1px); }
-.nr-b[disabled] { opacity: .3; pointer-events: none; }
+.nr-b:active { transform: translateY(var(--press-shift)); }
+.nr-b[disabled] { opacity: var(--opacity-disabled); pointer-events: none; }
 .nr-b svg { width: 50%; height: 50%; }
 .nr-b.pl { background: var(--rd); color: var(--bk); box-shadow: none; width: calc(var(--bs, 30px) * 1.3); clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px)); }
 .nr-b.pl:hover { background: #ff5a5a; }
 .nr-ext { grid-area: ext; display: none; gap: 6px; }
 .nr-ext .nr-b { width: auto; min-width: var(--bs, 30px); padding: 0 10px; }
 .nr-vol { display: flex; align-items: center; gap: 6px; } .nr-vol svg { width: 13px; height: 13px; }
+.card:not(.muted) .nr-vol .ic-mute svg, .card.muted .nr-vol .ic-vol svg { position: absolute; }
 .nr-vol em { font-style: normal; width: 34px; height: 4px; background: linear-gradient(90deg, var(--pp) 70%, rgba(236,232,220,.25) 70%); } .muted .nr-vol em { background: rgba(236,232,220,.25); }
 .nr-stripes { display: none; position: absolute; top: 0; right: 22%; width: 18%; height: 6px; background: repeating-linear-gradient(135deg, var(--pp) 0 2px, transparent 2px 5px); z-index: 3; }
 
