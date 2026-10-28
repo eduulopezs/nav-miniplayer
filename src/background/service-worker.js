@@ -84,7 +84,10 @@ function relayFrame(m, sender, tabId) {
   if (m.type === 'mp-frame' && sender.frameId > 0 && typeof m.list === 'string' && m.list.length <= MAX_FRAME_MSG) {
     chrome.tabs.sendMessage(tabId, { type: 'mp-frame', frame: sender.frameId, list: m.list }, { frameId: 0 }).catch(() => {});
   } else if (m.type === 'mp-cmd' && sender.frameId === 0 && Number.isInteger(m.frame) && m.frame > 0 && typeof m.cmd === 'string' && m.cmd.length < 40) {
-    chrome.tabs.sendMessage(tabId, { type: 'mp-cmd', cmd: m.cmd }, { frameId: m.frame }).catch(() => {});
+    // Si el marco ya no existe, se vacía su lista en el marco superior para que el medio desaparezca sin esperar a que caduque.
+    const frame = m.frame;
+    chrome.tabs.sendMessage(tabId, { type: 'mp-cmd', cmd: m.cmd }, { frameId: frame })
+      .catch(() => chrome.tabs.sendMessage(tabId, { type: 'mp-frame', frame, list: '[]' }, { frameId: 0 }).catch(() => {}));
   }
 }
 // Fuentes de los diseños: se leen de la propia extensión y se entregan al content script en base64 (no son accesibles desde las páginas).
