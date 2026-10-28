@@ -9,7 +9,7 @@
   const N = 48;
   const V = { N, b: new Float32Array(N), pk: new Float32Array(N), w: new Float32Array(96), ph: 0, t: 0, kick: 0, lvl: 0, hist: [], hAcc: 0, idle: true, real: false };
   const src = { bpm: 108, voice: false, on: false };
-  const real = { freq: null, time: null, at: -1e9, kick: 0, prevLow: 0 };
+  const real = { freq: null, time: null, at: -1e9, kick: 0, prevLow: 0, peak: .25, avg: new Float32Array(N) }; // peak: control automático de ganancia; avg: nivel medio por banda
   const now = () => (typeof performance !== 'undefined' ? performance.now() : Date.now());
   const REAL_FRESH_MS = 400;
 
@@ -40,16 +40,28 @@
     }
     return kick;
   }
+  // Señal real. La música rara vez llena el rango del analizador, así que se normaliza con un control automático de ganancia (el pico
+  // reciente fija la escala) y se realzan los cambios: cada banda mezcla su nivel con cuánto sube sobre su media de ~1 s, de modo que
+  // los golpes y las entradas se ven aunque el volumen sea bajo o la canción sea densa.
   function targetsReal(dt, tg) {
     const fq = real.freq, nb = fq.length, hz = real.rate / 2 / nb, lo = 40, hi = Math.min(14000, real.rate / 2 - 1), ratio = hi / lo;
+    let top = 0;
     for (let i = 0; i < N; i++) {
       const a = Math.max(0, Math.floor(lo * Math.pow(ratio, i / N) / hz)), b = Math.max(a + 1, Math.min(nb, Math.ceil(lo * Math.pow(ratio, (i + 1) / N) / hz)));
+      let m = 0; for (let k = a; k < b; k++) if (fq[k] > m) m = fq[k]; // el máximo de la banda conserva los picos que la media diluye
       let s = 0; for (let k = a; k < b; k++) s += fq[k];
-      const e = s / (b - a) / 255, tilt = .85 + .55 * (i / (N - 1)); // los agudos llegan con menos energía: se compensa un poco
-      tg[i] = Math.min(1, Math.pow(e, 1.35) * 1.25 * tilt);
+      const e = (.5 * m + .5 * s / (b - a)) / 255 * (.85 + .55 * (i / (N - 1))); // los agudos llegan con menos energía: se compensa un poco
+      tg[i] = e; if (e > top) top = e;
+    }
+    real.peak = Math.max(.12, top, real.peak * Math.exp(-dt * .3));
+    const kA = 1 - Math.exp(-dt / 1.0);
+    for (let i = 0; i < N; i++) {
+      const en = Math.min(1, tg[i] / real.peak), rise = Math.max(0, en - real.avg[i]);
+      real.avg[i] += (en - real.avg[i]) * kA;
+      tg[i] = Math.min(1, Math.pow(en, 1.6) * .8 + rise * 1.7);
     }
     let low = 0; for (let i = 0; i < 6; i++) low += tg[i]; low /= 6;
-    if (low - real.prevLow > .1) real.kick = Math.min(1, low * 1.4);
+    if (low - real.prevLow > .06) real.kick = Math.min(1, low * 1.5);
     real.kick *= Math.exp(-dt * 7); real.prevLow = low;
     return real.kick;
   }
@@ -61,7 +73,7 @@
     const kick = useReal ? targetsReal(dt, tg) : targetsSim(dt, tg);
     let sum = 0, loud = 0;
     for (let i = 0; i < N; i++) {
-      const t = Math.max(0, Math.min(1, tg[i])), v = V.b[i], k = 1 - Math.exp(-dt * (t > v ? 34 : 9));
+      const t = Math.max(0, Math.min(1, tg[i])), v = V.b[i], k = 1 - Math.exp(-dt * (t > v ? (useReal ? 60 : 34) : (useReal ? 13 : 9)));
       V.b[i] = v + (t - v) * k; V.pk[i] = Math.max(V.b[i], V.pk[i] - dt * .55); loud += V.b[i]; if (i < 8) sum += V.b[i];
     }
     V.kick = kick; V.lvl = sum / 8; V.idle = loud / N < .004;
