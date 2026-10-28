@@ -125,6 +125,7 @@ test('medio sin insertar dentro de un iframe', async () => {
   assert.equal((await p.read()).playLabel, 'Pausar');
   await p.click('act:play');
   await p.waitFor(() => frame.evaluate(() => window.x.paused));
+  await p.waitFor(async () => (await p.read()).playLabel === 'Reproducir'); // la tarjeta debe saber que está en pausa antes de reanudar
   await p.click('act:play');
   await p.waitFor(async () => !(await frame.evaluate(() => window.x.paused)));
   const t0 = await frame.evaluate(() => window.x.currentTime);
