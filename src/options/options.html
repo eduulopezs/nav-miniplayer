@@ -1,0 +1,50 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nav Miniplayer</title>
+<link rel="stylesheet" href="options.css">
+</head>
+<body>
+<main>
+  <h1 data-i18n="optionsTitle"></h1>
+
+  <section aria-labelledby="h-theme">
+    <h2 id="h-theme" data-i18n="design"></h2>
+    <p class="hint" data-i18n="themeHint"></p>
+    <div id="themes" class="themes" role="radiogroup" data-i18n-label="design"></div>
+  </section>
+
+  <section aria-labelledby="h-play">
+    <h2 id="h-play" data-i18n="playbackTitle"></h2>
+    <div class="row"><span id="l-skip" data-i18n="skip"></span><div id="skip" class="chips" role="radiogroup" aria-labelledby="l-skip"></div></div>
+    <label class="row"><span data-i18n="blurCover"></span><input id="blur" type="checkbox"></label>
+    <label class="row"><span data-i18n="captureOption"></span><input id="capture" type="checkbox"></label>
+    <p class="hint" data-i18n="captureHint"></p>
+  </section>
+
+  <section aria-labelledby="h-keys">
+    <h2 id="h-keys" data-i18n="shortcutsTitle"></h2>
+    <ul id="keys" class="keys"></ul>
+    <button id="edit-keys" type="button" data-i18n="editShortcuts"></button>
+  </section>
+
+  <section aria-labelledby="h-win">
+    <h2 id="h-win" data-i18n="windowTitle"></h2>
+    <button id="open-win" type="button" data-i18n="ctxWindow"></button>
+  </section>
+</main>
+<script src="../content/config.js"></script>
+<script src="../content/util.js"></script>
+<script src="../content/tokens.js"></script>
+<script src="../content/fonts.js"></script>
+<script src="../content/viz.js"></script>
+<script src="../content/skins/noir.js"></script>
+<script src="../content/skins/crt.js"></script>
+<script src="../content/skins/glass.js"></script>
+<script src="../content/skins/metal.js"></script>
+<script src="../content/styles.js"></script>
+<script src="options.js"></script>
+</body>
+</html>

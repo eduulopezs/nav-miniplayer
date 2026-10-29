@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es">
+<html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -8,11 +8,11 @@
 </head>
 <body>
 <header id="bar">
-  <div id="chips" role="tablist" aria-label="Pestañas con sonido"></div>
-  <button id="go" type="button" title="Ir a la pestaña" aria-label="Ir a la pestaña"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg></button>
+  <div id="chips" role="tablist" data-i18n-label="tabsWithSound"></div>
+  <button id="go" type="button" data-i18n-label="goToTab" data-i18n-title="goToTab"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg></button>
 </header>
 <main id="app"></main>
-<p id="empty" hidden>No suena nada en tus pestañas.</p>
+<p id="empty" hidden><span data-i18n="emptyWindow"></span></p>
 <script src="../content/config.js"></script>
 <script src="../content/util.js"></script>
 <script src="../content/fonts.js"></script>

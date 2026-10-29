@@ -6,6 +6,10 @@
   const { fmt, fmt2, pad2, strSeed, barcode, palette, DEFAULT_PAL } = NMP.util;
   const { skins: SK, viz } = NMP;
   const { PREFS_KEY } = NMP.cfg;
+  // Textos de la página (player.html) desde _locales.
+  document.documentElement.lang = chrome.i18n.getUILanguage();
+  for (const [attr, key] of [['data-i18n-label', 'aria-label'], ['data-i18n-title', 'title']]) document.querySelectorAll('[' + attr + ']').forEach((e) => e.setAttribute(key, NMP.t(e.getAttribute(attr))));
+  document.querySelectorAll('[data-i18n]').forEach((e) => { e.textContent = NMP.t(e.dataset.i18n); });
   const SESS_KEY = 'mp_sessions', THEME_KEY = 'mp_theme', WIN_KEY = 'mp_win';
   const $ = (id) => document.getElementById(id);
   const STALE_MS = 7000; // las pestañas informan cada 2 s mientras suenan; si callan, se muestra como en pausa
@@ -16,7 +20,7 @@
 ${NMP.css}
   .card.wnd { cursor: default; }
   .wnd [data-act=hide] { display: none !important; }
-  </style><div class="card pip show wnd" role="region" aria-label="Reproductor" tabindex="0"><div class="toast"></div></div>`;
+  </style><div class="card pip show wnd" role="region" aria-label="${NMP.t('player')}" tabindex="0"><div class="toast"></div></div>`;
   const card = root.querySelector('.card');
   const qa = (sel) => card.querySelectorAll(sel);
   card.style.setProperty('--r', '0px');
@@ -63,8 +67,8 @@ ${NMP.css}
   }
   function applySkip() {
     qa('[data-skn]').forEach((e) => { e.textContent = (e.dataset.skn || '') + skip; });
-    qa('[data-act=back]').forEach((b) => { b.title = `Retroceder ${skip} s`; b.setAttribute('aria-label', `Retroceder ${skip} segundos`); });
-    qa('[data-act=fwd]').forEach((b) => { b.title = `Avanzar ${skip} s`; b.setAttribute('aria-label', `Avanzar ${skip} segundos`); });
+    qa('[data-act=back]').forEach((b) => { b.title = NMP.t('backTitle', String(skip)); b.setAttribute('aria-label', NMP.t('backLabel', String(skip))); });
+    qa('[data-act=fwd]').forEach((b) => { b.title = NMP.t('fwdTitle', String(skip)); b.setAttribute('aria-label', NMP.t('fwdLabel', String(skip))); });
   }
 
   // ---------- Carátula y paleta: la descarga el service worker (reglas de red de net-guard) ----------
@@ -112,10 +116,10 @@ ${NMP.css}
       rem: live ? '--:--' : '-' + fmt(Math.max(0, d - t)), rem2: live ? '--:--' : '-' + fmt2(Math.max(0, d - t)), pct: Math.round(p * 100) + '%',
     };
     qa('[data-v]').forEach((e) => { const x = V[e.dataset.v]; if (x != null) setTxt(e, x); });
-    const now = Math.round(p * 100), vt = live ? 'En directo' : fmt(t) + ' de ' + fmt(d);
+    const now = Math.round(p * 100), vt = live ? NMP.t('live') : NMP.t('timeOf', [fmt(t), fmt(d)]);
     qa('[data-bar]').forEach((b) => { if (b._n !== now) { b._n = now; b.setAttribute('aria-valuenow', now); } if (b._vt !== vt) { b._vt = vt; b.setAttribute('aria-valuetext', vt); } });
     const playing = playingNow(s);
-    qa('[data-act=play]').forEach((b) => { const l = playing ? 'Pausar' : 'Reproducir'; if (b.title !== l) { b.title = l; b.setAttribute('aria-label', l); } });
+    qa('[data-act=play]').forEach((b) => { const l = playing ? NMP.t('pause') : NMP.t('play'); if (b.title !== l) { b.title = l; b.setAttribute('aria-label', l); } });
     card.classList.toggle('paused', !playing); card.classList.toggle('muted', s.muted);
     qa('[data-act=back],[data-act=fwd]').forEach((b) => { b.disabled = live; });
     qa('[data-act=next]').forEach((b) => { b.disabled = !s.next; });

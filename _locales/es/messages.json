@@ -1,0 +1,220 @@
+{
+  "extName": {
+    "message": "Nav Miniplayer"
+  },
+  "extDesc": {
+    "message": "Minirreproductor flotante con estilo glass para controlar el audio/vídeo de la pestaña: play/pausa, ±10 s, anterior/siguiente y progreso en el borde."
+  },
+  "actionTitle": {
+    "message": "Mostrar/ocultar minirreproductor"
+  },
+  "cmdToggle": {
+    "message": "Mostrar u ocultar el minirreproductor"
+  },
+  "cmdPlay": {
+    "message": "Reproducir o pausar"
+  },
+  "cmdBack": {
+    "message": "Retroceder"
+  },
+  "cmdFwd": {
+    "message": "Avanzar"
+  },
+  "cmdPrev": {
+    "message": "Pista anterior"
+  },
+  "cmdNext": {
+    "message": "Pista siguiente"
+  },
+  "cmdWindow": {
+    "message": "Abrir la ventana aparte con todas las pestañas"
+  },
+  "region": {
+    "message": "Minirreproductor"
+  },
+  "player": {
+    "message": "Reproductor"
+  },
+  "cover": {
+    "message": "Difuminar carátula"
+  },
+  "hide": {
+    "message": "Ocultar"
+  },
+  "prev": {
+    "message": "Anterior"
+  },
+  "next": {
+    "message": "Siguiente"
+  },
+  "play": {
+    "message": "Reproducir"
+  },
+  "pause": {
+    "message": "Pausar"
+  },
+  "mute": {
+    "message": "Silenciar"
+  },
+  "muteLabel": {
+    "message": "Silenciar o activar sonido"
+  },
+  "volume": {
+    "message": "Volumen"
+  },
+  "progress": {
+    "message": "Progreso"
+  },
+  "backTitle": {
+    "message": "Retroceder $p1$ s",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "backLabel": {
+    "message": "Retroceder $p1$ segundos",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "fwdTitle": {
+    "message": "Avanzar $p1$ s",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "fwdLabel": {
+    "message": "Avanzar $p1$ segundos",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "live": {
+    "message": "En directo"
+  },
+  "timeOf": {
+    "message": "$p1$ de $p2$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      }
+    }
+  },
+  "volumeToast": {
+    "message": "Volumen $p1$%",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "copied": {
+    "message": "Enlace copiado"
+  },
+  "copyFailed": {
+    "message": "No se pudo copiar"
+  },
+  "copyLink": {
+    "message": "Copiar enlace en este minuto"
+  },
+  "playerOptions": {
+    "message": "Opciones del reproductor"
+  },
+  "rate": {
+    "message": "Velocidad"
+  },
+  "skip": {
+    "message": "Salto"
+  },
+  "design": {
+    "message": "Diseño"
+  },
+  "themeGlass": {
+    "message": "Glassware"
+  },
+  "themeNoir": {
+    "message": "Noir"
+  },
+  "themeCrt": {
+    "message": "Terminal CRT"
+  },
+  "themeMetal": {
+    "message": "Liquid Metal"
+  },
+  "tabsWithSound": {
+    "message": "Pestañas con sonido"
+  },
+  "goToTab": {
+    "message": "Ir a la pestaña"
+  },
+  "emptyWindow": {
+    "message": "No suena nada en tus pestañas."
+  },
+  "ctxCapture": {
+    "message": "Visualizador con el audio real de la pestaña"
+  },
+  "ctxWindow": {
+    "message": "Abrir ventana aparte (todas las pestañas)"
+  },
+  "ctxSettings": {
+    "message": "Ajustes…"
+  },
+  "offscreenReason": {
+    "message": "Analizar el audio de la pestaña para el visualizador"
+  },
+  "captureUnavailable": {
+    "message": "Captura de audio no disponible: $p1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "optionsTitle": {
+    "message": "Ajustes de Nav Miniplayer"
+  },
+  "themeHint": {
+    "message": "El diseño se aplica al momento en todas las pestañas."
+  },
+  "playbackTitle": {
+    "message": "Reproducción"
+  },
+  "blurCover": {
+    "message": "Difuminar la carátula"
+  },
+  "captureOption": {
+    "message": "Visualizador con el audio real"
+  },
+  "captureHint": {
+    "message": "Analiza el audio de la pestaña cuando muestras el reproductor con el icono."
+  },
+  "shortcutsTitle": {
+    "message": "Atajos de teclado"
+  },
+  "editShortcuts": {
+    "message": "Cambiar atajos en el navegador"
+  },
+  "noShortcut": {
+    "message": "Sin asignar"
+  },
+  "windowTitle": {
+    "message": "Ventana aparte"
+  },
+  "previewTitle": {
+    "message": "Título de la pista"
+  },
+  "previewArtist": {
+    "message": "Artista"
+  }
+}

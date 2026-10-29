@@ -3,27 +3,27 @@
   const SKINS = (NMP.skins ||= {});
   const { hash } = NMP.util;
 
-SKINS.crt = { label: 'Terminal CRT', tpl: () => `
+SKINS.crt = { get label() { return NMP.t('themeCrt'); }, tpl: () => `
   <div class="cr-wrap">
     <div class="cr-head"><span class="tag">NTT-7 MEDIA</span><span class="idx" data-t="idx">01/04</span><i class="rule"></i><span class="cr-state"></span>
-      <button class="cr-hb" data-act="hide" title="Ocultar" aria-label="Ocultar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
-    <button class="cr-art" data-act="cover" aria-pressed="false" aria-label="Difuminar carátula" title="Difuminar carátula"><canvas class="cr-scr" data-viz="scr"></canvas><div class="cr-corners"></div></button>
+      <button class="cr-hb" data-act="hide" title="${NMP.t('hide')}" aria-label="${NMP.t('hide')}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <button class="cr-art" data-act="cover" aria-pressed="false" aria-label="${NMP.t('cover')}" title="${NMP.t('cover')}"><canvas class="cr-scr" data-viz="scr"></canvas><div class="cr-corners"></div></button>
     <div class="cr-meta">
       <div class="cr-kv ttl"><b>TRK</b><span data-t="title"></span></div>
       <div class="cr-kv art"><b>ART</b><span data-t="artist"></span></div>
       <div class="cr-kv time"><b>T+</b><span data-v="cur2">00:00</span><em data-v="rem2">-00:00</em><span class="pct" data-v="pct">0%</span></div>
     </div>
-    <div class="cr-bar" role="slider" tabindex="0" data-bar aria-label="Progreso" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
+    <div class="cr-bar" role="slider" tabindex="0" data-bar aria-label="${NMP.t('progress')}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
     <div class="cr-ctl">
-      <button class="cr-b pv" data-act="prev" title="Anterior" aria-label="Anterior"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="M6 5v14M19 5.5v13L9 12z"/></svg></button>
-      <button class="cr-b bk" data-act="back" title="Retroceder 10 s" aria-label="Retroceder 10 segundos"><span data-skn="-">-10</span></button>
-      <button class="cr-b pl" data-act="play" title="Pausar" aria-label="Pausar"><span class="ic ic-pause"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="M8 5v14M16 5v14" stroke-width="3.4"/></svg></span><span class="ic ic-play"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="M7 4.5v15L20 12z" fill="currentColor"/></svg></span></button>
-      <button class="cr-b fw" data-act="fwd" title="Avanzar 10 s" aria-label="Avanzar 10 segundos"><span data-skn="+">+10</span></button>
-      <button class="cr-b nx" data-act="next" title="Siguiente" aria-label="Siguiente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="M18 5v14M5 5.5v13L15 12z"/></svg></button>
+      <button class="cr-b pv" data-act="prev" title="${NMP.t('prev')}" aria-label="${NMP.t('prev')}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="M6 5v14M19 5.5v13L9 12z"/></svg></button>
+      <button class="cr-b bk" data-act="back" title="${NMP.t('backTitle', '10')}" aria-label="${NMP.t('backLabel', '10')}"><span data-skn="-">-10</span></button>
+      <button class="cr-b pl" data-act="play" title="${NMP.t('pause')}" aria-label="${NMP.t('pause')}"><span class="ic ic-pause"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="M8 5v14M16 5v14" stroke-width="3.4"/></svg></span><span class="ic ic-play"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="M7 4.5v15L20 12z" fill="currentColor"/></svg></span></button>
+      <button class="cr-b fw" data-act="fwd" title="${NMP.t('fwdTitle', '10')}" aria-label="${NMP.t('fwdLabel', '10')}"><span data-skn="+">+10</span></button>
+      <button class="cr-b nx" data-act="next" title="${NMP.t('next')}" aria-label="${NMP.t('next')}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="M18 5v14M5 5.5v13L15 12z"/></svg></button>
     </div>
     <div class="cr-ext">
-      <button class="cr-b vl" data-act="mute" title="Silenciar" aria-label="Silenciar o activar sonido"><span class="cr-vol"><span class="ic ic-vol"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z" fill="currentColor"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></svg></span><span class="ic ic-mute"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z" fill="currentColor"/><path d="M16 9.5l5 5M21 9.5l-5 5"/></svg></span></span></button>
-      <input type="range" class="vol-r" data-vol min="0" max="100" step="1" value="100" aria-label="Volumen">
+      <button class="cr-b vl" data-act="mute" title="${NMP.t('mute')}" aria-label="${NMP.t('muteLabel')}"><span class="cr-vol"><span class="ic ic-vol"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z" fill="currentColor"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></svg></span><span class="ic ic-mute"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z" fill="currentColor"/><path d="M16 9.5l5 5M21 9.5l-5 5"/></svg></span></span></button>
+      <input type="range" class="vol-r" data-vol min="0" max="100" step="1" value="100" aria-label="${NMP.t('volume')}">
     </div>
   </div>` };
 SKINS.crt.viz = {

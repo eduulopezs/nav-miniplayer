@@ -20,7 +20,7 @@ ${NMP.tokens.css}
 ${NMP.css}
 ${NMP.menuCss}
 </style>
-<div class="card" role="region" aria-label="Minirreproductor" tabindex="0" aria-keyshortcuts="Space ArrowLeft ArrowRight Escape">
+<div class="card" role="region" aria-label="${NMP.t('region')}" tabindex="0" aria-keyshortcuts="Space ArrowLeft ArrowRight Escape">
   <div class="toast" role="status" aria-live="polite"></div>
   <div class="sb" aria-hidden="true"><i></i><b></b></div>
 </div>`;
@@ -148,8 +148,8 @@ ${NMP.menuCss}
     card.classList.toggle('cov-blur', prefs.blur);
     qa('[data-act=cover]').forEach((b) => b.setAttribute('aria-pressed', String(prefs.blur)));
     qa('[data-skn]').forEach((e) => { e.textContent = (e.dataset.skn || '') + n; });
-    qa('[data-act=back]').forEach((b) => { b.title = `Retroceder ${n} s`; b.setAttribute('aria-label', `Retroceder ${n} segundos`); });
-    qa('[data-act=fwd]').forEach((b) => { b.title = `Avanzar ${n} s`; b.setAttribute('aria-label', `Avanzar ${n} segundos`); });
+    qa('[data-act=back]').forEach((b) => { b.title = NMP.t('backTitle', String(n)); b.setAttribute('aria-label', NMP.t('backLabel', String(n))); });
+    qa('[data-act=fwd]').forEach((b) => { b.title = NMP.t('fwdTitle', String(n)); b.setAttribute('aria-label', NMP.t('fwdLabel', String(n))); });
   }
   let toastT = 0;
   function toast(text) {
@@ -224,7 +224,7 @@ ${NMP.menuCss}
     setTheme(id) { try { chrome.storage.local.set({ [THEME_KEY]: id }); } catch (_) { applyTheme(id); } },
     copyLink() {
       if (!media) return;
-      navigator.clipboard.writeText(timeUrl()).then(() => toast('Enlace copiado'), () => toast('No se pudo copiar'));
+      navigator.clipboard.writeText(timeUrl()).then(() => toast(NMP.t('copied')), () => toast(NMP.t('copyFailed')));
     },
     isPip: () => pip,
   });
@@ -240,7 +240,7 @@ ${NMP.menuCss}
     if (!tunable()) return;
     e.preventDefault();
     const v = clamp(Math.round(((media.muted ? 0 : media.volume) + (e.deltaY < 0 ? .05 : -.05)) * 100) / 100, 0, 1);
-    setVolume(v); toast('Volumen ' + Math.round(v * 100) + '%'); if (menu.isOpen()) menu.sync();
+    setVolume(v); toast(NMP.t('volumeToast', String(Math.round(v * 100)))); if (menu.isOpen()) menu.sync();
   }, { passive: false });
   // Atajos globales (chrome.commands): los lanza el service worker sobre la pestaña activa.
   const COMMANDS = { 'play-pause': 'play', 'seek-back': 'back', 'seek-fwd': 'fwd', 'next-track': 'next', 'prev-track': 'prev' };
@@ -420,13 +420,13 @@ ${NMP.menuCss}
       rem: live ? '--:--' : '-' + fmt(Math.max(0, dur - ct)), rem2: live ? '--:--' : '-' + fmt2(Math.max(0, dur - ct)), pct: Math.round(p * 100) + '%',
     };
     qa('[data-v]').forEach((e) => { const t = V[e.dataset.v]; if (t != null) setTxt(e, t); });
-    const now = Math.round(p * 100), vt = live ? 'En directo' : fmt(ct) + ' de ' + fmt(dur);
+    const now = Math.round(p * 100), vt = live ? NMP.t('live') : NMP.t('timeOf', [fmt(ct), fmt(dur)]);
     qa('[data-bar]').forEach((b) => { if (b._n !== now) { b._n = now; b.setAttribute('aria-valuenow', now); } if (b._vt !== vt) { b._vt = vt; b.setAttribute('aria-valuetext', vt); } });
 
     const playing = !media.paused && !media.ended;
     if (playing !== lastPlaying) {
       lastPlaying = playing;
-      const label = playing ? 'Pausar' : 'Reproducir';
+      const label = playing ? NMP.t('pause') : NMP.t('play');
       qa('[data-act=play]').forEach((b) => { b.title = label; b.setAttribute('aria-label', label); });
     }
     card.classList.toggle('paused', !playing);

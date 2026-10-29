@@ -1,4 +1,4 @@
-importScripts('net-guard.js', 'sessions.js');
+importScripts('net-guard.js', 'sessions.js', 'migrate.js');
 const { isAllowedArtworkUrl, isStoryboardUrl, sniffImage, MAX_URL } = self.NMPNet;
 
 // Clic izquierdo: se ejecuta un script en la pestaña desde el propio clic, para que cuente como gesto del usuario
@@ -18,7 +18,7 @@ async function startCapture(tabId) {
     if (!(await chrome.storage.local.get(CAPTURE_KEY))[CAPTURE_KEY]) return;
     const streamId = await chrome.tabCapture.getMediaStreamId({ targetTabId: tabId });
     try { // solo puede haber un documento offscreen: si ya existe, createDocument falla y se reutiliza
-      await chrome.offscreen.createDocument({ url: 'src/offscreen/offscreen.html', reasons: ['USER_MEDIA'], justification: 'Analizar el audio de la pestaña para el visualizador' });
+      await chrome.offscreen.createDocument({ url: 'src/offscreen/offscreen.html', reasons: ['USER_MEDIA'], justification: chrome.i18n.getMessage('offscreenReason') });
     } catch (e) { if (!/single offscreen/i.test(String(e && e.message))) throw e; }
     const r = await chrome.runtime.sendMessage({ target: 'offscreen', type: 'cap-start', tabId, streamId });
     if (r && r.ok) chrome.tabs.sendMessage(tabId, { type: 'viz-connect' }).catch(() => {});
@@ -27,8 +27,8 @@ async function startCapture(tabId) {
     // Aviso visible en el icono (6 s) para saber por qué no hay captura sin abrir la consola
     chrome.action.setBadgeBackgroundColor({ tabId, color: '#c0392b' }).catch(() => {});
     chrome.action.setBadgeText({ tabId, text: '!' }).catch(() => {});
-    chrome.action.setTitle({ tabId, title: 'Captura de audio no disponible: ' + msg.slice(0, 160) }).catch(() => {});
-    setTimeout(() => { chrome.action.setBadgeText({ tabId, text: '' }).catch(() => {}); chrome.action.setTitle({ tabId, title: 'Mostrar/ocultar minirreproductor' }).catch(() => {}); }, 6000); /* pestaña no capturable (chrome://, ya capturada...): sigue el visualizador simulado */ }
+    chrome.action.setTitle({ tabId, title: chrome.i18n.getMessage('captureUnavailable', msg.slice(0, 160)) }).catch(() => {});
+    setTimeout(() => { chrome.action.setBadgeText({ tabId, text: '' }).catch(() => {}); chrome.action.setTitle({ tabId, title: chrome.i18n.getMessage('actionTitle') }).catch(() => {}); }, 6000); /* pestaña no capturable (chrome://, ya capturada...): sigue el visualizador simulado */ }
 }
 
 // Atajos de teclado (chrome.commands, configurables en chrome://extensions/shortcuts): se ejecutan sobre la pestaña activa.
@@ -109,7 +109,9 @@ async function readFont(file) {
   return data;
 }
 chrome.runtime.onMessage.addListener((m, sender) => {
-  if (sender.id === chrome.runtime.id && !sender.tab && m && m.type === 'cap-idle') chrome.offscreen.closeDocument().catch(() => {});
+  if (sender.id !== chrome.runtime.id || sender.tab || !m) return;
+  if (m.type === 'cap-idle') chrome.offscreen.closeDocument().catch(() => {});
+  else if (m.type === 'open-window' && sender.url === chrome.runtime.getURL('src/options/options.html')) self.NMPSess.openWindow(); // botón de la página de ajustes
 });
 const inflight = new Set(); // una descarga a la vez por pestaña
 const inflightSb = new Set(); // ídem para las hojas del storyboard
@@ -139,24 +141,26 @@ chrome.runtime.onMessage.addListener((m, sender, reply) => {
 
 // Clic derecho en el icono: captura de audio, ventana aparte y (para desarrollo) el diseño.
 const THEME_KEY = 'mp_theme';
-const THEMES = { glass: 'Glassware', noir: 'Noir', crt: 'Terminal CRT', metal: 'Liquid Metal' };
+const THEMES = { glass: 'themeGlass', noir: 'themeNoir', crt: 'themeCrt', metal: 'themeMetal' };
 const syncMenu = (theme) => {
   const up = (id, checked) => chrome.contextMenus.update(id, { checked }, () => void chrome.runtime.lastError);
   if (theme) for (const id of Object.keys(THEMES)) up('th:' + id, id === theme);
 };
 chrome.runtime.onInstalled.addListener(() => {
-  chrome.storage.local.remove(['mp_mode', 'mp_pos', 'mp_size']); // ajustes de los modos Mini y Tarjeta, ya retirados
+  self.NMPMigrate.migrate().catch((e) => console.warn('[Nav Miniplayer] migración de ajustes fallida:', e));
   chrome.contextMenus.removeAll(() => {
-    chrome.contextMenus.create({ id: 'cap', type: 'checkbox', title: 'Visualizador con el audio real de la pestaña', contexts: ['action'], checked: false });
-    chrome.contextMenus.create({ id: 'win', title: 'Abrir ventana aparte (todas las pestañas)', contexts: ['action'] });
-    chrome.contextMenus.create({ id: 'themes', title: 'Diseño', contexts: ['action'] });
-    for (const [id, title] of Object.entries(THEMES)) chrome.contextMenus.create({ id: 'th:' + id, parentId: 'themes', type: 'radio', title, contexts: ['action'], checked: id === 'glass' });
+    chrome.contextMenus.create({ id: 'cap', type: 'checkbox', title: chrome.i18n.getMessage('ctxCapture'), contexts: ['action'], checked: false });
+    chrome.contextMenus.create({ id: 'win', title: chrome.i18n.getMessage('ctxWindow'), contexts: ['action'] });
+    chrome.contextMenus.create({ id: 'themes', title: chrome.i18n.getMessage('design'), contexts: ['action'] });
+    for (const [id, key] of Object.entries(THEMES)) chrome.contextMenus.create({ id: 'th:' + id, parentId: 'themes', type: 'radio', title: chrome.i18n.getMessage(key), contexts: ['action'], checked: id === 'glass' });
+    chrome.contextMenus.create({ id: 'settings', title: chrome.i18n.getMessage('ctxSettings'), contexts: ['action'] });
     chrome.storage.local.get(THEME_KEY, (r) => syncMenu((r && r[THEME_KEY]) || 'glass'));
   });
 });
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   const id = String(info.menuItemId);
   if (id === 'win') { self.NMPSess.openWindow(); return; }
+  if (id === 'settings') { chrome.runtime.openOptionsPage(); return; }
   if (id === 'cap') { // el clic en el menú también es un gesto del usuario: al activarla se captura ya la pestaña actual
     await chrome.storage.local.set({ [CAPTURE_KEY]: !!info.checked });
     if (info.checked && tab && tab.id != null) startCapture(tab.id);

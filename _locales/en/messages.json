@@ -1,0 +1,220 @@
+{
+  "extName": {
+    "message": "Nav Miniplayer"
+  },
+  "extDesc": {
+    "message": "Floating glass-style mini player to control the tab's audio and video: play/pause, ±10 s, previous/next and progress along the edge."
+  },
+  "actionTitle": {
+    "message": "Show/hide mini player"
+  },
+  "cmdToggle": {
+    "message": "Show or hide the mini player"
+  },
+  "cmdPlay": {
+    "message": "Play or pause"
+  },
+  "cmdBack": {
+    "message": "Skip back"
+  },
+  "cmdFwd": {
+    "message": "Skip forward"
+  },
+  "cmdPrev": {
+    "message": "Previous track"
+  },
+  "cmdNext": {
+    "message": "Next track"
+  },
+  "cmdWindow": {
+    "message": "Open the separate window with all tabs"
+  },
+  "region": {
+    "message": "Mini player"
+  },
+  "player": {
+    "message": "Player"
+  },
+  "cover": {
+    "message": "Blur cover art"
+  },
+  "hide": {
+    "message": "Hide"
+  },
+  "prev": {
+    "message": "Previous"
+  },
+  "next": {
+    "message": "Next"
+  },
+  "play": {
+    "message": "Play"
+  },
+  "pause": {
+    "message": "Pause"
+  },
+  "mute": {
+    "message": "Mute"
+  },
+  "muteLabel": {
+    "message": "Mute or unmute"
+  },
+  "volume": {
+    "message": "Volume"
+  },
+  "progress": {
+    "message": "Progress"
+  },
+  "backTitle": {
+    "message": "Back $p1$ s",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "backLabel": {
+    "message": "Skip back $p1$ seconds",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "fwdTitle": {
+    "message": "Forward $p1$ s",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "fwdLabel": {
+    "message": "Skip forward $p1$ seconds",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "live": {
+    "message": "Live"
+  },
+  "timeOf": {
+    "message": "$p1$ of $p2$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      },
+      "p2": {
+        "content": "$2"
+      }
+    }
+  },
+  "volumeToast": {
+    "message": "Volume $p1$%",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "copied": {
+    "message": "Link copied"
+  },
+  "copyFailed": {
+    "message": "Could not copy"
+  },
+  "copyLink": {
+    "message": "Copy link at this time"
+  },
+  "playerOptions": {
+    "message": "Player options"
+  },
+  "rate": {
+    "message": "Speed"
+  },
+  "skip": {
+    "message": "Skip"
+  },
+  "design": {
+    "message": "Design"
+  },
+  "themeGlass": {
+    "message": "Glassware"
+  },
+  "themeNoir": {
+    "message": "Noir"
+  },
+  "themeCrt": {
+    "message": "CRT Terminal"
+  },
+  "themeMetal": {
+    "message": "Liquid Metal"
+  },
+  "tabsWithSound": {
+    "message": "Tabs playing sound"
+  },
+  "goToTab": {
+    "message": "Go to tab"
+  },
+  "emptyWindow": {
+    "message": "Nothing is playing in your tabs."
+  },
+  "ctxCapture": {
+    "message": "Visualizer with the tab's real audio"
+  },
+  "ctxWindow": {
+    "message": "Open separate window (all tabs)"
+  },
+  "ctxSettings": {
+    "message": "Settings…"
+  },
+  "offscreenReason": {
+    "message": "Analyze the tab's audio for the visualizer"
+  },
+  "captureUnavailable": {
+    "message": "Audio capture unavailable: $p1$",
+    "placeholders": {
+      "p1": {
+        "content": "$1"
+      }
+    }
+  },
+  "optionsTitle": {
+    "message": "Nav Miniplayer settings"
+  },
+  "themeHint": {
+    "message": "The design is applied immediately in every tab."
+  },
+  "playbackTitle": {
+    "message": "Playback"
+  },
+  "blurCover": {
+    "message": "Blur the cover art"
+  },
+  "captureOption": {
+    "message": "Visualizer with real audio"
+  },
+  "captureHint": {
+    "message": "Analyzes the tab's audio when you show the player from the toolbar icon."
+  },
+  "shortcutsTitle": {
+    "message": "Keyboard shortcuts"
+  },
+  "editShortcuts": {
+    "message": "Change shortcuts in the browser"
+  },
+  "noShortcut": {
+    "message": "Not set"
+  },
+  "windowTitle": {
+    "message": "Separate window"
+  },
+  "previewTitle": {
+    "message": "Track title"
+  },
+  "previewArtist": {
+    "message": "Artist"
+  }
+}
