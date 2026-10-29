@@ -1,0 +1,25 @@
+:root { color-scheme: light dark; --bg: #fff; --fg: #1b1b24; --fg2: #5b5d68; --line: rgba(0, 0, 0, .14); --chip: rgba(0, 0, 0, .06); --on: #1b1b24; --on-fg: #fff; }
+@media (prefers-color-scheme: dark) { :root { --bg: #14151a; --fg: #eef0f3; --fg2: #a6a9b3; --line: rgba(255, 255, 255, .16); --chip: rgba(255, 255, 255, .08); --on: #eef0f3; --on-fg: #14151a; } }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 400 14px/1.45 system-ui, sans-serif; }
+main { max-width: 640px; margin: 0 auto; padding: 24px 16px 48px; }
+h1 { font-size: 20px; margin: 0 0 16px; }
+h2 { font-size: 14px; margin: 0 0 8px; }
+section { padding: 16px 0; border-top: 1px solid var(--line); }
+.hint { margin: 0 0 12px; color: var(--fg2); font-size: 12px; }
+.row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 6px 0; }
+.chips { display: flex; gap: 6px; }
+button { font: inherit; color: inherit; cursor: pointer; padding: 6px 12px; border: 0; border-radius: 8px; background: var(--chip); }
+button:hover { background: var(--line); }
+button[aria-checked=true] { background: var(--on); color: var(--on-fg); }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
+.themes { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+.theme { all: unset; box-sizing: border-box; cursor: pointer; display: grid; gap: 6px; padding: 8px; border-radius: 12px; box-shadow: inset 0 0 0 1px var(--line); }
+.theme[aria-checked=true] { background: none; color: inherit; box-shadow: inset 0 0 0 2px var(--fg); }
+.theme:focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
+.theme .pv { display: block; background: linear-gradient(135deg, #3b4a6b, #6b3b5e 55%, #2f5d62); height: 130px; border-radius: 8px; overflow: hidden; pointer-events: none; }
+.theme .nm { font-weight: 600; }
+.keys { list-style: none; margin: 0 0 12px; padding: 0; }
+.keys li { display: flex; justify-content: space-between; gap: 12px; padding: 4px 0; }
+.keys kbd { font: 12px ui-monospace, monospace; color: var(--fg2); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }

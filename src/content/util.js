@@ -1,6 +1,9 @@
 (() => {
   const NMP = (globalThis.__NMP ||= {});
 
+  // Texto localizado (_locales). Si falta la clave o no hay chrome.i18n (pruebas), devuelve la clave.
+  const t = (key, subs) => { try { return chrome.i18n.getMessage(key, subs) || key; } catch (_) { return ''; } };
+
   const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 
   const fmt = (s) => {
@@ -64,5 +67,6 @@
     } catch (_) { return null; }
   }
 
+  NMP.t = t;
   NMP.util = { clamp, fmt, fmt2, pad2, hash, strSeed, barcode, palette, DEFAULT_PAL, contrast, ensureContrast, rgbOf };
 })();

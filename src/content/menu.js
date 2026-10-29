@@ -38,17 +38,17 @@
     };
     const row = (label, ...kids) => el('div', { className: 'mrow' }, [el('span', { textContent: label }), ...kids]);
 
-    const vol = el('input', { type: 'range', min: 0, max: 100, step: 1 }); vol.setAttribute('aria-label', 'Volumen'); vol.dataset.m = 'vol';
+    const vol = el('input', { type: 'range', min: 0, max: 100, step: 1 }); vol.setAttribute('aria-label', NMP.t('volume')); vol.dataset.m = 'vol';
     const volOut = el('output', { textContent: '100%' });
-    const rate = chips(RATES.map((r) => [r, r + 'x']), (r) => { o.setRate(r); sync(); }, 'Velocidad');
-    const skip = chips(SKIPS.map((s) => [s, s + ' s']), (s) => { o.setPref('skip', s); sync(); }, 'Salto');
-    const theme = chips(o.themes, (id) => { o.setTheme(id); sync(); }, 'Diseño');
-    const copy = el('button', { type: 'button', textContent: 'Copiar enlace en este minuto' }); copy.dataset.m = 'copy';
+    const rate = chips(RATES.map((r) => [r, r + 'x']), (r) => { o.setRate(r); sync(); }, NMP.t('rate'));
+    const skip = chips(SKIPS.map((s) => [s, s + ' s']), (s) => { o.setPref('skip', s); sync(); }, NMP.t('skip'));
+    const theme = chips(o.themes, (id) => { o.setTheme(id); sync(); }, NMP.t('design'));
+    const copy = el('button', { type: 'button', textContent: NMP.t('copyLink') }); copy.dataset.m = 'copy';
 
     const menu = el('div', { className: 'menu' });
-    menu.setAttribute('role', 'dialog'); menu.setAttribute('aria-label', 'Opciones del reproductor');
-    const volRow = row('Volumen', el('div', { className: 'vol' }, [vol, volOut])), rateRow = row('Velocidad', rate);
-    menu.append(volRow, rateRow, row('Salto', skip), el('div', { className: 'sep' }), row('Diseño', theme), el('div', { className: 'sep' }), copy);
+    menu.setAttribute('role', 'dialog'); menu.setAttribute('aria-label', NMP.t('playerOptions'));
+    const volRow = row(NMP.t('volume'), el('div', { className: 'vol' }, [vol, volOut])), rateRow = row(NMP.t('rate'), rate);
+    menu.append(volRow, rateRow, row(NMP.t('skip'), skip), el('div', { className: 'sep' }), row(NMP.t('design'), theme), el('div', { className: 'sep' }), copy);
     o.root.append(menu);
 
     const press = (g, v) => g.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.v === String(v))));

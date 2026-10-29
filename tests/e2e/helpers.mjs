@@ -67,7 +67,7 @@ export async function launch({ capture = false } = {}) {
   const dir = fs.mkdtempSync(join(os.tmpdir(), 'nmp-e2e-'));
   const ctx = await chromium.launchPersistentContext(dir, {
     headless: false, viewport: { width: 900, height: 500 },
-    args: ['--headless=new', '--autoplay-policy=no-user-gesture-required', `--disable-extensions-except=${EXT}`, `--load-extension=${EXT}`, ...(capture ? [`--allowlisted-extension-id=${extId}`] : [])],
+    args: ['--headless=new', '--lang=es', '--autoplay-policy=no-user-gesture-required', `--disable-extensions-except=${EXT}`, `--load-extension=${EXT}`, ...(capture ? [`--allowlisted-extension-id=${extId}`] : [])],
   });
   const sw = ctx.serviceWorkers()[0] || await ctx.waitForEvent('serviceworker', { timeout: 20000 });
   return { ctx, sw, close: async () => { await ctx.close(); fs.rmSync(dir, { recursive: true, force: true }); } };
