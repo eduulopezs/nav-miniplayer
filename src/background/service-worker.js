@@ -1,12 +1,17 @@
-importScripts('net-guard.js', 'sessions.js', 'migrate.js');
+importScripts('net-guard.js', 'sessions.js', 'migrate.js', 'injection.js');
 const { isAllowedArtworkUrl, isStoryboardUrl, sniffImage, MAX_URL } = self.NMPNet;
 
 // Clic izquierdo: se ejecuta un script en la pestaña desde el propio clic, para que cuente como gesto del usuario
 // y el navegador deje abrir la ventana flotante al momento. Corre en el mundo aislado de la extensión (el mismo
 // que el content script), así que llama a una función que la página no puede ver ni invocar.
+// Si la pestaña no lleva los scripts (sin permiso de host: solo activeTab, concedido por este mismo clic o atajo), se inyectan en ese momento.
+const callPlayer = (tabId, method, arg) => {
+  const run = () => chrome.scripting.executeScript({ target: { tabId }, args: [method, arg], func: (m, a) => { const n = globalThis.__NMP; if (n && typeof n[m] === 'function') { n[m](a); return true; } return false; } });
+  return run().then(async ([r]) => { if (r && r.result) return; await self.NMPInject.injectInto(tabId); await run(); }).catch(() => {});
+};
 chrome.action.onClicked.addListener((tab) => {
   if (tab.id == null) return;
-  chrome.scripting.executeScript({ target: { tabId: tab.id }, func: () => { const n = globalThis.__NMP; if (n && typeof n.toggle === 'function') n.toggle(); } }).catch(() => {});
+  callPlayer(tab.id, 'toggle');
   startCapture(tab.id); // el clic en el icono es el gesto que autoriza la captura (activeTab)
 });
 
@@ -40,7 +45,7 @@ chrome.commands.onCommand.addListener((cmd) => {
   chrome.tabs.query({ active: true, lastFocusedWindow: true }, (tabs) => {
     const tab = tabs && tabs[0];
     if (!tab || tab.id == null) return;
-    chrome.scripting.executeScript({ target: { tabId: tab.id }, args: [cmd], func: (c) => { const n = globalThis.__NMP; if (n && typeof n.command === 'function') n.command(c); } }).catch(() => {});
+    callPlayer(tab.id, 'command', cmd);
   });
 });
 
@@ -161,6 +166,19 @@ const buildMenu = async () => {
 };
 chrome.runtime.onInstalled.addListener(buildMenu);
 chrome.runtime.onStartup.addListener(buildMenu);
+
+// Scripts de las páginas: se registran para los orígenes concedidos (permisos opcionales) y se reconcilian al instalar, arrancar
+// y cuando el usuario concede o retira un permiso. Al conceder, las pestañas ya abiertas reciben los scripts en el momento.
+const reconcile = () => self.NMPInject.reconcile().catch((e) => console.warn('[Nav Miniplayer] registro de scripts fallido:', e));
+chrome.runtime.onInstalled.addListener(async (d) => {
+  await reconcile();
+  // Instalación nueva sin permiso de host: se abre Ajustes, donde está el interruptor "Acceso a los sitios".
+  if (d.reason === 'install' && !(await chrome.permissions.contains({ origins: ['<all_urls>'] }).catch(() => true))) chrome.runtime.openOptionsPage().catch(() => {});
+});
+chrome.runtime.onStartup.addListener(reconcile);
+chrome.permissions.onAdded.addListener(async (p) => { await reconcile(); if (p.origins && p.origins.length) self.NMPInject.injectOpen(p.origins).catch(() => {}); });
+chrome.permissions.onRemoved.addListener(reconcile);
+reconcile(); // también en cada arranque del worker: es idempotente y no depende de que llegue onInstalled/onStartup
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   const id = String(info.menuItemId);
   if (id === 'win') { self.NMPSess.openWindow(); return; }

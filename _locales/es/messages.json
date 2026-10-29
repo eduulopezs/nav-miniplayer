@@ -216,5 +216,14 @@
   },
   "previewArtist": {
     "message": "Artista"
+  },
+  "accessTitle": {
+    "message": "Acceso a los sitios"
+  },
+  "accessOption": {
+    "message": "Activar en todos los sitios web"
+  },
+  "accessHint": {
+    "message": "El navegador te pedirá permiso para leer y modificar las páginas. Sin él, la extensión no se carga en ninguna web. Puedes retirarlo aquí cuando quieras."
   }
 }
