@@ -141,6 +141,24 @@ test('el clic en el icono o un atajo inyecta el reproductor en una pestaña que 
   await env.sw.evaluate(() => self.NMPInject.reconcile());
 });
 
+test('el clic izquierdo del icono (toggle, sin argumento) se ejecuta en la pestaña sin errores', async () => {
+  await env.sw.evaluate(() => chrome.storage.local.set({ mp_inpage: true }));
+  const page = await env.ctx.newPage();
+  await page.goto(`${server.base}/`);
+  await sleep(400);
+  const tab = await tabOf(env.sw, `${server.base}/*`);
+  // Lo que hace onClicked: callPlayer(tab.id, 'toggle') con el tercer argumento sin definir (no serializable si no se normaliza).
+  const warns = await env.sw.evaluate(async (id) => {
+    const seen = [], orig = console.warn;
+    console.warn = (...a) => { seen.push(a.join(' ')); };
+    try { await callPlayer(id, 'toggle'); await callPlayer(id, 'toggle'); } finally { console.warn = orig; }
+    return seen;
+  }, tab);
+  assert.deepEqual(warns, []);
+  assert.equal((await has(env.sw, tab)).ui, true);
+  await page.close();
+});
+
 test('una instalación sin permiso de host abre Ajustes', async () => {
   const bare = await launch({ optional: true });
   try {

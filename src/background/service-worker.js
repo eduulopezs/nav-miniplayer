@@ -6,8 +6,8 @@ const { isAllowedArtworkUrl, isStoryboardUrl, sniffImage, MAX_URL } = self.NMPNe
 // que el content script), así que llama a una función que la página no puede ver ni invocar.
 // Si la pestaña no lleva los scripts (sin permiso de host: solo activeTab, concedido por este mismo clic o atajo), se inyectan en ese momento.
 const callPlayer = (tabId, method, arg) => {
-  const run = () => chrome.scripting.executeScript({ target: { tabId }, args: [method, arg], func: (m, a) => { const n = globalThis.__NMP; if (n && typeof n[m] === 'function') { n[m](a); return true; } return false; } });
-  return run().then(async ([r]) => { if (r && r.result) return; await self.NMPInject.injectInto(tabId); await run(); }).catch(() => {});
+  const run = () => chrome.scripting.executeScript({ target: { tabId }, args: [method, arg ?? null], func: (m, a) => { const n = globalThis.__NMP; if (n && typeof n[m] === 'function') { n[m](a); return true; } return false; } });
+  return run().then(async ([r]) => { if (r && r.result) return; await self.NMPInject.injectInto(tabId); await run(); }).catch((e) => console.warn('[Nav Miniplayer] no se pudo ejecutar la orden en la pestaña:', (e && e.message) || e));
 };
 chrome.action.onClicked.addListener((tab) => {
   if (tab.id == null) return;
