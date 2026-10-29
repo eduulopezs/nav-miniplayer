@@ -86,6 +86,7 @@ export async function launch({ capture = false, optional = false } = {}) {
   const dir = fs.mkdtempSync(join(os.tmpdir(), 'nmp-e2e-'));
   const ctx = await chromium.launchPersistentContext(dir, {
     headless: false, viewport: { width: 900, height: 500 },
+    env: { ...process.env, LANGUAGE: 'es' }, // en Linux Chrome toma el idioma de LANGUAGE y no de --lang
     args: ['--headless=new', '--lang=es', '--autoplay-policy=no-user-gesture-required', `--disable-extensions-except=${ext}`, `--load-extension=${ext}`, ...(capture ? [`--allowlisted-extension-id=${extId}`] : [])],
   });
   const sw = ctx.serviceWorkers()[0] || await ctx.waitForEvent('serviceworker', { timeout: 20000 });
