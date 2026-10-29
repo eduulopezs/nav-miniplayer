@@ -142,21 +142,25 @@ chrome.runtime.onMessage.addListener((m, sender, reply) => {
 // Clic derecho en el icono: captura de audio, ventana aparte y (para desarrollo) el diseño.
 const THEME_KEY = 'mp_theme';
 const THEMES = { glass: 'themeGlass', noir: 'themeNoir', crt: 'themeCrt', metal: 'themeMetal' };
-const syncMenu = (theme) => {
+const syncMenu = (theme, capture) => {
   const up = (id, checked) => chrome.contextMenus.update(id, { checked }, () => void chrome.runtime.lastError);
   if (theme) for (const id of Object.keys(THEMES)) up('th:' + id, id === theme);
+  if (typeof capture === 'boolean') up('cap', capture);
 };
-chrome.runtime.onInstalled.addListener(() => {
-  self.NMPMigrate.migrate().catch((e) => console.warn('[Nav Miniplayer] migración de ajustes fallida:', e));
+// El menú se reconstruye al instalar y al arrancar para que siga el idioma del navegador y los ajustes guardados.
+const buildMenu = async () => {
+  await self.NMPMigrate.migrate().catch((e) => console.warn('[Nav Miniplayer] migración de ajustes fallida:', e));
   chrome.contextMenus.removeAll(() => {
     chrome.contextMenus.create({ id: 'cap', type: 'checkbox', title: chrome.i18n.getMessage('ctxCapture'), contexts: ['action'], checked: false });
     chrome.contextMenus.create({ id: 'win', title: chrome.i18n.getMessage('ctxWindow'), contexts: ['action'] });
     chrome.contextMenus.create({ id: 'themes', title: chrome.i18n.getMessage('design'), contexts: ['action'] });
     for (const [id, key] of Object.entries(THEMES)) chrome.contextMenus.create({ id: 'th:' + id, parentId: 'themes', type: 'radio', title: chrome.i18n.getMessage(key), contexts: ['action'], checked: id === 'glass' });
     chrome.contextMenus.create({ id: 'settings', title: chrome.i18n.getMessage('ctxSettings'), contexts: ['action'] });
-    chrome.storage.local.get(THEME_KEY, (r) => syncMenu((r && r[THEME_KEY]) || 'glass'));
+    chrome.storage.local.get([THEME_KEY, CAPTURE_KEY], (r) => syncMenu((r && r[THEME_KEY]) || 'glass', !!(r && r[CAPTURE_KEY])));
   });
-});
+};
+chrome.runtime.onInstalled.addListener(buildMenu);
+chrome.runtime.onStartup.addListener(buildMenu);
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   const id = String(info.menuItemId);
   if (id === 'win') { self.NMPSess.openWindow(); return; }
@@ -168,4 +172,4 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   }
   if (id.startsWith('th:') && THEMES[id.slice(3)]) chrome.storage.local.set({ [THEME_KEY]: id.slice(3) });
 });
-chrome.storage.onChanged.addListener((c) => syncMenu(c[THEME_KEY] && c[THEME_KEY].newValue));
+chrome.storage.onChanged.addListener((c) => syncMenu(c[THEME_KEY] && c[THEME_KEY].newValue, c[CAPTURE_KEY] ? c[CAPTURE_KEY].newValue === true : undefined));

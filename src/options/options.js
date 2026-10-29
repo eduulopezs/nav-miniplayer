@@ -19,7 +19,7 @@
   const savePrefs = () => chrome.storage.local.set({ [PREFS_KEY]: { ...prefs } });
 
   // ---- Diseños: cada tarjeta es una vista previa real (plantilla y CSS del diseño) con datos de ejemplo.
-  const cards = {};
+  const cards = {}, previews = {};
   for (const id of ['glass', 'noir', 'crt', 'metal'].filter((k) => NMP.skins[k])) {
     const skin = NMP.skins[id];
     const b = document.createElement('button');
@@ -29,12 +29,12 @@
     b.append(pv, nm); $('themes').append(b); cards[id] = b;
     b.addEventListener('click', () => { theme = id; markTheme(); saveTheme(id); });
     const root = pv.attachShadow({ mode: 'closed' });
-    root.innerHTML = `<style>${NMP.tokens.css}\n${NMP.css}\n.card { --r: 0px; height: 130px; }</style><div class="card pip show paused sk-${id}" aria-hidden="true">${skin.tpl()}<i class="probe" aria-hidden="true"></i></div>`;
+    root.innerHTML = `<style>${NMP.tokens.css}\n${NMP.css}\n.card { --r: 0px; height: 130px; }</style><div class="card pip show paused sk-${id}" aria-hidden="true" inert>${skin.tpl()}<i class="probe" aria-hidden="true"></i></div>`;
     const set = (sel, text) => root.querySelectorAll(sel).forEach((e) => { e.textContent = text; });
     set('[data-t=title]', t('previewTitle')); set('[data-t=artist]', t('previewArtist'));
     set('[data-v=cur]', '1:24'); set('[data-v=dur]', '3:42'); set('[data-v=cur2]', '01:24'); set('[data-v=dur2]', '03:42');
     root.querySelectorAll('[data-bar] i').forEach((e) => { e.style.width = '38%'; });
-    root.querySelectorAll('[data-skn]').forEach((e) => { e.textContent = (e.dataset.skn || '') + prefs.skip; });
+    previews[id] = root;
     for (const [family, weight, file] of NMP.fontFiles[id] || []) {
       fetch(chrome.runtime.getURL(`src/fonts/${file}-normal.woff2`)).then((r) => r.arrayBuffer())
         .then((buf) => { const f = new FontFace(family, buf, { weight: String(weight) }); return f.load().then(() => document.fonts.add(f)); }).catch(() => {});
@@ -49,7 +49,16 @@
     b.addEventListener('click', () => { prefs.skip = s; markSkip(); savePrefs(); });
     skipEl.append(b);
   }
-  const markSkip = () => skipEl.querySelectorAll('button').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.v === String(prefs.skip))));
+  const markSkip = () => {
+    // Los botones de salto de las vistas previas llevan el valor elegido.
+    for (const root of Object.values(previews)) {
+      root.querySelectorAll('[data-skn]').forEach((e) => { e.textContent = (e.dataset.skn || '') + prefs.skip; });
+      root.querySelectorAll('[data-act=back]').forEach((e) => { e.title = t('backTitle', String(prefs.skip)); e.setAttribute('aria-label', t('backLabel', String(prefs.skip))); });
+      root.querySelectorAll('[data-act=fwd]').forEach((e) => { e.title = t('fwdTitle', String(prefs.skip)); e.setAttribute('aria-label', t('fwdLabel', String(prefs.skip))); });
+    }
+    markSkipChips();
+  };
+  const markSkipChips = () => skipEl.querySelectorAll('button').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.v === String(prefs.skip))));
   $('blur').addEventListener('change', (e) => { prefs.blur = e.target.checked; savePrefs(); });
   $('capture').addEventListener('change', (e) => chrome.storage.local.set({ [CAPTURE_KEY]: e.target.checked }));
 

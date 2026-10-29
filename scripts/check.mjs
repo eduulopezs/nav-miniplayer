@@ -64,10 +64,14 @@ if (!/^\d+\.\d+\.\d+$/.test(manifest.version)) errors.push(`versión no válida:
 {
   const read = (lang) => JSON.parse(readFileSync(join(root, '_locales', lang, 'messages.json'), 'utf8'));
   const es = read(manifest.default_locale ?? 'es'), others = readdirSync(join(root, '_locales')).filter((l) => l !== (manifest.default_locale ?? 'es'));
-  for (const lang of others) {
+  for (const lang of [manifest.default_locale ?? 'es', ...others]) {
     const m = read(lang);
     for (const k of Object.keys(es)) if (!(k in m)) errors.push(`_locales/${lang}: falta ${k}`);
     for (const k of Object.keys(m)) if (!(k in es)) errors.push(`_locales/${lang}: ${k} no existe en ${manifest.default_locale}`);
+    for (const [k, v] of Object.entries(m)) {
+      const names = Object.keys(v.placeholders ?? {}), used = [...v.message.matchAll(/\$(\w+)\$/g)].map((x) => x[1]);
+      if (names.some((n) => !used.includes(n)) || used.some((n) => !names.includes(n))) errors.push(`_locales/${lang}: marcadores mal escritos en ${k}`);
+    }
     for (const k of Object.keys(m)) if (es[k] && Object.keys(es[k].placeholders ?? {}).length !== Object.keys(m[k].placeholders ?? {}).length) errors.push(`_locales/${lang}: marcadores distintos en ${k}`);
   }
   const used = new Set();
