@@ -62,8 +62,10 @@ export async function startServer() {
 
 // Chromium con la extensión cargada (el nuevo modo headless admite extensiones).
 // `capture: true` permite a la extensión usar tabCapture sin el clic en el icono (bandera de pruebas de Chromium), para poder probar la captura real.
+// Chrome deriva el id de una extensión sin empaquetar de su ruta: en UTF-16 en Windows y en UTF-8 en el resto.
+const extPathBytes = () => { const p = fs.realpathSync(EXT); return process.platform === 'win32' ? Buffer.from(p, 'utf16le') : p; };
 export async function launch({ capture = false } = {}) {
-  const extId = capture ? createHash('sha256').update(fs.realpathSync(EXT)).digest('hex').slice(0, 32).replace(/./g, (c) => 'abcdefghijklmnop'[parseInt(c, 16)]) : '';
+  const extId = capture ? createHash('sha256').update(extPathBytes()).digest('hex').slice(0, 32).replace(/./g, (c) => 'abcdefghijklmnop'[parseInt(c, 16)]) : '';
   const dir = fs.mkdtempSync(join(os.tmpdir(), 'nmp-e2e-'));
   const ctx = await chromium.launchPersistentContext(dir, {
     headless: false, viewport: { width: 900, height: 500 },
