@@ -48,9 +48,10 @@
         if (!((r[SESS_KEY] || {})[m.tabId])) return; // solo pestañas que han informado de un medio
         chrome.tabs.sendMessage(m.tabId, { type: 'rc-cmd', cmd: m.cmd }, { frameId: 0 }).catch(() => update((s) => { delete s[m.tabId]; return s; }));
       });
-    } else if (m.type === 'art' && fromWindow(sender)) {
+    } else if ((m.type === 'art' || m.type === 'fav') && fromWindow(sender)) {
+      // 'fav': el icono del sitio (la URL la anuncia la página) pasa por las mismas reglas de red que la carátula; admite además .ico.
       if (typeof m.url !== 'string' || m.url.length > MAX_URL) { reply({}); return; }
-      fetchArtwork(m.url).then((data) => reply({ data }), () => reply({}));
+      fetchArtwork(m.url, undefined, m.type === 'fav').then((data) => reply({ data }), () => reply({}));
       return true;
     }
   });

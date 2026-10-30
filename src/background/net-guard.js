@@ -36,7 +36,8 @@
   }
 
   // Identifica el formato por sus primeros bytes (no se fía del Content-Type). SVG queda fuera a propósito.
-  function sniffImage(b) {
+  // Con ico=true también admite .ico (solo para favicons; las carátulas no lo necesitan).
+  function sniffImage(b, ico) {
     if (!b || b.length < 12) return null;
     const eq = (off, s) => [...s].every((c, i) => b[off + i] === c.charCodeAt(0));
     if (b[0] === 0x89 && eq(1, 'PNG')) return 'image/png';
@@ -44,6 +45,7 @@
     if (eq(0, 'GIF8')) return 'image/gif';
     if (eq(0, 'RIFF') && eq(8, 'WEBP')) return 'image/webp';
     if (eq(4, 'ftyp') && (eq(8, 'avif') || eq(8, 'avis'))) return 'image/avif';
+    if (ico && b[0] === 0 && b[1] === 0 && b[2] === 1 && b[3] === 0) return 'image/x-icon';
     return null;
   }
 
