@@ -76,7 +76,7 @@ async function readCapped(res, max) {
   for (const c of chunks) { out.set(c, off); off += c.length; }
   return out;
 }
-async function fetchArtwork(url, extra = () => true) {
+async function fetchArtwork(url, extra = () => true, ico = false) {
   if (!isAllowedArtworkUrl(url) || !extra(url)) throw new Error('URL no permitida');
   const ctl = new AbortController();
   const timer = setTimeout(() => ctl.abort(), ART_TIMEOUT_MS);
@@ -85,7 +85,7 @@ async function fetchArtwork(url, extra = () => true) {
     if (!res.ok || !res.body) throw new Error('HTTP ' + res.status);
     if (+res.headers.get('content-length') > MAX_ART_BYTES) throw new Error('imagen demasiado grande');
     const bytes = await readCapped(res, MAX_ART_BYTES);
-    const mime = sniffImage(bytes);
+    const mime = sniffImage(bytes, ico);
     if (!mime) throw new Error('no es una imagen válida');
     return `data:${mime};base64,${toBase64(bytes)}`;
   } finally { clearTimeout(timer); }

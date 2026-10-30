@@ -56,18 +56,20 @@ t('las acciones anunciadas por la página se filtran', /KNOWN_ACTIONS/.test(play
 // Service worker con fetch simulado: camino positivo y negativos de la descarga de carátulas.
 {
   let listener = null, calls = [];
+  const listeners = []; // varios módulos registran su onMessage: la ventana habla con el de sessions.js
   const bytesPng = Uint8Array.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0, 0, 0, 1, 2, 3, 4]);
   const mkRes = (body, { ok = true, len } = {}) => ({ ok, status: ok ? 200 : 500, headers: { get: (k) => (k === 'content-length' && len != null ? String(len) : null) },
     body: { getReader() { let sent = false; return { read: async () => (sent ? { done: true } : ((sent = true), { done: false, value: body })), cancel: async () => {} }; } } });
   const sctx = vm.createContext({
     URL, AbortController, setTimeout, clearTimeout, btoa: (s) => Buffer.from(s, 'binary').toString('base64'), console,
     importScripts(...fs) { for (const f of fs) vm.runInContext(read('src/background/' + f), sctx); },
-    chrome: { runtime: { id: 'me', getURL: (p) => 'chrome-extension://me/' + p, onMessage: { addListener: (f) => { listener = f; } }, onInstalled: { addListener() {} }, onStartup: { addListener() {} } }, tabs: { onRemoved: { addListener() {} } }, windows: { onRemoved: { addListener() {} } }, action: { onClicked: { addListener() {} } }, commands: { onCommand: { addListener() {} } },
+    chrome: { runtime: { id: 'me', getURL: (p) => 'chrome-extension://me/' + p, onMessage: { addListener: (f) => { listener = f; listeners.push(f); } }, onInstalled: { addListener() {} }, onStartup: { addListener() {} } }, tabs: { onRemoved: { addListener() {} } }, windows: { onRemoved: { addListener() {} } }, action: { onClicked: { addListener() {} } }, commands: { onCommand: { addListener() {} } },
       scripting: {}, permissions: { onAdded: { addListener() {} }, onRemoved: { addListener() {} } }, storage: { onChanged: { addListener() {} }, local: { get() {}, set() {} }, session: { get: async () => ({}), set: async () => {}, remove: async () => {} } }, contextMenus: { onClicked: { addListener() {} }, removeAll() {}, create() {}, update() {} } },
     fetch: async (u, o) => { calls.push([u, o]); return sctx.__next(u); },
   });
   sctx.self = sctx;
   vm.runInContext(read('src/background/service-worker.js'), sctx);
+  const askFav = (url, sender = { id: 'me', url: 'chrome-extension://me/src/window/player.html' }) => new Promise((ok) => { const r = listeners.map((l) => l({ type: 'fav', url }, sender, ok)).find((x) => x === true); if (r !== true) setTimeout(() => ok('sin respuesta'), 20); });
   const ask = (url, sender = { id: 'me', tab: { id: 1 } }) => new Promise((ok) => { const r = listener({ type: 'img', url }, sender, ok); if (r !== true) setTimeout(() => ok('sin respuesta'), 20); });
 
   sctx.__next = () => mkRes(bytesPng);
@@ -76,6 +78,18 @@ t('las acciones anunciadas por la página se filtran', /KNOWN_ACTIONS/.test(play
   t('la petición va sin cookies ni redirecciones', calls[0][1].credentials === 'omit' && calls[0][1].redirect === 'error' && calls[0][1].referrerPolicy === 'no-referrer');
   const n = calls.length;
   r = await ask('http://127.0.0.1/a.png'); t('IP privada: respuesta vacía y sin petición', !r.data && calls.length === n);
+  r = await askFav('http://192.168.1.1/favicon.ico'); t('favicon: IP privada, respuesta vacía y sin petición', !r.data && calls.length === n);
+  r = await askFav('http://localhost/favicon.ico'); t('favicon: localhost, sin petición', !r.data && calls.length === n);
+  r = await askFav('https://cdn.example.org/favicon.png'); t('favicon: PNG público como data URL, sin cookies ni redirecciones', r.data && r.data.startsWith('data:image/png;base64,') && calls[calls.length - 1][1].credentials === 'omit' && calls[calls.length - 1][1].redirect === 'error');
+  sctx.__next = () => mkRes(Uint8Array.from([0, 0, 1, 0, 1, 0, 16, 16, 0, 0, 1, 0]));
+  r = await askFav('https://cdn.example.org/favicon.ico'); t('favicon: admite .ico', r.data && r.data.startsWith('data:image/x-icon;base64,'));
+  r = await ask('https://cdn.example.org/a.ico'); t('carátula: no admite .ico', !r.data);
+  sctx.__next = () => mkRes(Uint8Array.from(str('<svg xmlns="http://www.w3.org/2000/svg"></svg>')));
+  r = await askFav('https://cdn.example.org/favicon.svg'); t('favicon: rechaza SVG', !r.data);
+  sctx.__next = () => mkRes(new Uint8Array(6 * 1024 * 1024).fill(0xff));
+  r = await askFav('https://cdn.example.org/big.ico'); t('favicon: rechaza más de 5 MB', !r.data);
+  sctx.__next = () => mkRes(bytesPng);
+  const fv = calls.length; r = await askFav('https://cdn.example.org/favicon.png', { id: 'me', tab: { id: 1 } }); t('favicon: solo desde la ventana (una pestaña no puede pedirlo)', r === 'sin respuesta' && calls.length === fv);
   const askSb = (url) => new Promise((done) => { const r = listener({ type: 'sb', url }, { id: 'me', tab: { id: 1 } }, done); if (r !== true) setTimeout(() => done('sin respuesta'), 20); });
   const m = calls.length; r = await askSb('https://cdn.example.org/a.png'); t('storyboard: otro servidor, sin petición', !r.data && calls.length === m);
   r = await askSb('https://i.ytimg.com/sb/a/b.jpg?sigh=1'); await new Promise((d) => setTimeout(d, 5)); r = await askSb('https://i.ytimg.com/sb/a/b.jpg?sigh=1'); t('storyboard: descarga una hoja de ytimg.com', r.data && r.data.startsWith('data:image/png;base64,'));
