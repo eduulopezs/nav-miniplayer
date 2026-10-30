@@ -10,6 +10,12 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y e
 
 - Ficheros de comunidad: `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md` y este registro de cambios.
 
+## [1.15.1] - 2026-10-30
+
+### Seguridad
+
+- Los iconos de sitio (favicons) de la ventana aparte los descarga el service worker con las reglas de `net-guard` (sin cookies ni redirecciones, solo bytes de imagen, 5 MB y 8 s) en lugar de cargarse directamente (#64).
+
 ## [1.15.0] - 2026-10-30
 
 ### Cambiado
