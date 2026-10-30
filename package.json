@@ -29,6 +29,7 @@
     "security": "node scripts/security.mjs",
     "test": "npm run check && npm run security && npm run smoke",
     "e2e": "node --test --test-concurrency=1 \"tests/e2e/*.test.mjs\"",
+    "manual": "node scripts/manual-sites.mjs",
     "zip": "node scripts/zip.mjs"
   },
   "devDependencies": {
