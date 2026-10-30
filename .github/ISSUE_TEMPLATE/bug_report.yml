@@ -1,0 +1,68 @@
+name: Informe de error
+description: Algo no funciona como debería
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Gracias por avisar. **No incluyas datos personales** (cuentas, correos, URLs privadas, tokens ni capturas con información sensible) en la issue ni en los logs.
+  - type: input
+    id: extension-version
+    attributes:
+      label: Versión de la extensión
+      description: La encuentras en chrome://extensions.
+      placeholder: "1.15.0"
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Navegador y versión
+      placeholder: "Chrome 130.0.6723.92"
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: Sistema operativo
+      placeholder: "Windows 11, macOS 14, Ubuntu 24.04"
+    validations:
+      required: true
+  - type: input
+    id: site
+    attributes:
+      label: Sitio o URL afectado
+      description: Usa solo URLs públicas y sin datos personales.
+      placeholder: "https://www.youtube.com"
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Pasos para reproducir
+      placeholder: |
+        1. Abre ...
+        2. Reproduce ...
+        3. Cambia de pestaña ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Resultado esperado
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Resultado obtenido
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs o errores de consola
+      description: Revisa que no contengan datos personales antes de pegarlos.
+      render: shell
+    validations:
+      required: false
