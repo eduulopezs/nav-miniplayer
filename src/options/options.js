@@ -62,6 +62,16 @@
   $('blur').addEventListener('change', (e) => { prefs.blur = e.target.checked; savePrefs(); });
   $('capture').addEventListener('change', (e) => chrome.storage.local.set({ [CAPTURE_KEY]: e.target.checked }));
 
+  // ---- Acceso a los sitios: permiso opcional de host. El service worker registra los scripts cuando se concede y los retira al revocarlo.
+  const ALL = { origins: ['<all_urls>'] };
+  const syncAccess = () => chrome.permissions.contains(ALL).then((ok) => { $('access').checked = ok; }, () => {});
+  $('access').addEventListener('change', async (e) => {
+    try { if (e.target.checked) await chrome.permissions.request(ALL); else await chrome.permissions.remove(ALL); } catch (_) { /* el navegador decide */ }
+    syncAccess();
+  });
+  chrome.permissions.onAdded.addListener(syncAccess); chrome.permissions.onRemoved.addListener(syncAccess);
+  syncAccess();
+
   // ---- Atajos: se muestran los de chrome.commands; cambiarlos se hace en la página del navegador.
   chrome.commands.getAll().then((cmds) => {
     for (const c of cmds) {

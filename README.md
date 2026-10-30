@@ -6,7 +6,7 @@ Mismo código para ambos navegadores (requiere Chrome/Edge 116 o superior).
 - **Edge:** abre `edge://extensions`, activa **Modo de desarrollador** y pulsa **Cargar desempaquetada**.
 - **Chrome:** abre `chrome://extensions`, activa **Modo de desarrollador** (arriba a la derecha) y pulsa **Cargar descomprimida**.
 
-Elige la carpeta del repositorio (la que contiene `manifest.json`) y recarga las pestañas ya abiertas. Al reproducir audio/vídeo, pulsa el icono de la extensión para abrir el minirreproductor.
+Elige la carpeta del repositorio (la que contiene `manifest.json`). La primera vez se abre **Ajustes**: activa **Acceso a los sitios** para que el reproductor se cargue solo en todas las páginas (permiso opcional; las pestañas abiertas lo reciben al concederlo). Sin ese acceso, el clic en el icono o un atajo lo cargan en la pestaña activa, pero anterior/siguiente pueden no funcionar en sitios que registran sus controles antes. Al reproducir audio/vídeo, pulsa el icono de la extensión para abrir el minirreproductor.
 
 ## Uso
 - Play/pausa, ±10 s, anterior/siguiente (usa Media Session del sitio; en YouTube/Spotify Web funcionan).

@@ -63,7 +63,7 @@ t('las acciones anunciadas por la página se filtran', /KNOWN_ACTIONS/.test(play
     URL, AbortController, setTimeout, clearTimeout, btoa: (s) => Buffer.from(s, 'binary').toString('base64'), console,
     importScripts(...fs) { for (const f of fs) vm.runInContext(read('src/background/' + f), sctx); },
     chrome: { runtime: { id: 'me', getURL: (p) => 'chrome-extension://me/' + p, onMessage: { addListener: (f) => { listener = f; } }, onInstalled: { addListener() {} }, onStartup: { addListener() {} } }, tabs: { onRemoved: { addListener() {} } }, windows: { onRemoved: { addListener() {} } }, action: { onClicked: { addListener() {} } }, commands: { onCommand: { addListener() {} } },
-      scripting: {}, storage: { onChanged: { addListener() {} }, local: { get() {}, set() {} }, session: { get: async () => ({}), set: async () => {}, remove: async () => {} } }, contextMenus: { onClicked: { addListener() {} }, removeAll() {}, create() {}, update() {} } },
+      scripting: {}, permissions: { onAdded: { addListener() {} }, onRemoved: { addListener() {} } }, storage: { onChanged: { addListener() {} }, local: { get() {}, set() {} }, session: { get: async () => ({}), set: async () => {}, remove: async () => {} } }, contextMenus: { onClicked: { addListener() {} }, removeAll() {}, create() {}, update() {} } },
     fetch: async (u, o) => { calls.push([u, o]); return sctx.__next(u); },
   });
   sctx.self = sctx;

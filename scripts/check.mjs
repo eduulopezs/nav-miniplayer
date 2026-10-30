@@ -9,7 +9,16 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const manifest = JSON.parse(readFileSync(join(root, 'manifest.json'), 'utf8'));
 const errors = [];
 
+// Los grupos de scripts de src/background/injection.js son la fuente única: se registran en tiempo de ejecución para los orígenes
+// concedidos. El manifiesto no debe declarar hosts ni content_scripts (darían el aviso de instalación de "todos los sitios").
+const inj = { self: {} };
+vm.runInNewContext(readFileSync(join(root, 'src/background/injection.js'), 'utf8'), inj);
+const groups = inj.self.NMPInject.GROUPS;
+if (manifest.content_scripts?.length) errors.push('manifest.json: content_scripts debe estar vacío (los scripts se registran en src/background/injection.js)');
+if (manifest.host_permissions?.length) errors.push('manifest.json: los hosts van en optional_host_permissions');
+
 const files = new Set();
+for (const g of groups) for (const f of g.js) files.add(f);
 if (manifest.background?.service_worker) files.add(manifest.background.service_worker);
 for (const cs of manifest.content_scripts ?? []) for (const f of [...(cs.js ?? []), ...(cs.css ?? [])]) files.add(f);
 for (const f of Object.values(manifest.icons ?? {})) files.add(f);

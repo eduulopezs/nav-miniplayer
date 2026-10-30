@@ -63,15 +63,35 @@ export async function startServer() {
 // Chromium con la extensión cargada (el nuevo modo headless admite extensiones).
 // `capture: true` permite a la extensión usar tabCapture sin el clic en el icono (bandera de pruebas de Chromium), para poder probar la captura real.
 // Chrome deriva el id de una extensión sin empaquetar de su ruta: en UTF-16 en Windows y en UTF-8 en el resto.
-const extPathBytes = () => { const p = fs.realpathSync(EXT); return process.platform === 'win32' ? Buffer.from(p, 'utf16le') : p; };
-export async function launch({ capture = false } = {}) {
-  const extId = capture ? createHash('sha256').update(extPathBytes()).digest('hex').slice(0, 32).replace(/./g, (c) => 'abcdefghijklmnop'[parseInt(c, 16)]) : '';
+const extPathBytes = (dir) => { const p = fs.realpathSync(dir); return process.platform === 'win32' ? Buffer.from(p, 'utf16le') : p; };
+
+// Copia de la extensión para las pruebas con el permiso de host ya concedido: permissions.request necesita un gesto y el diálogo del navegador,
+// y no se automatiza. Con `host_permissions` en el manifiesto el service worker registra los scripts igual que tras conceder el permiso.
+let granted = null;
+function grantedCopy() {
+  if (granted) return granted;
+  granted = fs.mkdtempSync(join(os.tmpdir(), 'nmp-ext-'));
+  for (const f of ['icons', 'src', '_locales']) fs.cpSync(join(EXT, f), join(granted, f), { recursive: true });
+  const m = JSON.parse(fs.readFileSync(join(EXT, 'manifest.json'), 'utf8'));
+  m.host_permissions = m.optional_host_permissions; delete m.optional_host_permissions;
+  fs.writeFileSync(join(granted, 'manifest.json'), JSON.stringify(m));
+  process.on('exit', () => fs.rmSync(granted, { recursive: true, force: true }));
+  return granted;
+}
+
+// `optional: true` carga la extensión tal cual está en el repo, sin el permiso de host concedido.
+export async function launch({ capture = false, optional = false } = {}) {
+  const ext = optional ? EXT : grantedCopy();
+  const extId = capture ? createHash('sha256').update(extPathBytes(ext)).digest('hex').slice(0, 32).replace(/./g, (c) => 'abcdefghijklmnop'[parseInt(c, 16)]) : '';
   const dir = fs.mkdtempSync(join(os.tmpdir(), 'nmp-e2e-'));
   const ctx = await chromium.launchPersistentContext(dir, {
     headless: false, viewport: { width: 900, height: 500 },
-    args: ['--headless=new', '--lang=es', '--autoplay-policy=no-user-gesture-required', `--disable-extensions-except=${EXT}`, `--load-extension=${EXT}`, ...(capture ? [`--allowlisted-extension-id=${extId}`] : [])],
+    env: { ...process.env, LANGUAGE: 'es' }, // en Linux Chrome toma el idioma de LANGUAGE y no de --lang
+    args: ['--headless=new', '--lang=es', '--autoplay-policy=no-user-gesture-required', `--disable-extensions-except=${ext}`, `--load-extension=${ext}`, ...(capture ? [`--allowlisted-extension-id=${extId}`] : [])],
   });
   const sw = ctx.serviceWorkers()[0] || await ctx.waitForEvent('serviceworker', { timeout: 20000 });
+  // El registro de scripts ocurre en onInstalled: hasta que termina, las páginas que se abran no llevarían el reproductor.
+  for (let i = 0; i < 100 && !optional && (await sw.evaluate(() => chrome.scripting.getRegisteredContentScripts())).length < 3; i++) await sleep(100);
   return { ctx, sw, close: async () => { await ctx.close(); fs.rmSync(dir, { recursive: true, force: true }); } };
 }
 
