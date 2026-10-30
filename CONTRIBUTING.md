@@ -23,9 +23,10 @@ npm ci          # instala las dependencias exactas del lockfile
 npm test        # tokens, comprobaciones estáticas, contraste, seguridad y smoke
 npm run e2e     # tests de extremo a extremo con Playwright
 npm run zip     # empaqueta la extensión
+npm run manual  # prueba manual contra sitios reales (YouTube, Spotify, SoundCloud, Twitch, Vimeo)
 ```
 
-Ejecuta `npm test` antes de cada commit y `npm run e2e` cuando toques comportamiento visible.
+Ejecuta `npm test` antes de cada commit y `npm run e2e` cuando toques comportamiento visible. `npm run manual` abre sitios reales con la extensión cargada y no forma parte del CI: un fallo aislado puede deberse a cookies, regiones o bloqueos del sitio y no a la extensión.
 
 ### Cargar la extensión descomprimida
 

@@ -4,7 +4,7 @@ Las releases las genera el workflow [`release.yml`](../.github/workflows/release
 
 ## Pasos
 
-1. Sube `version` en `manifest.json` (y `package.json` si procede) y actualiza el changelog. Integra el cambio en `main` mediante PR.
+1. Sube `version` en `manifest.json` (y `package.json` si procede) y actualiza el changelog. Integra el cambio en `main` mediante PR. Antes, opcionalmente, ejecuta `npm run manual` para comprobar que la tarjeta aparece en sitios reales (termina con código 1 si alguno falla).
 2. Desde `main` actualizado, crea el tag con el prefijo `v` y la misma versión que el manifest:
 
    ```sh
