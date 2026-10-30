@@ -88,6 +88,25 @@ ${NMP.css}
       });
     } catch (_) { /* sin background */ }
   }
+  // Iconos de sitio: la URL la anuncia la página, así que también los descarga el service worker (net-guard) y la ventana solo pinta el data URL.
+  const favCache = new Map(), favBusy = new Set(), favFail = new Map(); // url -> data URL; peticiones en vuelo; fallos recientes
+  function loadFav(url, ic) {
+    const show = (data) => {
+      if (!data) return;
+      const im = new Image(); im.alt = ''; im.onload = () => { ic.textContent = ''; ic.append(im); }; im.src = data;
+    };
+    if (favCache.has(url)) return show(favCache.get(url));
+    if (favBusy.has(url) || Date.now() < (favFail.get(url) || 0)) return; // ya en vuelo, o fallo reciente (se reintenta pasado un minuto)
+    favBusy.add(url);
+    const set = (d) => { favBusy.delete(url); if (!d) { favFail.set(url, Date.now() + 60000); return; } if (favCache.size > 50) favCache.delete(favCache.keys().next().value); favCache.set(url, d); };
+    try {
+      chrome.runtime.sendMessage({ type: 'fav', url }, (r) => {
+        void chrome.runtime.lastError;
+        const d = r && typeof r.data === 'string' ? r.data : '';
+        set(d); if (d) { chipsKey = ''; renderChips(); } // las pastillas se reconstruyen: la cacheada ya pinta el icono
+      });
+    } catch (_) { favBusy.delete(url); /* sin background */ }
+  }
   const setPal = (p) => p.forEach((c, i) => card.style.setProperty('--c' + (i + 1), c));
 
   // ---------- Render ----------
@@ -139,7 +158,7 @@ ${NMP.css}
       b.type = 'button'; b.className = 'chip' + (playingNow(s) ? '' : ' paused'); b.setAttribute('role', 'tab');
       b.setAttribute('aria-selected', String(!!cur && cur.tabId === s.tabId)); b.title = s.title + ' · ' + s.host;
       const ic = document.createElement('i'); ic.textContent = (s.host[0] || '?').toUpperCase();
-      if (s.fav) { const im = document.createElement('img'); im.referrerPolicy = 'no-referrer'; im.alt = ''; im.onload = () => { ic.textContent = ''; ic.append(im); }; im.src = s.fav; }
+      if (s.fav) loadFav(s.fav, ic);
       const sp = document.createElement('span'); sp.textContent = s.title || s.host;
       b.append(ic, sp);
       b.addEventListener('click', () => { sel = s.tabId; render(); });

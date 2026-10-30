@@ -1,8 +1,26 @@
 {
   "name": "nav-miniplayer",
   "private": true,
-  "description": "Extensi\u00f3n MV3 (Chrome/Edge): minirreproductor flotante para el audio/v\u00eddeo de la pesta\u00f1a.",
+  "description": "Extensión MV3 (Chrome/Edge): minirreproductor flotante para el audio/vídeo de la pestaña.",
   "license": "MIT",
+  "author": "eduulopezs",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eduulopezs/nav-miniplayer.git"
+  },
+  "bugs": {
+    "url": "https://github.com/eduulopezs/nav-miniplayer/issues"
+  },
+  "homepage": "https://github.com/eduulopezs/nav-miniplayer#readme",
+  "keywords": [
+    "chrome-extension",
+    "manifest-v3",
+    "mini-player",
+    "picture-in-picture",
+    "video",
+    "audio",
+    "edge"
+  ],
   "scripts": {
     "tokens": "node scripts/build-tokens.mjs",
     "contrast": "node scripts/contrast.mjs",
