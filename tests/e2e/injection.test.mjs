@@ -159,6 +159,42 @@ test('el clic izquierdo del icono (toggle, sin argumento) se ejecuta en la pesta
   await page.close();
 });
 
+test('reinyectar en una pestaña que ya lleva los scripts no duplica el puente ni la interfaz', async () => {
+  const page = await env.ctx.newPage();
+  await page.goto(`${server.base}/`);
+  await sleep(400);
+  const tab = await tabOf(env.sw, `${server.base}/*`);
+  assert.deepEqual(await has(env.sw, tab), { ui: true, bridge: true });
+  await env.sw.evaluate((id) => self.NMPInject.injectInto(id), tab);
+  await env.sw.evaluate((id) => self.NMPInject.injectInto(id), tab);
+  // Un puente duplicado respondería dos veces a cada consulta.
+  const replies = await page.evaluate(() => new Promise((res) => {
+    let n = 0;
+    document.addEventListener('__mp_actions', () => n++);
+    document.dispatchEvent(new CustomEvent('__mp_query'));
+    setTimeout(() => res(n), 100);
+  }));
+  assert.equal(replies, 1);
+  await page.close();
+});
+
+test('si falla un grupo de la inyección manual, los demás se inyectan igualmente', async () => {
+  await env.sw.evaluate(() => chrome.scripting.unregisterContentScripts({ ids: ['nmp-agent', 'nmp-bridge', 'nmp-ui'] }));
+  const page = await env.ctx.newPage();
+  await page.goto(`${server.base}/`);
+  await sleep(400);
+  const tab = await tabOf(env.sw, `${server.base}/*`);
+  await env.sw.evaluate(() => {
+    self.__exec = chrome.scripting.executeScript;
+    chrome.scripting.executeScript = (inj) => (inj.files && inj.files[0].includes('frame-agent') ? Promise.reject(new Error('sin acceso')) : self.__exec.call(chrome.scripting, inj));
+  });
+  try { await env.sw.evaluate((id) => self.NMPInject.injectInto(id), tab); }
+  finally { await env.sw.evaluate(() => { chrome.scripting.executeScript = self.__exec; }); }
+  assert.deepEqual(await has(env.sw, tab), { ui: true, bridge: true });
+  await page.close();
+  await env.sw.evaluate(() => self.NMPInject.reconcile());
+});
+
 test('una instalación sin permiso de host abre Ajustes', async () => {
   const bare = await launch({ optional: true });
   try {

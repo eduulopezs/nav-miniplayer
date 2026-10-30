@@ -1,5 +1,5 @@
-// Única fuente de los scripts que la extensión inyecta en las páginas. Hoy el manifiesto los declara como content_scripts estáticos
-// (scripts/check.mjs comprueba que coincidan con estos grupos); injectInto los inyecta a mano en una pestaña ya abierta.
+// Única fuente de los scripts que la extensión inyecta en las páginas. El manifiesto no declara content_scripts: se registran
+// dinámicamente (reconcile) para los orígenes concedidos, e injectInto los inyecta a mano en una pestaña ya abierta.
 (() => {
   const GROUPS = [
     // Agente sin interfaz de los iframes.
@@ -28,12 +28,29 @@
     },
   ];
 
-  // Inyecta los grupos en una pestaña ya cargada. executeScript no respeta runAt: el puente de MAIN llega tarde y no ve los
+  // ¿Qué grupos lleva ya la pestaña? Evita reinyectar: repetir los archivos de la interfaz sobreescribiría NMP.* mientras
+  // player.js conserva las referencias antiguas.
+  const present = async (tabId) => {
+    const probe = (world, func) => chrome.scripting.executeScript({ target: { tabId }, world, func }).then(([r]) => !!(r && r.result), () => false);
+    return {
+      ui: await probe('ISOLATED', () => !!(globalThis.__NMP && globalThis.__NMP.toggle)),
+      bridge: await probe('MAIN', () => typeof MediaSession !== 'undefined' && !!MediaSession.prototype.setActionHandler[Symbol.for('nmp.bridge')]),
+    };
+  };
+
+  // Inyecta los grupos que falten en una pestaña ya cargada. executeScript no respeta runAt: el puente de MAIN llega tarde y no ve los
   // manejadores que la página registró antes (en un content script registrado sí llegaría a document_start).
+  // Un grupo que falla (p. ej. allFrames con iframes de otro origen bajo activeTab) no impide los demás; solo falla la llamada si falla la interfaz.
   async function injectInto(tabId) {
+    const have = await present(tabId);
+    let uiError = null;
     for (const g of GROUPS) {
-      await chrome.scripting.executeScript({ target: { tabId, allFrames: g.allFrames }, files: g.js, world: g.world || 'ISOLATED' });
+      if (have[g.id]) continue;
+      try {
+        await chrome.scripting.executeScript({ target: { tabId, allFrames: g.allFrames }, files: g.js, world: g.world || 'ISOLATED' });
+      } catch (e) { if (g.id === 'ui') uiError = e; }
     }
+    if (uiError) throw uiError;
   }
 
   // ---- Registro dinámico: sustituye a los content_scripts estáticos del manifiesto. Los scripts registrados corren en cada carga

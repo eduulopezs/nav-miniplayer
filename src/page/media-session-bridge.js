@@ -3,6 +3,10 @@
 (() => {
   if (typeof MediaSession === 'undefined') return; // sin banderas globales: la página no puede detectar la extensión por una variable
 
+  // Si ya se inyectó, no se vuelve a parchear: los listeners y envoltorios se duplicarían. La marca es un símbolo en el
+  // propio envoltorio, no una variable global.
+  const MARK = Symbol.for('nmp.bridge');
+  if (MediaSession.prototype.setActionHandler[MARK]) return;
   const handlers = new Map();
   const original = MediaSession.prototype.setActionHandler;
 
@@ -18,6 +22,7 @@
     announce();
     return original.call(this, action, handler);
   };
+  MediaSession.prototype.setActionHandler[MARK] = true;
 
   document.addEventListener('__mp_query', announce);
   let pipWin = null, pipPending = false;
