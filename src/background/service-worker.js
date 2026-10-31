@@ -175,12 +175,9 @@ const reconcile = () => self.NMPInject.reconcile().catch((e) => console.warn('[N
 const initialReconcile = reconcile();
 chrome.runtime.onInstalled.addListener(async (d) => {
   await initialReconcile;
-  // Instalación nueva sin permiso de host: se abre Ajustes, donde está el interruptor "Acceso a los sitios".
-  // Actualización desde una versión anterior a 1.15.0 (host_permissions obligatorio): si Chrome no conservó el permiso, el reproductor
-  // dejaría de cargar en todos los sitios sin aviso, así que también se abre Ajustes. Quien ya tenía 1.15+ pudo retirarlo a propósito.
-  const [maj, min] = (d.previousVersion || '').split('.').map(Number);
-  const fromMandatory = d.reason === 'update' && (maj < 1 || (maj === 1 && min < 15));
-  if ((d.reason === 'install' || fromMandatory) && !(await chrome.permissions.contains({ origins: ['<all_urls>'] }).catch(() => true))) chrome.runtime.openOptionsPage().catch(() => {});
+  // Sin permiso de host se abre Ajustes, donde está el interruptor "Acceso a los sitios": en una instalación nueva y al actualizar desde
+  // antes de 1.15.0, donde Chrome pudo no conservar el permiso y el reproductor dejaría de cargar en todos los sitios sin aviso.
+  if (self.NMPInject.promptsAccess(d) && !(await chrome.permissions.contains({ origins: ['<all_urls>'] }).catch(() => true))) chrome.runtime.openOptionsPage().catch(() => {});
 });
 chrome.permissions.onAdded.addListener(async (p) => { await reconcile(); if (p.origins && p.origins.length) self.NMPInject.injectOpen(p.origins).catch(() => {}); });
 chrome.permissions.onRemoved.addListener(reconcile);

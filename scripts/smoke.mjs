@@ -65,6 +65,16 @@ const N = ctx.__NMP;
 }
 console.log('✓ medios remotos y política de selección');
 
+// Aviso de acceso tras instalar o actualizar: solo en instalaciones nuevas y al venir de antes de 1.15.0 (permiso de host obligatorio).
+{
+  const P = inj.self.NMPInject.promptsAccess, ok = (c, m) => { if (!c) throw new Error('aviso de acceso: ' + m); };
+  ok(P({ reason: 'install' }), 'instalación nueva');
+  ok(P({ reason: 'update', previousVersion: '1.14.0' }) && P({ reason: 'update', previousVersion: '1.9.3' }) && P({ reason: 'update', previousVersion: '0.9.0' }), 'actualización desde < 1.15.0');
+  ok(!P({ reason: 'update', previousVersion: '1.15.0' }) && !P({ reason: 'update', previousVersion: '1.15.4' }) && !P({ reason: 'update', previousVersion: '2.0.0' }), 'actualización desde >= 1.15.0');
+  ok(!P({ reason: 'update' }) && !P({ reason: 'chrome_update' }) && !P({ reason: 'shared_module_update' }), 'sin versión previa u otro motivo');
+  console.log('✓ aviso de acceso al instalar o actualizar');
+}
+
 // Paleta de la carátula: el ajuste de contraste lleva cualquier color a 3:1 como mínimo y no toca los que ya cumplen.
 {
   const { util: U, tokens: T } = ctx.__NMP;
