@@ -168,18 +168,18 @@ const buildMenu = async () => {
 chrome.runtime.onInstalled.addListener(buildMenu);
 chrome.runtime.onStartup.addListener(buildMenu);
 
-// Scripts de las páginas: se registran para los orígenes concedidos (permisos opcionales) y se reconcilian al instalar, arrancar
-// y cuando el usuario concede o retira un permiso. Al conceder, las pestañas ya abiertas reciben los scripts en el momento.
+// Scripts de las páginas: se registran para los orígenes concedidos (permisos opcionales). Se reconcilian en cada arranque del worker
+// (nivel superior: cubre instalar y arrancar sin depender de onInstalled/onStartup) y cuando el usuario concede o retira un permiso.
+// Al conceder, las pestañas ya abiertas reciben los scripts en el momento.
 const reconcile = () => self.NMPInject.reconcile().catch((e) => console.warn('[Nav Miniplayer] registro de scripts fallido:', e));
+const initialReconcile = reconcile();
 chrome.runtime.onInstalled.addListener(async (d) => {
-  await reconcile();
+  await initialReconcile;
   // Instalación nueva sin permiso de host: se abre Ajustes, donde está el interruptor "Acceso a los sitios".
   if (d.reason === 'install' && !(await chrome.permissions.contains({ origins: ['<all_urls>'] }).catch(() => true))) chrome.runtime.openOptionsPage().catch(() => {});
 });
-chrome.runtime.onStartup.addListener(reconcile);
 chrome.permissions.onAdded.addListener(async (p) => { await reconcile(); if (p.origins && p.origins.length) self.NMPInject.injectOpen(p.origins).catch(() => {}); });
 chrome.permissions.onRemoved.addListener(reconcile);
-reconcile(); // también en cada arranque del worker: es idempotente y no depende de que llegue onInstalled/onStartup
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   const id = String(info.menuItemId);
   if (id === 'win') { self.NMPSess.openWindow(); return; }
