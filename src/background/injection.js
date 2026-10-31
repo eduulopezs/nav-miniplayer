@@ -80,5 +80,14 @@
     await Promise.all(tabs.filter((t) => t.id != null).map((t) => injectInto(t.id).catch(() => {})));
   }
 
-  self.NMPInject = { GROUPS, injectInto, reconcile, injectOpen };
+  // ¿Hay que llevar al usuario a Ajustes tras onInstalled si falta el permiso de host? En una instalación nueva, siempre. En una actualización,
+  // solo desde antes de 1.15.0 (host_permissions obligatorio): quien ya tenía 1.15+ pudo retirar el permiso a propósito.
+  function promptsAccess(d) {
+    if (d.reason === 'install') return true;
+    if (d.reason !== 'update' || !/^\d+\.\d+/.test(d.previousVersion || '')) return false;
+    const [maj, min] = d.previousVersion.split('.').map(Number);
+    return maj < 1 || (maj === 1 && min < 15);
+  }
+
+  self.NMPInject = { GROUPS, injectInto, reconcile, injectOpen, promptsAccess };
 })();

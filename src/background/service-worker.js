@@ -175,8 +175,9 @@ const reconcile = () => self.NMPInject.reconcile().catch((e) => console.warn('[N
 const initialReconcile = reconcile();
 chrome.runtime.onInstalled.addListener(async (d) => {
   await initialReconcile;
-  // Instalación nueva sin permiso de host: se abre Ajustes, donde está el interruptor "Acceso a los sitios".
-  if (d.reason === 'install' && !(await chrome.permissions.contains({ origins: ['<all_urls>'] }).catch(() => true))) chrome.runtime.openOptionsPage().catch(() => {});
+  // Sin permiso de host se abre Ajustes, donde está el interruptor "Acceso a los sitios": en una instalación nueva y al actualizar desde
+  // antes de 1.15.0, donde Chrome pudo no conservar el permiso y el reproductor dejaría de cargar en todos los sitios sin aviso.
+  if (self.NMPInject.promptsAccess(d) && !(await chrome.permissions.contains({ origins: ['<all_urls>'] }).catch(() => true))) chrome.runtime.openOptionsPage().catch(() => {});
 });
 chrome.permissions.onAdded.addListener(async (p) => { await reconcile(); if (p.origins && p.origins.length) self.NMPInject.injectOpen(p.origins).catch(() => {}); });
 chrome.permissions.onRemoved.addListener(reconcile);
