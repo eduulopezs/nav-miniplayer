@@ -166,13 +166,13 @@ export async function openPage(env, server, { art, inpage = true, theme, bare = 
     // Estilo calculado de un elemento del reproductor (se evalúa en el nodo por CDP, porque el shadow está cerrado).
     async style(cls, prop) {
       const { object } = await cdp.send('DOM.resolveNode', { backendNodeId: (await node(cls)).backendNodeId });
-      const r = await cdp.send('Runtime.callFunctionOn', { objectId: object.objectId, returnByValue: true, functionDeclaration: `function () { return getComputedStyle(this).getPropertyValue(${JSON.stringify(String(prop))}); }` });
+      const r = await cdp.send('Runtime.callFunctionOn', { objectId: object.objectId, returnByValue: true, functionDeclaration: 'function (p) { return getComputedStyle(this).getPropertyValue(p); }', arguments: [{ value: String(prop) }] });
       return r.result.value;
     },
     // Cambia el tamaño de la tarjeta en la página (elige el layout por container queries).
     async size(w, h) {
       const { object } = await cdp.send('DOM.resolveNode', { backendNodeId: (await node('card')).backendNodeId });
-      await cdp.send('Runtime.callFunctionOn', { objectId: object.objectId, functionDeclaration: `function () { this.style.width = '${Number(w)}px'; this.style.height = '${Number(h)}px'; }` });
+      await cdp.send('Runtime.callFunctionOn', { objectId: object.objectId, functionDeclaration: 'function (w, h) { this.style.width = w + "px"; this.style.height = h + "px"; }', arguments: [{ value: Number(w) }, { value: Number(h) }] });
       await sleep(150);
     },
     // Atributo de un elemento del reproductor.
