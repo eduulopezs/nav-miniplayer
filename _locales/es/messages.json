@@ -224,6 +224,6 @@
     "message": "Activar en todos los sitios web"
   },
   "accessHint": {
-    "message": "El navegador te pedirá permiso para leer y modificar las páginas. Sin él, la extensión no se carga en ninguna web. Puedes retirarlo aquí cuando quieras."
+    "message": "El navegador te pedirá permiso para leer y modificar las páginas. Sin él, el reproductor solo se activa en la pestaña actual al pulsar el icono o un atajo. Puedes retirarlo aquí cuando quieras."
   }
 }

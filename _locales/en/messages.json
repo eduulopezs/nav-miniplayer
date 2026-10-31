@@ -224,6 +224,6 @@
     "message": "Enable on all websites"
   },
   "accessHint": {
-    "message": "The browser will ask for permission to read and change web pages. Without it, the extension does not load on any site. You can withdraw it here at any time."
+    "message": "The browser will ask for permission to read and change web pages. Without it, the player only starts on the active tab when you click the icon or use a shortcut. You can withdraw it here at any time."
   }
 }
