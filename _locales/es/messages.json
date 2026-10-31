@@ -122,6 +122,9 @@
   "copied": {
     "message": "Enlace copiado"
   },
+  "reloadHint": {
+    "message": "Recarga la página para activar anterior y siguiente."
+  },
   "copyFailed": {
     "message": "No se pudo copiar"
   },
@@ -159,7 +162,7 @@
     "message": "Ir a la pestaña"
   },
   "emptyWindow": {
-    "message": "No suena nada en tus pestañas."
+    "message": "No suena nada en tus pestañas. Solo aparecen las que tienen el reproductor activo (icono, atajo o acceso a los sitios en Ajustes)."
   },
   "ctxCapture": {
     "message": "Visualizador con el audio real de la pestaña"

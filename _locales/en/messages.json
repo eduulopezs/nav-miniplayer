@@ -122,6 +122,9 @@
   "copied": {
     "message": "Link copied"
   },
+  "reloadHint": {
+    "message": "Reload the page to enable previous and next."
+  },
   "copyFailed": {
     "message": "Could not copy"
   },
@@ -159,7 +162,7 @@
     "message": "Go to tab"
   },
   "emptyWindow": {
-    "message": "Nothing is playing in your tabs."
+    "message": "Nothing is playing in your tabs. Only tabs with the player active are listed (icon, shortcut or site access in Settings)."
   },
   "ctxCapture": {
     "message": "Visualizer with the tab's real audio"

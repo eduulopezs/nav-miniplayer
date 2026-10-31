@@ -41,6 +41,7 @@
   // Inyecta los grupos que falten en una pestaña ya cargada. executeScript no respeta runAt: el puente de MAIN llega tarde y no ve los
   // manejadores que la página registró antes (en un content script registrado sí llegaría a document_start).
   // Un grupo que falla (p. ej. allFrames con iframes de otro origen bajo activeTab) no impide los demás; solo falla la llamada si falla la interfaz.
+  // Devuelve true si el puente de MAIN se inyectó ahora (llega tarde); false si la pestaña ya lo tenía.
   async function injectInto(tabId) {
     const have = await present(tabId);
     let uiError = null;
@@ -51,6 +52,7 @@
       } catch (e) { if (g.id === 'ui') uiError = e; }
     }
     if (uiError) throw uiError;
+    return !have.bridge;
   }
 
   // ---- Registro dinámico: sustituye a los content_scripts estáticos del manifiesto. Los scripts registrados corren en cada carga

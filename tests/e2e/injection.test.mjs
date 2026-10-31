@@ -159,6 +159,18 @@ test('el clic izquierdo del icono (toggle, sin argumento) se ejecuta en la pesta
   await page.close();
 });
 
+test('injectInto avisa de que el puente llega tarde solo la primera vez', async () => {
+  await env.sw.evaluate(() => chrome.scripting.unregisterContentScripts({ ids: ['nmp-agent', 'nmp-bridge', 'nmp-ui'] }));
+  const page = await env.ctx.newPage();
+  await page.goto(`${server.base}/`);
+  await sleep(400);
+  const tab = await tabOf(env.sw, `${server.base}/*`);
+  assert.equal(await env.sw.evaluate((id) => self.NMPInject.injectInto(id), tab), true, 'puente inyectado tarde');
+  assert.equal(await env.sw.evaluate((id) => self.NMPInject.injectInto(id), tab), false, 'ya lo lleva');
+  await page.close();
+  await env.sw.evaluate(() => self.NMPInject.reconcile());
+});
+
 test('reinyectar en una pestaña que ya lleva los scripts no duplica el puente ni la interfaz', async () => {
   const page = await env.ctx.newPage();
   await page.goto(`${server.base}/`);
