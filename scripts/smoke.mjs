@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
-import { GROUPS } from './groups.mjs';
+import { GROUPS, NMPInject } from './groups.mjs';
 const files = GROUPS.find((g) => g.id === 'ui').js;
 const mk = () => { const f = function () {}; return new Proxy(f, { get: (t, k) => k === Symbol.toPrimitive ? () => 0 : k === 'length' ? 0 : k === 'then' ? undefined : mk(), apply: () => mk(), construct: () => mk(), set: () => true }); };
 const listeners = [];
@@ -67,7 +67,7 @@ console.log('✓ medios remotos y política de selección');
 
 // Aviso de acceso tras instalar o actualizar: solo en instalaciones nuevas y al venir de antes de 1.15.0 (permiso de host obligatorio).
 {
-  const P = inj.self.NMPInject.promptsAccess, ok = (c, m) => { if (!c) throw new Error('aviso de acceso: ' + m); };
+  const P = NMPInject.promptsAccess, ok = (c, m) => { if (!c) throw new Error('aviso de acceso: ' + m); };
   ok(P({ reason: 'install' }), 'instalación nueva');
   ok(P({ reason: 'update', previousVersion: '1.14.0' }) && P({ reason: 'update', previousVersion: '1.9.3' }) && P({ reason: 'update', previousVersion: '0.9.0' }), 'actualización desde < 1.15.0');
   ok(!P({ reason: 'update', previousVersion: '1.15.0' }) && !P({ reason: 'update', previousVersion: '1.15.4' }) && !P({ reason: 'update', previousVersion: '2.0.0' }), 'actualización desde >= 1.15.0');
