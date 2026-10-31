@@ -10,6 +10,9 @@ import { fileURLToPath } from 'node:url';
 
 // createRequire respeta NODE_PATH (útil en máquinas con Playwright instalado globalmente).
 const { chromium } = createRequire(import.meta.url)('playwright');
+// Literal JS seguro para incrustar dentro de un <script> (evita cerrar la etiqueta con `</script>` o `<!--`).
+const jsStr = (v) => JSON.stringify(String(v)).replace(/</g, '\\u003c').replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
+
 export const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 // NMP_EXT_DIR permite probar otra carpeta (p. ej. el zip descomprimido) en lugar del repositorio.
 export const EXT = process.env.NMP_EXT_DIR || ROOT;
@@ -51,7 +54,7 @@ export async function startServer() {
     }
     if (url.pathname === '/leak.png') { r.writeHead(200, { 'content-type': 'image/png' }); return r.end(Buffer.from('89504e470d0a1a0a000000000000000000000000', 'hex')); }
     const artwork = url.searchParams.get('art');
-    const meta = `navigator.mediaSession.metadata=new MediaMetadata({title:${JSON.stringify((url.searchParams.get('title') || 'Canción de prueba'))},artist:'Artista',artwork:${artwork ? `[{src:${JSON.stringify(artwork)},sizes:'512x512'}]` : '[]'}});`;
+    const meta = `navigator.mediaSession.metadata=new MediaMetadata({title:${jsStr(url.searchParams.get('title') || 'Canción de prueba')},artist:'Artista',artwork:${artwork ? `[{src:${jsStr(artwork)},sizes:'512x512'}]` : '[]'}});`;
     r.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
     r.end(`<!doctype html><meta charset=utf-8><title>Prueba</title><body style="margin:0;height:100vh;background:#336">${url.searchParams.has('bare') ? '' : '<audio id=a src="/a.wav" loop></audio>'}<script>${meta}</script>`);
   });
@@ -163,13 +166,13 @@ export async function openPage(env, server, { art, inpage = true, theme, bare = 
     // Estilo calculado de un elemento del reproductor (se evalúa en el nodo por CDP, porque el shadow está cerrado).
     async style(cls, prop) {
       const { object } = await cdp.send('DOM.resolveNode', { backendNodeId: (await node(cls)).backendNodeId });
-      const r = await cdp.send('Runtime.callFunctionOn', { objectId: object.objectId, returnByValue: true, functionDeclaration: `function () { return getComputedStyle(this).getPropertyValue(${JSON.stringify(prop)}); }` });
+      const r = await cdp.send('Runtime.callFunctionOn', { objectId: object.objectId, returnByValue: true, functionDeclaration: 'function (p) { return getComputedStyle(this).getPropertyValue(p); }', arguments: [{ value: String(prop) }] });
       return r.result.value;
     },
     // Cambia el tamaño de la tarjeta en la página (elige el layout por container queries).
     async size(w, h) {
       const { object } = await cdp.send('DOM.resolveNode', { backendNodeId: (await node('card')).backendNodeId });
-      await cdp.send('Runtime.callFunctionOn', { objectId: object.objectId, functionDeclaration: `function () { this.style.width = '${w}px'; this.style.height = '${h}px'; }` });
+      await cdp.send('Runtime.callFunctionOn', { objectId: object.objectId, functionDeclaration: 'function (w, h) { this.style.width = w + "px"; this.style.height = h + "px"; }', arguments: [{ value: Number(w) }, { value: Number(h) }] });
       await sleep(150);
     },
     // Atributo de un elemento del reproductor.
