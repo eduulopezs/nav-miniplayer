@@ -28,8 +28,8 @@ Pedimos no divulgar públicamente el fallo hasta que haya una versión corregida
 Si investigas de buena fe y dentro de esta política (sin acceder a datos de terceros, sin degradar servicios ajenos, sin divulgar antes de tiempo), no emprenderemos acciones legales contra ti ni te las reclamaremos y colaboraremos para resolverlo.
 
 ### Alcance
-Dentro: el código de este repositorio (extensión MV3: service worker, content scripts, puente de Media Session, página de ajustes, ventana aparte, documento offscreen) y los scripts de `scripts/`.
-Fuera: fallos del navegador o de las APIs de Chrome/Edge, vulnerabilidades de los sitios web donde se usa, ingeniería social, ataques que exijan ya tener control del perfil del navegador o de la extensión, informes automáticos sin impacto demostrable, y las limitaciones de «Límites conocidos» tal como están descritas (un impacto mayor que el descrito sí está dentro de alcance).
+- Dentro: el código de este repositorio (extensión MV3: service worker, content scripts, puente de Media Session, página de ajustes, ventana aparte, documento offscreen) y los scripts de `scripts/`.
+- Fuera: fallos del navegador o de las APIs de Chrome/Edge, vulnerabilidades de los sitios web donde se usa, ingeniería social, ataques que exijan ya tener control del perfil del navegador o de la extensión, informes automáticos sin impacto demostrable, y las limitaciones de «Límites conocidos» tal como están descritas (un impacto mayor que el descrito sí está dentro de alcance).
 
 # Modelo de amenazas
 
