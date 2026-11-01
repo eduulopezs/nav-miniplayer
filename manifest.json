@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "__MSG_extName__",
   "default_locale": "es",
-  "version": "1.17.0",
+  "version": "1.18.0",
   "description": "__MSG_extDesc__",
   "minimum_chrome_version": "116",
   "permissions": ["storage", "contextMenus", "scripting", "tabCapture", "offscreen", "activeTab"],

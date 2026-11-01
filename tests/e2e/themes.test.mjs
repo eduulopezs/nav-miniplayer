@@ -9,9 +9,9 @@ let env, server;
 before(async () => { fs.mkdirSync(SHOTS, { recursive: true }); server = await startServer(); env = await launch(); });
 after(async () => { await env.close(); await server.close(); });
 
-test('los 6 diseños se aplican y se ven distintos', async () => {
+test('los 7 diseños se aplican y se ven distintos', async () => {
   const hashes = {};
-  for (const theme of ['glass', 'noir', 'crt', 'metal', 'minimal', 'ansi']) {
+  for (const theme of ['glass', 'noir', 'crt', 'metal', 'minimal', 'ansi', 'dynamic']) {
     const p = await openPage(env, server, { theme });
     await p.toggle();
     await p.waitFor(async () => (await p.read()).shown);
@@ -23,5 +23,5 @@ test('los 6 diseños se aplican y se ven distintos', async () => {
     hashes[theme] = createHash('sha1').update(buf).digest('hex');
     await p.page.close();
   }
-  assert.equal(new Set(Object.values(hashes)).size, 6, 'dos diseños se ven idénticos');
+  assert.equal(new Set(Object.values(hashes)).size, 7, 'dos diseños se ven idénticos');
 });

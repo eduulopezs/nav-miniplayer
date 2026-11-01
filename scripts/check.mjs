@@ -88,7 +88,7 @@ if (!/^\d+\.\d+\.\d+$/.test(manifest.version)) errors.push(`versión no válida:
     const text = readFileSync(join(root, p), 'utf8');
     for (const [, k] of text.matchAll(/(?:NMP\.t|\bt|getMessage)\(\s*'(\w+)'/g)) used.add(k);
     for (const [, k] of text.matchAll(/data-i18n(?:-label|-title)?="(\w+)"/g)) used.add(k);
-    for (const [, k] of text.matchAll(/'(theme(?:Glass|Noir|Crt|Metal|Minimal|Ansi))'/g)) used.add(k);
+    for (const [, k] of text.matchAll(/'(theme(?:Glass|Noir|Crt|Metal|Minimal|Ansi|Dynamic))'/g)) used.add(k);
   });
   walk('src');
   for (const [, k] of JSON.stringify(manifest).matchAll(/__MSG_(\w+)__/g)) used.add(k);
