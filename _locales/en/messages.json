@@ -158,6 +158,9 @@
   "themeMinimal": {
     "message": "Minimal"
   },
+  "themeAnsi": {
+    "message": "Terminal ANSI"
+  },
   "tabsWithSound": {
     "message": "Tabs playing sound"
   },

@@ -7,6 +7,7 @@
   const FILES = {
     noir: [['Archivo Narrow', 500, 'archivo-narrow-latin-500'], ['Archivo Narrow', 700, 'archivo-narrow-latin-700'], ['Space Mono', 400, 'space-mono-latin-400'], ['Space Mono', 700, 'space-mono-latin-700']],
     crt: [['JetBrains Mono', 400, 'jetbrains-mono-latin-400'], ['JetBrains Mono', 700, 'jetbrains-mono-latin-700'], ['VT323', 400, 'vt323-latin-400']],
+    ansi: [['JetBrains Mono', 400, 'jetbrains-mono-latin-400'], ['JetBrains Mono', 700, 'jetbrains-mono-latin-700']],
     minimal: [['Figtree', 500, 'figtree-latin-500'], ['Figtree', 700, 'figtree-latin-700']],
     glass: [['Figtree', 500, 'figtree-latin-500'], ['Figtree', 700, 'figtree-latin-700']],
     metal: [['Montserrat', 300, 'montserrat-latin-300'], ['Montserrat', 400, 'montserrat-latin-400'], ['Syne', 700, 'syne-latin-700'], ['Figtree', 500, 'figtree-latin-500'], ['Figtree', 700, 'figtree-latin-700']],
