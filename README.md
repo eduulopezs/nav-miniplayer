@@ -141,7 +141,7 @@ Requiere Node 22 o superior.
 La versión vive solo en el campo `version` de `manifest.json`.
 
 ## Contribuir
-Las contribuciones son bienvenidas: lee [CONTRIBUTING.md](CONTRIBUTING.md). Los cambios de cada versión están en [CHANGELOG.md](CHANGELOG.md). Para avisar de una vulnerabilidad, mira [SECURITY.md](SECURITY.md).
+Las contribuciones son bienvenidas: lee [CONTRIBUTING.md](CONTRIBUTING.md). Los cambios de cada versión están en [CHANGELOG.md](CHANGELOG.md). Para avisar de una vulnerabilidad, mira [SECURITY.md](SECURITY.md). Estado de accesibilidad en [ACCESSIBILITY.md](ACCESSIBILITY.md).
 
 ## Licencia y créditos
 [MIT](LICENSE). Las fuentes incluidas (JetBrains Mono, Archivo Narrow, Space Mono, Figtree, Syne, VT323 y Montserrat) se distribuyen bajo la SIL Open Font License 1.1 y conservan su copyright original; ver [src/fonts/LICENSES.txt](src/fonts/LICENSES.txt).

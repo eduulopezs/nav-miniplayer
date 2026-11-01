@@ -45,6 +45,10 @@ Ejecuta `npm test` antes de cada commit y `npm run e2e` cuando toques comportami
 
 Los colores, escalas y demás valores de diseño tienen una única fuente en [`design/tokens.json`](design/tokens.json). No pongas valores sueltos en los estilos: añade o reutiliza un token y regenera con `npm run tokens`. `npm test` comprueba que los tokens existan, se usen y cumplan el contraste.
 
+## Accesibilidad
+
+El estado y las limitaciones están en [`ACCESSIBILITY.md`](ACCESSIBILITY.md). Si tu cambio toca teclado, etiquetas ARIA, foco, contraste o movimiento, mantenlo al día y no declares ahí nada que no hayas comprobado.
+
 ## Seguridad
 
 - Nada de `eval`, `new Function` ni de cargar o ejecutar código remoto.
