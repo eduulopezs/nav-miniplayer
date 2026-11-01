@@ -152,9 +152,9 @@ ${NMP.menuCss}
     qa('[data-act=fwd]').forEach((b) => { b.title = NMP.t('fwdTitle', String(n)); b.setAttribute('aria-label', NMP.t('fwdLabel', String(n))); });
   }
   let toastT = 0;
-  function toast(text) {
+  function toast(text, ms = 1100) {
     toastEl.textContent = text; card.classList.add('tst');
-    clearTimeout(toastT); toastT = setTimeout(() => card.classList.remove('tst'), 1100);
+    clearTimeout(toastT); toastT = setTimeout(() => card.classList.remove('tst'), ms);
   }
   // Volumen y velocidad solo existen en medios del DOM; los remotos (sin insertar, iframes) no los exponen.
   const tunable = () => !!media && !media.seek && 'volume' in media;
@@ -327,6 +327,10 @@ ${NMP.menuCss}
     if (actions.has('@pip')) send('__pip'); else openWindowFallback();
   };
 
+
+  // El service worker lo invoca tras inyectar el puente en una pestaña ya cargada sin permiso de host (solo activeTab): los manejadores que
+  // la página registró antes no se ven, así que anterior/siguiente pueden faltar hasta recargar.
+  NMP.lateBridge = () => toast(NMP.t('reloadHint'), 5000);
 
   // ---------- Render ----------
   // Solo hay trabajo (y temporizador) mientras algo se ve: la ventana flotante o, en las pruebas, la tarjeta en la página.
