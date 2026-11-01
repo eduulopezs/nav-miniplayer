@@ -22,10 +22,11 @@
   /* Carátula: un clic la difumina (sin cambiar el layout) y otro la devuelve; el estado es una preferencia. */
   [data-act=cover] { display: block; cursor: pointer; } /* el reinicio de los botones lo deja en línea */
   :is(.gl-cov, .nr-art, .lm-cov, .cr-art) { transition: filter var(--dur-in) var(--ease-out); }
-  .card.cov-blur :is(.gl-cov, .nr-art, .lm-cov, .cr-art) { filter: blur(var(--blur-cover)); }
+  .card.cov-blur :is(.gl-cov, .nr-art, .lm-cov, .cr-art, .mn-cov) { filter: blur(var(--blur-cover)); }
   .card.cov-blur.paused .gl-cov { filter: saturate(.55) brightness(.85) blur(var(--blur-cover)); }
   .card.cov-blur.paused .nr-art { filter: grayscale(1) contrast(1.1) brightness(.5) blur(var(--blur-cover)); }
   .card.cov-blur.paused .lm-cov { filter: grayscale(.7) blur(var(--blur-cover)); }
+  .card.cov-blur.paused .mn-cov { filter: saturate(.5) blur(var(--blur-cover)); }
   /* Regulador de volumen (en los layouts medianos y grandes): el color lo pone cada diseño con --vol-c. */
   .vol-r { width: var(--size-vol); height: var(--size-target); flex: none; min-width: 0; accent-color: var(--vol-c, #fff); cursor: pointer; touch-action: none; }
   .vol-r:focus-visible { outline: var(--size-ring) solid var(--focus); outline-offset: var(--size-ring-offset); }

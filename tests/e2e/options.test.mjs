@@ -18,7 +18,7 @@ test('la página de ajustes muestra los diseños con vista previa y guarda los c
   await page.goto(url);
   await page.waitForSelector('.theme');
   assert.equal(await page.title(), 'Ajustes de Nav Miniplayer', 'el título sale de _locales');
-  assert.equal(await page.locator('.theme').count(), 4);
+  assert.equal(await page.locator('.theme').count(), 5);
   // Cada vista previa es una tarjeta real con altura (la plantilla del diseño se pintó).
   for (const b of await page.locator('.theme .pv').all()) assert.ok((await b.boundingBox()).height >= 100);
   assert.equal(await page.locator('[data-i18n]:empty').count(), 0, 'ningún texto traducible queda vacío');

@@ -8,6 +8,9 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y e
 
 ### Añadido
 
+- Nuevo diseño Minimal: superficie plana, clara u oscura según `prefers-color-scheme`, con contraste AA comprobado en los dos esquemas (#14).
+
+
 - Sin permiso de host, el reproductor avisa de recargar la página cuando el puente de Media Session se inyecta tarde (#30).
 - La ventana aparte aclara que solo lista las pestañas con el reproductor activo (#30).
 - Ficheros de comunidad: `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md` y este registro de cambios.

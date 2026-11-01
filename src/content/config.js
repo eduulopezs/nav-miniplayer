@@ -5,7 +5,7 @@
   NMP.cfg = {
     SKIP: 10, // s que saltan los botones ±10
     MIN_DURATION: 30, // s; ignora sonidos/clips cortos
-    THEME_KEY: 'mp_theme', // desarrollo: 'glass' | 'noir' | 'crt' | 'metal'
+    THEME_KEY: 'mp_theme', // desarrollo: 'glass' | 'noir' | 'crt' | 'metal' | 'minimal'
     PREFS_KEY: 'mp_prefs', // { skip }
     REMOTE_KEY: 'mp_remote', // true mientras la ventana aparte está abierta: las pestañas informan de su medio
     VOL_KEY: 'mp_vol', // volumen recordado por sitio

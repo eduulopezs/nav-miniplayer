@@ -21,6 +21,7 @@
         'src/content/skins/crt.js',
         'src/content/skins/glass.js',
         'src/content/skins/metal.js',
+        'src/content/skins/minimal.js',
         'src/content/styles.js',
         'src/content/menu.js',
         'src/content/player.js',
