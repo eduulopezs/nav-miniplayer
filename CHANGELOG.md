@@ -10,6 +10,7 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y e
 
 - Nuevo diseño Minimal: superficie plana, clara u oscura según `prefers-color-scheme`, con contraste AA comprobado en los dos esquemas (#14).
 - Nuevo diseño Terminal ANSI: texto monoespaciado, los 16 colores ANSI, barra de progreso en bloques y botones entre corchetes (#14).
+- Nuevo diseño Dynamic: el fondo y el acento toman el color de la carátula y cambian con cada pista, con contraste AA comprobado con tintas extremas (#14).
 
 
 - Sin permiso de host, el reproductor avisa de recargar la página cuando el puente de Media Session se inyecta tarde (#30).

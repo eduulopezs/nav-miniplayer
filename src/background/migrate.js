@@ -3,7 +3,7 @@
 (() => {
   const SCHEMA_KEY = 'mp_schema';
   const SKIPS = [5, 10, 15, 30];
-  const THEMES = ['glass', 'noir', 'crt', 'metal', 'minimal', 'ansi'];
+  const THEMES = ['glass', 'noir', 'crt', 'metal', 'minimal', 'ansi', 'dynamic'];
   const LEGACY_THEME = { brutal: 'noir', retro: 'crt', pixel: 'glass' };
 
   const STEPS = [

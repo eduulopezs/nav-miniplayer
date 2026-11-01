@@ -29,7 +29,7 @@ const pairs = [];
 // Pares de los tokens compartidos: anillo de foco (componente de interfaz, 3:1; WCAG 1.4.11 y 2.4.11) y texto del toast sobre su velo, que se compone sobre el fondo del diseño.
 const base = (k) => k['bg-b']; // fondo sobre el que se compone la tarjeta (el que usa la paleta de la carátula)
 const veil = (key) => (k) => hex(over(k[key], base(k)));
-for (const th of ['glass', 'noir', 'crt', 'metal', 'minimal', 'ansi']) {
+for (const th of ['glass', 'noir', 'crt', 'metal', 'minimal', 'ansi', 'dynamic']) {
   pairs.push([th, 'foco', 'focus', base, 3]);
   pairs.push([th, 'toast', 'on-overlay', veil('scrim-toast'), 4.5]);
 }
@@ -64,6 +64,26 @@ for (const [what, key, min] of [['texto', 'fg', 4.5], ['secundario', 'dim', 4.5]
   const r = ratio(anv[key], anv.bg), ok = r >= min;
   if (!ok) fails++;
   console.log(`${ok ? '✓' : '✗'} ${'ansi'.padEnd(14)} ${what.padEnd(11)} ${key.padEnd(9)} sobre bg       ${r.toFixed(2).padStart(5)}:1 (mín ${min})`);
+}
+// Dynamic tiñe su fondo con la paleta de la carátula (color-mix en sRGB): se comprueba con tintas extremas, que es el peor caso.
+const dy = readFileSync(join(root, 'src/content/skins/dynamic.js'), 'utf8');
+const dyBlock = dy.slice(dy.indexOf('.card.sk-dynamic {'), dy.indexOf('.dy-wrap {'));
+const dyv = Object.fromEntries([...dyBlock.matchAll(/--dy-(\w+): (#[0-9a-f]{6}|\d+%)/gi)].map((m) => [m[1], m[2]]));
+const mixc = (a, b, pct) => hex(parse(a).slice(0, 3).map((v, i) => v * pct + parse(b)[i] * (1 - pct)));
+const inks = ['#ffffff', '#ffff00', '#00ffff', '#00ff00', '#ff00ff', '#ff0000', '#3050ff', '#ffb36b', '#e0475b', '#7c5cff'];
+for (const [what, min, f] of [
+  ['texto', 4.5, (bg) => ratio(dyv.fg, bg)],
+  ['secundario', 4.5, (bg) => ratio(dyv.mute, bg)],
+  ['acento (barra)', 3, (bg, ink) => ratio(mixc(ink, '#ffffff', .55), bg)],
+  ['pista (barra)', 3, (bg) => ratio(mixc(dyv.fg, bg, .55), bg)],
+  ['icono play', 4.5, (bg, ink) => ratio(dyv.base, mixc(ink, '#ffffff', .55))],
+  ['foco', 3, (bg) => ratio('#ffffff', bg)],
+]) {
+  let worst = Infinity;
+  for (const ink of inks) worst = Math.min(worst, f(mixc(ink, dyv.base, parseFloat(dyv.mix) / 100), ink));
+  const ok = worst >= min;
+  if (!ok) fails++;
+  console.log(`${ok ? '✓' : '✗'} ${'dynamic'.padEnd(14)} ${what.padEnd(14)} peor caso     ${worst.toFixed(2).padStart(5)}:1 (mín ${min})`);
 }
 console.log(fails ? `\n${fails} par(es) por debajo del mínimo WCAG` : '\n✓ todos los pares cumplen WCAG');
 if (fails && process.argv.includes('--strict')) process.exit(1);

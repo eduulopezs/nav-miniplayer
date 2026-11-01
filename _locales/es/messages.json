@@ -161,6 +161,9 @@
   "themeAnsi": {
     "message": "Terminal ANSI"
   },
+  "themeDynamic": {
+    "message": "Dynamic"
+  },
   "tabsWithSound": {
     "message": "Pestañas con sonido"
   },
