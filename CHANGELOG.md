@@ -10,6 +10,7 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y e
 
 - Sin permiso de host, el reproductor avisa de recargar la página cuando el puente de Media Session se inyecta tarde (#30).
 - La ventana aparte aclara que solo lista las pestañas con el reproductor activo (#30).
+- `ACCESSIBILITY.md` con la declaración de accesibilidad (objetivo WCAG 2.2 AA), sus limitaciones conocidas y cómo informar de un problema (#73).
 - Ficheros de comunidad: `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md` y este registro de cambios.
 
 ## [1.15.1] - 2026-10-30

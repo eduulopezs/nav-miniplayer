@@ -141,7 +141,7 @@ Requires Node 22 or later.
 The version lives only in the `version` field of `manifest.json`.
 
 ## Contributing
-Contributions are welcome: read [CONTRIBUTING.md](CONTRIBUTING.md). Changes per release are in [CHANGELOG.md](CHANGELOG.md). To report a vulnerability, see [SECURITY.md](SECURITY.md).
+Contributions are welcome: read [CONTRIBUTING.md](CONTRIBUTING.md). Changes per release are in [CHANGELOG.md](CHANGELOG.md). To report a vulnerability, see [SECURITY.md](SECURITY.md). Accessibility status (in Spanish) in [ACCESSIBILITY.md](ACCESSIBILITY.md).
 
 ## License and credits
 [MIT](LICENSE). The bundled fonts (JetBrains Mono, Archivo Narrow, Space Mono, Figtree, Syne, VT323 and Montserrat) are distributed under the SIL Open Font License 1.1 and keep their original copyright; see [src/fonts/LICENSES.txt](src/fonts/LICENSES.txt).
