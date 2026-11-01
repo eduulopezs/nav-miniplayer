@@ -20,7 +20,7 @@
 
   // ---- Diseños: cada tarjeta es una vista previa real (plantilla y CSS del diseño) con datos de ejemplo.
   const cards = {}, previews = {};
-  for (const id of ['glass', 'noir', 'crt', 'metal', 'minimal'].filter((k) => NMP.skins[k])) {
+  for (const id of ['glass', 'noir', 'crt', 'metal', 'minimal', 'ansi'].filter((k) => NMP.skins[k])) {
     const skin = NMP.skins[id];
     const b = document.createElement('button');
     b.type = 'button'; b.className = 'theme'; b.setAttribute('role', 'radio'); b.dataset.id = id;

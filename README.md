@@ -9,7 +9,7 @@
 ![Chrome 116+](https://img.shields.io/badge/Chrome-%E2%89%A5%20116-brightgreen)
 
 Un minirreproductor flotante para el audio y el vídeo de cualquier pestaña de Chrome o Edge, siempre encima de tus otras ventanas.
-Play/pausa, ±10 s, pista anterior y siguiente, barra de progreso y cinco diseños, sin salir de lo que estás haciendo.
+Play/pausa, ±10 s, pista anterior y siguiente, barra de progreso y seis diseños, sin salir de lo que estás haciendo.
 
 <p align="center">
   <img src="docs/screenshots/glass.png" width="340" alt="Diseño Glassware: tarjeta de cristal translúcido con cintas de color y los controles de reproducción">
@@ -58,6 +58,7 @@ Clic derecho en el icono → **Diseño** para cambiar el aspecto en caliente (se
 - **Terminal CRT**: fósforo ámbar con curvatura de tubo, líneas de escaneo y ecualizador de texto.
 - **Liquid Metal**: metal cromado con mercurio en movimiento y anillo de color.
 - **Minimal**: superficie plana sin efectos, clara u oscura según el sistema.
+- **Terminal ANSI**: terminal moderna con texto monoespaciado, los colores ANSI y botones entre corchetes.
 
 Para que el visualizador siga el audio real de la pestaña, marca **Visualizador con el audio real de la pestaña** en el menú del icono; la captura empieza con el clic en el icono y el navegador muestra su indicador. Sin ella, el visualizador es simulado.
 
@@ -114,7 +115,7 @@ src/
     viz.js                       motor del visualizador (espectro y forma de onda)
     menu.js                      menú del clic derecho sobre la tarjeta
     storyboard.js                miniatura al pasar por la barra (YouTube)
-    skins/                       los cinco diseños: glass, noir, crt, metal
+    skins/                       los seis diseños: glass, noir, crt, metal, minimal, ansi
     player.js                    DOM, estado, ventana con marco y teclado
   offscreen/                     documento que analiza el audio capturado
   options/                       página de Ajustes

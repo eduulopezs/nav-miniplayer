@@ -29,7 +29,7 @@ const pairs = [];
 // Pares de los tokens compartidos: anillo de foco (componente de interfaz, 3:1; WCAG 1.4.11 y 2.4.11) y texto del toast sobre su velo, que se compone sobre el fondo del diseño.
 const base = (k) => k['bg-b']; // fondo sobre el que se compone la tarjeta (el que usa la paleta de la carátula)
 const veil = (key) => (k) => hex(over(k[key], base(k)));
-for (const th of ['glass', 'noir', 'crt', 'metal', 'minimal']) {
+for (const th of ['glass', 'noir', 'crt', 'metal', 'minimal', 'ansi']) {
   pairs.push([th, 'foco', 'focus', base, 3]);
   pairs.push([th, 'toast', 'on-overlay', veil('scrim-toast'), 4.5]);
 }
@@ -55,6 +55,15 @@ for (const [name, v] of mnSets) {
     if (!ok) fails++;
     console.log(`${ok ? '✓' : '✗'} ${name.padEnd(14)} ${what.padEnd(11)} ${key.padEnd(9)} sobre bg       ${r.toFixed(2).padStart(5)}:1 (mín ${min})`);
   }
+}
+// Terminal ANSI declara sus colores como --an-* en su CSS; se comprueban sobre su fondo.
+const an = readFileSync(join(root, 'src/content/skins/ansi.js'), 'utf8');
+const anBlock = an.slice(an.indexOf('.card.sk-ansi {'), an.indexOf('.an-wrap {'));
+const anv = Object.fromEntries([...anBlock.matchAll(/--an-(\w+): (#[0-9a-f]{6})/gi)].map((m) => [m[1], m[2]]));
+for (const [what, key, min] of [['texto', 'fg', 4.5], ['secundario', 'dim', 4.5], ['verde', 'green', 4.5], ['cian', 'cyan', 4.5], ['amarillo', 'yellow', 4.5], ['barra', 'track', 3]]) {
+  const r = ratio(anv[key], anv.bg), ok = r >= min;
+  if (!ok) fails++;
+  console.log(`${ok ? '✓' : '✗'} ${'ansi'.padEnd(14)} ${what.padEnd(11)} ${key.padEnd(9)} sobre bg       ${r.toFixed(2).padStart(5)}:1 (mín ${min})`);
 }
 console.log(fails ? `\n${fails} par(es) por debajo del mínimo WCAG` : '\n✓ todos los pares cumplen WCAG');
 if (fails && process.argv.includes('--strict')) process.exit(1);

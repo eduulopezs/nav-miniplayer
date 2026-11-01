@@ -9,7 +9,7 @@ after(async () => { await env.close(); await server.close(); });
 
 const reset = () => env.sw.evaluate(() => chrome.storage.local.remove(['mp_prefs', 'mp_vol']));
 const vol = (p) => p.media(() => document.getElementById('a').volume);
-const COV = { glass: '.gl-cov', noir: '.nr-art', crt: '.cr-art', metal: '.lm-cov', minimal: '.mn-cov' };
+const COV = { glass: '.gl-cov', noir: '.nr-art', crt: '.cr-art', metal: '.lm-cov', minimal: '.mn-cov', ansi: '.an-cov' };
 
 for (const theme of Object.keys(COV)) {
   test(`${theme}: la carátula se difumina con clic y con teclado, y se recuerda`, async () => {

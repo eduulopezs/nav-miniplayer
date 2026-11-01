@@ -148,7 +148,7 @@ chrome.runtime.onMessage.addListener((m, sender, reply) => {
 
 // Clic derecho en el icono: captura de audio, ventana aparte y (para desarrollo) el diseño.
 const THEME_KEY = 'mp_theme';
-const THEMES = { glass: 'themeGlass', noir: 'themeNoir', crt: 'themeCrt', metal: 'themeMetal', minimal: 'themeMinimal' };
+const THEMES = { glass: 'themeGlass', noir: 'themeNoir', crt: 'themeCrt', metal: 'themeMetal', minimal: 'themeMinimal', ansi: 'themeAnsi' };
 const syncMenu = (theme, capture) => {
   const up = (id, checked) => chrome.contextMenus.update(id, { checked }, () => void chrome.runtime.lastError);
   if (theme) for (const id of Object.keys(THEMES)) up('th:' + id, id === theme);
