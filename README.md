@@ -34,7 +34,7 @@ npm run zip        # opcional: genera dist/nav-miniplayer-<versión>.zip
 ```
 Carga la carpeta del repositorio como se indica arriba. Para usarla no hace falta compilar nada ni instalar dependencias.
 
-La primera vez se abre **Ajustes**: activa **Acceso a los sitios** para que el reproductor se cargue solo en todas las páginas (permiso opcional; las pestañas abiertas lo reciben al concederlo). Sin ese acceso, el clic en el icono o un atajo lo cargan en la pestaña activa, pero anterior/siguiente pueden no funcionar en sitios que registran sus controles antes. Al reproducir audio/vídeo, pulsa el icono de la extensión para abrir el minirreproductor.
+La primera vez se abre **Ajustes**: activa **Acceso a los sitios** para que el reproductor se cargue solo en todas las páginas (permiso opcional; las pestañas abiertas lo reciben al concederlo). Sin ese acceso, el clic en el icono o un atajo lo cargan en la pestaña activa, pero anterior/siguiente pueden no funcionar en sitios que registran sus controles antes (el reproductor te avisa de que recargues la página para activarlos). Al reproducir audio/vídeo, pulsa el icono de la extensión para abrir el minirreproductor.
 
 ## Uso
 - Play/pausa, ±10 s, anterior/siguiente (usa Media Session del sitio; en YouTube/Spotify Web funcionan).

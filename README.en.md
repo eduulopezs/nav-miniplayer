@@ -34,7 +34,7 @@ npm run zip        # optional: builds dist/nav-miniplayer-<version>.zip
 ```
 Load the repository folder as described above. Using it needs no build step and no dependencies.
 
-The first time, **Settings** opens: turn on **Site access** so the player loads by itself on every page (optional permission; open tabs get it as soon as you grant it). Without that access, clicking the icon or using a shortcut loads it in the active tab, but previous/next may not work on sites that register their controls earlier. While audio/video plays, click the extension icon to open the mini player.
+The first time, **Settings** opens: turn on **Site access** so the player loads by itself on every page (optional permission; open tabs get it as soon as you grant it). Without that access, clicking the icon or using a shortcut loads it in the active tab, but previous/next may not work on sites that register their controls earlier (the player tells you to reload the page to enable them). While audio/video plays, click the extension icon to open the mini player.
 
 ## Usage
 - Play/pause, ±10 s, previous/next (uses the site's Media Session; works on YouTube/Spotify Web).

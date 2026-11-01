@@ -171,6 +171,32 @@ test('injectInto avisa de que el puente llega tarde solo la primera vez', async 
   await env.sw.evaluate(() => self.NMPInject.reconcile());
 });
 
+// Sin permiso de host real no se puede automatizar activeTab (lo concede el clic en el icono): se simula la falta del permiso en el worker.
+test('sin permiso de host, el clic que inyecta el puente tarde muestra el aviso de recarga', async () => {
+  await env.sw.evaluate(() => chrome.scripting.unregisterContentScripts({ ids: ['nmp-agent', 'nmp-bridge', 'nmp-ui'] }));
+  await env.sw.evaluate(() => chrome.storage.local.set({ mp_inpage: true }));
+  const page = await env.ctx.newPage();
+  await page.goto(`${server.base}/`);
+  await page.waitForFunction(() => document.getElementById('a').readyState > 0);
+  const tab = await tabOf(env.sw, `${server.base}/*`);
+  const toastText = async () => {
+    const cdp = await env.ctx.newCDPSession(page);
+    const walk = (n) => (n.attributes && n.attributes.includes('toast') ? [n] : []).concat(...[...(n.children || []), ...(n.shadowRoots || [])].map(walk));
+    const root = (await cdp.send('DOM.getDocument', { depth: -1, pierce: true })).root;
+    const card = (function f(n) { return (n.attributes || []).includes('card tst') || /\btst\b/.test((n.attributes || [])[(n.attributes || []).indexOf('class') + 1] || '') ? n : [...(n.children || []), ...(n.shadowRoots || [])].map(f).find(Boolean); })(root);
+    const t = walk(root)[0];
+    await cdp.detach();
+    return { shown: !!card, text: t ? (t.children || []).map((c) => c.nodeValue || '').join('') : null };
+  };
+  await env.sw.evaluate(() => { self.__contains = chrome.permissions.contains; chrome.permissions.contains = () => Promise.resolve(false); });
+  try { await env.sw.evaluate((id) => callPlayer(id, 'toggle'), tab); } finally { await env.sw.evaluate(() => { chrome.permissions.contains = self.__contains; }); }
+  const t = await toastText();
+  assert.equal(t.shown, true, 'toast visible');
+  assert.match(t.text, /Recarga la página/);
+  await page.close();
+  await env.sw.evaluate(() => self.NMPInject.reconcile());
+});
+
 test('reinyectar en una pestaña que ya lleva los scripts no duplica el puente ni la interfaz', async () => {
   const page = await env.ctx.newPage();
   await page.goto(`${server.base}/`);
