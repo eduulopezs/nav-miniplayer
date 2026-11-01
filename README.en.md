@@ -9,7 +9,7 @@
 ![Chrome 116+](https://img.shields.io/badge/Chrome-%E2%89%A5%20116-brightgreen)
 
 A floating mini player for the audio and video of any Chrome or Edge tab, always on top of your other windows.
-Play/pause, ±10 s, previous and next track, a progress bar and four designs, without leaving what you are doing.
+Play/pause, ±10 s, previous and next track, a progress bar and five designs, without leaving what you are doing.
 
 <p align="center">
   <img src="docs/screenshots/glass.png" width="340" alt="Glassware design: translucent glass card with colour ribbons and playback controls">
@@ -57,6 +57,7 @@ Right-click the icon → **Design** to switch the look live (applied to the open
 - **Noir**: black and signal red, black-and-white cover, barcode and spectrum relief.
 - **Terminal CRT**: amber phosphor with tube curvature, scanlines and a text equaliser.
 - **Liquid Metal**: chrome metal with moving mercury and a colour ring.
+- **Minimal**: flat, effect-free surface, light or dark following the system.
 
 For the visualizer to follow the tab's real audio, tick **Visualizer with the tab's real audio** in the icon menu; capture starts with the click on the icon and the browser shows its indicator. Without it, the visualizer is simulated.
 
@@ -113,7 +114,7 @@ src/
     viz.js                       visualizer engine (spectrum and waveform)
     menu.js                      right-click menu on the card
     storyboard.js                hover thumbnail on the bar (YouTube)
-    skins/                       the four designs: glass, noir, crt, metal
+    skins/                       the five designs: glass, noir, crt, metal, minimal
     player.js                    DOM, state, framed window and keyboard
   offscreen/                     document that analyses the captured audio
   options/                       Settings page

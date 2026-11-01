@@ -29,7 +29,7 @@ const pairs = [];
 // Pares de los tokens compartidos: anillo de foco (componente de interfaz, 3:1; WCAG 1.4.11 y 2.4.11) y texto del toast sobre su velo, que se compone sobre el fondo del diseño.
 const base = (k) => k['bg-b']; // fondo sobre el que se compone la tarjeta (el que usa la paleta de la carátula)
 const veil = (key) => (k) => hex(over(k[key], base(k)));
-for (const th of ['glass', 'noir', 'crt', 'metal']) {
+for (const th of ['glass', 'noir', 'crt', 'metal', 'minimal']) {
   pairs.push([th, 'foco', 'focus', base, 3]);
   pairs.push([th, 'toast', 'on-overlay', veil('scrim-toast'), 4.5]);
 }
@@ -43,6 +43,18 @@ for (const [theme, what, fgKey, bgKey, min] of pairs) {
   const ok = r >= min;
   if (!ok) fails++;
   console.log(`${ok ? '✓' : '✗'} ${theme.padEnd(6)} ${what.padEnd(11)} ${fgKey.padEnd(9)} sobre ${(typeof bgKey === "function" ? "fondo" : bgKey).padEnd(8)} ${r.toFixed(2).padStart(5)}:1 (mín ${min})`);
+}
+// Minimal declara sus pares claro/oscuro como --mn-* en su propio CSS (sigue prefers-color-scheme); se leen de ahí para comprobar AA en los dos esquemas.
+const mn = readFileSync(join(root, 'src/content/skins/minimal.js'), 'utf8');
+const mnVars = (block) => Object.fromEntries([...block.matchAll(/--mn-(\w+): (#[0-9a-f]{6})/gi)].map((m) => [m[1], m[2]]));
+const mnDarkAt = mn.indexOf('@media (prefers-color-scheme: dark)');
+const mnSets = [['minimal claro', mnVars(mn.slice(mn.indexOf('.card.sk-minimal {'), mnDarkAt))], ['minimal oscuro', mnVars(mn.slice(mnDarkAt, mn.indexOf('.mn-wrap {')))]];
+for (const [name, v] of mnSets) {
+  for (const [what, key, min] of [['título', 'fg', 4.5], ['secundario', 'mute', 4.5], ['foco', 'fg', 3], ['barra', 'track', 3]]) {
+    const r = ratio(v[key], v.bg), ok = r >= min;
+    if (!ok) fails++;
+    console.log(`${ok ? '✓' : '✗'} ${name.padEnd(14)} ${what.padEnd(11)} ${key.padEnd(9)} sobre bg       ${r.toFixed(2).padStart(5)}:1 (mín ${min})`);
+  }
 }
 console.log(fails ? `\n${fails} par(es) por debajo del mínimo WCAG` : '\n✓ todos los pares cumplen WCAG');
 if (fails && process.argv.includes('--strict')) process.exit(1);

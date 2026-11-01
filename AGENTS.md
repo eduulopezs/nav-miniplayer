@@ -4,7 +4,7 @@ Extensión MV3 de Chrome/Edge: minirreproductor flotante para el audio/vídeo de
 
 ## Estructura de `src/`
 - `background/`: service worker (`service-worker.js`), inyección (`injection.js`), sesiones (`sessions.js`), migraciones (`migrate.js`) y la protección de red (`net-guard.js`).
-- `content/`: content scripts del reproductor (`player.js`, `media.js`, `menu.js`, `storyboard.js`, `viz.js`, `styles.js`, `tokens.js`, ...) y `skins/` (crt, glass, metal, noir).
+- `content/`: content scripts del reproductor (`player.js`, `media.js`, `menu.js`, `storyboard.js`, `viz.js`, `styles.js`, `tokens.js`, ...) y `skins/` (crt, glass, metal, minimal, noir).
 - `page/`: puente de Media Session en el mundo MAIN (`media-session-bridge.js`).
 - `offscreen/`: documento offscreen que analiza el audio capturado.
 - `window/`: ventana aparte del reproductor.
