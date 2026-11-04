@@ -118,7 +118,6 @@ async function readFont(file) {
 chrome.runtime.onMessage.addListener((m, sender) => {
   if (sender.id !== chrome.runtime.id || sender.tab || !m) return;
   if (m.type === 'cap-idle') chrome.offscreen.closeDocument().catch(() => {});
-  else if (m.type === 'open-window' && sender.url === chrome.runtime.getURL('src/options/options.html')) self.NMPSess.openWindow(); // botón de la página de ajustes
 });
 const inflight = new Set(); // una descarga a la vez por pestaña
 const inflightSb = new Set(); // ídem para las hojas del storyboard
@@ -140,7 +139,7 @@ chrome.runtime.onMessage.addListener((m, sender, reply) => {
     return true;
   }
   if (m.type !== 'img' || typeof m.url !== 'string' || m.url.length > MAX_URL) return;
-  if (inflight.has(tabId)) { reply({}); return; }
+  if (inflight.has(tabId)) { reply({ busy: true }); return; } // el reproductor reintenta; una respuesta vacía se leería como fallo
   inflight.add(tabId);
   fetchArtwork(m.url).then((data) => reply({ data }), () => reply({})).finally(() => inflight.delete(tabId));
   return true;

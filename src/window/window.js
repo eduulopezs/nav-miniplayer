@@ -5,7 +5,7 @@
   const NMP = globalThis.__NMP;
   const { fmt, fmt2, pad2, strSeed, barcode, palette, DEFAULT_PAL } = NMP.util;
   const { skins: SK, viz } = NMP;
-  const { PREFS_KEY } = NMP.cfg;
+  const { PREFS_KEY, SKIPS } = NMP.cfg;
   // Textos de la página (player.html) desde _locales.
   document.documentElement.lang = chrome.i18n.getUILanguage();
   for (const [attr, key] of [['data-i18n-label', 'aria-label'], ['data-i18n-title', 'title']]) document.querySelectorAll('[' + attr + ']').forEach((e) => e.setAttribute(key, NMP.t(e.getAttribute(attr))));
@@ -212,11 +212,11 @@ ${NMP.css}
     if (area === 'session' && c[SESS_KEY]) setSessions(c[SESS_KEY].newValue);
     if (area === 'local') {
       if (c[THEME_KEY] && c[THEME_KEY].newValue) applyTheme(c[THEME_KEY].newValue);
-      if (c[PREFS_KEY] && c[PREFS_KEY].newValue && [5, 10, 15, 30].includes(c[PREFS_KEY].newValue.skip)) { skip = c[PREFS_KEY].newValue.skip; applySkip(); }
+      if (c[PREFS_KEY] && c[PREFS_KEY].newValue && SKIPS.includes(c[PREFS_KEY].newValue.skip)) { skip = c[PREFS_KEY].newValue.skip; applySkip(); }
     }
   });
   chrome.storage.local.get([THEME_KEY, PREFS_KEY], (r) => {
-    if (r && r[PREFS_KEY] && [5, 10, 15, 30].includes(r[PREFS_KEY].skip)) skip = r[PREFS_KEY].skip;
+    if (r && r[PREFS_KEY] && SKIPS.includes(r[PREFS_KEY].skip)) skip = r[PREFS_KEY].skip;
     applyTheme((r && r[THEME_KEY]) || 'glass');
   });
   setInterval(render, 250);

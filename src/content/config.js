@@ -3,7 +3,7 @@
 
   // Constantes compartidas por todos los módulos del content script.
   NMP.cfg = {
-    SKIP: 10, // s que saltan los botones ±10
+    SKIPS: [5, 10, 15, 30], // s que pueden saltar los botones ±; el paso de migración guarda su propia copia
     MIN_DURATION: 30, // s; ignora sonidos/clips cortos
     THEME_KEY: 'mp_theme', // desarrollo: 'glass' | 'noir' | 'crt' | 'metal' | 'minimal' | 'ansi' | 'dynamic'
     PREFS_KEY: 'mp_prefs', // { skip }
