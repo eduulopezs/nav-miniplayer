@@ -6,13 +6,13 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y e
 
 ## [Sin publicar]
 
+## [1.18.2] - 2026-11-04
+
 ### Añadido
 
 - Nuevo diseño Minimal: superficie plana, clara u oscura según `prefers-color-scheme`, con contraste AA comprobado en los dos esquemas (#14).
 - Nuevo diseño Terminal ANSI: texto monoespaciado, los 16 colores ANSI, barra de progreso en bloques y botones entre corchetes (#14).
 - Nuevo diseño Dynamic: el fondo y el acento toman el color de la carátula y cambian con cada pista, con contraste AA comprobado con tintas extremas (#14).
-
-
 - Sin permiso de host, el reproductor avisa de recargar la página cuando el puente de Media Session se inyecta tarde (#30).
 - La ventana aparte aclara que solo lista las pestañas con el reproductor activo (#30).
 - `ACCESSIBILITY.md` con la declaración de accesibilidad (objetivo WCAG 2.2 AA), sus limitaciones conocidas y cómo informar de un problema (#73).
@@ -20,9 +20,10 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y e
 
 ### Corregido
 
-- El volumen por sitio se guarda en una clave por sitio (`mp_vol:<sitio>`): dos pestañas que cambian el volumen a la vez ya no se pisan. La migración convierte el formato anterior.
-- La paleta de la carátula reintenta con espera creciente y un límite mientras el service worker descarga la anterior.
-- El botón «Abrir ventana» de Ajustes no depende de que la página se abra en una pestaña.
+- La paleta de la carátula ya no se queda en la de por defecto al saltar de pista mientras se descarga la anterior, y el volumen que cambia otra pestaña ya no se pierde con la siguiente escritura (#79).
+- El volumen por sitio se guarda en una clave por sitio (`mp_vol:<sitio>`): dos pestañas que cambian el volumen a la vez ya no se pisan. La migración convierte el formato anterior (#80).
+- La paleta de la carátula reintenta con espera creciente y un límite mientras el service worker descarga la anterior (#80).
+- El botón «Abrir ventana» de Ajustes no depende de que la página se abra en una pestaña (#80).
 
 ## [1.15.1] - 2026-10-30
 
