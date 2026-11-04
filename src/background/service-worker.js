@@ -123,9 +123,10 @@ const inflight = new Set(); // una descarga a la vez por pestaña
 const inflightSb = new Set(); // ídem para las hojas del storyboard
 chrome.runtime.onMessage.addListener((m, sender, reply) => {
   const tabId = sender.tab && sender.tab.id;
-  if (sender.id !== chrome.runtime.id || tabId == null || !m) return;
+  if (sender.id !== chrome.runtime.id || !m) return;
+  if (m.type === 'open-window') return void self.NMPSess.openWindow(); // desde una pestaña sin ventana con marco, o desde Ajustes (con o sin pestaña)
+  if (tabId == null) return;
   if (m.type === 'mp-frame' || m.type === 'mp-cmd') return void relayFrame(m, sender, tabId);
-  if (m.type === 'open-window') return void self.NMPSess.openWindow(); // la pestaña lo pide cuando no puede abrir la ventana con marco
   if (m.type === 'font') {
     if (typeof m.file !== 'string' || !FONT_FILE.test(m.file)) return;
     readFont(m.file).then((data) => reply({ data }), () => reply({}));

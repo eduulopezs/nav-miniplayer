@@ -52,12 +52,14 @@ test('el botón de ventana aparte abre la ventana', async () => {
 
 test('la migración normaliza ajustes antiguos y es idempotente', async () => {
   await env.sw.evaluate(() => chrome.storage.local.clear());
-  await env.sw.evaluate(() => chrome.storage.local.set({ mp_theme: 'brutal', mp_prefs: { skip: 99, blur: 'sí' }, mp_mode: 'mini', mp_pos: {}, mp_size: {}, mp_capture: 'x' }));
+  await env.sw.evaluate(() => chrome.storage.local.set({ mp_theme: 'brutal', mp_prefs: { skip: 99, blur: 'sí' }, mp_mode: 'mini', mp_pos: {}, mp_size: {}, mp_capture: 'x', mp_vol: { 'a.com': 0.5, 'b.com': 7, 'c.com': 'x' } }));
   await env.sw.evaluate(() => self.NMPMigrate.migrate());
   const a = await stored(null);
   assert.equal(a.mp_theme, 'noir');
   assert.deepEqual(a.mp_prefs, { skip: 10, blur: false });
   for (const k of ['mp_mode', 'mp_pos', 'mp_size', 'mp_capture']) assert.ok(!(k in a), k + ' se elimina');
+  assert.equal(a['mp_vol:a.com'], 0.5, 'el volumen válido pasa a su clave');
+  for (const k of ['mp_vol', 'mp_vol:b.com', 'mp_vol:c.com']) assert.ok(!(k in a), k + ' no queda');
   assert.equal(a.mp_schema, await env.sw.evaluate(() => self.NMPMigrate.SCHEMA));
   await env.sw.evaluate(() => self.NMPMigrate.migrate());
   assert.deepEqual(await stored(null), a);

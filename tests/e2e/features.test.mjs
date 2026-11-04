@@ -9,7 +9,7 @@ after(async () => { await env.close(); await server.close(); });
 
 const near = (v, expected, tol, msg) => assert.ok(Math.abs(v - expected) <= tol, `${msg}: ${v} no está cerca de ${expected} (±${tol})`);
 const vol = (p) => p.media(() => document.getElementById('a').volume);
-const reset = () => env.sw.evaluate(() => chrome.storage.local.remove(['mp_prefs', 'mp_vol']));
+const reset = () => env.sw.evaluate(async () => chrome.storage.local.remove(['mp_prefs', ...Object.keys(await chrome.storage.local.get(null)).filter((k) => k.startsWith('mp_vol:'))]));
 
 test('la rueda sobre la tarjeta cambia el volumen en pasos de 5 %', async () => {
   await reset();
@@ -45,7 +45,7 @@ test('clic derecho abre el menú: velocidad, salto y volumen recordado por sitio
   await p.page.mouse.move(b.x + b.w / 2, b.y + b.h / 2);
   for (let i = 0; i < 4; i++) await p.page.mouse.wheel(0, 100);
   // Los pasos de la rueda se procesan de forma asíncrona: se espera al valor final, no a que exista la clave (con el primer paso ya existe).
-  const savedVol = () => env.sw.evaluate(async () => (await chrome.storage.local.get('mp_vol')).mp_vol?.['127.0.0.1']);
+  const savedVol = () => env.sw.evaluate(async () => (await chrome.storage.local.get('mp_vol:127.0.0.1'))['mp_vol:127.0.0.1']);
   await p.waitFor(async () => Math.abs((await savedVol()) - 0.8) < 0.001);
   await p.page.close();
   const q = await openPage(env, server);
