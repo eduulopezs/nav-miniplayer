@@ -105,7 +105,7 @@ t('las acciones anunciadas por la página se filtran', /KNOWN_ACTIONS/.test(play
   r = await ask('https://cdn.example.org/404.png'); t('error HTTP: respuesta vacía', !r.data);
   let release; sctx.__next = () => new Promise((ok) => { release = () => ok(mkRes(bytesPng)); });
   const first = ask('https://cdn.example.org/slow.png');
-  r = await ask('https://cdn.example.org/second.png'); t('una descarga a la vez por pestaña', !r.data);
+  r = await ask('https://cdn.example.org/second.png'); t('una descarga a la vez por pestaña (responde busy para que se reintente)', !r.data && r.busy === true);
   await new Promise((ok) => setTimeout(ok, 5)); release(); r = await first; t('la primera descarga termina bien', !!r.data);
 }
 

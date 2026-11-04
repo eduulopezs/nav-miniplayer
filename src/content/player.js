@@ -3,7 +3,7 @@
   window.__glassMiniPlayer = true;
 
   const NMP = globalThis.__NMP;
-  const { MIN_DURATION, REMOTE_KEY, THEME_KEY, INPAGE_KEY, PREFS_KEY, VOL_KEY, SITE_BUTTONS } = NMP.cfg;
+  const { MIN_DURATION, REMOTE_KEY, THEME_KEY, INPAGE_KEY, PREFS_KEY, VOL_KEY, SITE_BUTTONS, SKIPS } = NMP.cfg;
   const { clamp, fmt, fmt2, pad2, strSeed, barcode, palette, DEFAULT_PAL } = NMP.util;
   const HOST_CSS = 'all:initial;position:fixed;right:24px;bottom:24px;z-index:2147483647;';
   const { skins: SK, viz, media: MEDIA } = NMP;
@@ -137,7 +137,7 @@ ${NMP.menuCss}
   const HOST_KEY = location.hostname;
   const applyPrefs = (v) => {
     if (!v || typeof v !== 'object') return;
-    if ([5, 10, 15, 30].includes(v.skip)) prefs.skip = v.skip;
+    if (SKIPS.includes(v.skip)) prefs.skip = v.skip;
     if (typeof v.blur === 'boolean') prefs.blur = v.blur;
     applySkip();
   };
@@ -367,14 +367,18 @@ ${NMP.menuCss}
 
   // Paleta de la carátula: tiñe los diseños (--c1..--c3). Sin carátula, o si no se puede leer, la de por defecto.
   const setPalette = (p) => p.forEach((c, i) => card.style.setProperty('--c' + (i + 1), c));
+  let palSeq = 0; // cada llamada invalida los reintentos de la anterior, aunque vuelva la misma carátula
   function loadPalette(src) {
+    const id = ++palSeq;
     setPalette(DEFAULT_PAL);
     if (!src) return;
     const done = (im) => { if (curImg !== src) return; const p = palette(im, NMP.tokens.theme[theme]['bg-b']); if (p) setPalette(p); };
     const load = (u, cors, fail) => { const im = new Image(); if (cors) im.crossOrigin = 'anonymous'; im.onload = () => done(im); im.onerror = fail; im.src = u; };
-    load(src, true, () => {
-      try { chrome.runtime.sendMessage({ type: 'img', url: src }, (r) => { void chrome.runtime.lastError; if (r && r.data) load(r.data, false, () => {}); }); } catch (_) { /* sin background */ }
-    });
+    // busy: el worker aún descarga la carátula anterior (una por pestaña); se reintenta mientras esta siga siendo la actual.
+    const ask = () => {
+      try { chrome.runtime.sendMessage({ type: 'img', url: src }, (r) => { void chrome.runtime.lastError; if (r && r.busy) setTimeout(() => { if (palSeq === id) ask(); }, 500); else if (r && r.data) load(r.data, false, () => {}); }); } catch (_) { /* sin background */ }
+    };
+    load(src, true, ask);
   }
 
   let lastP = -1;
@@ -544,11 +548,13 @@ ${NMP.menuCss}
       if (r && r[INPAGE_KEY] === true) setInpage(true);
       if (r && r[THEME_KEY]) applyTheme(r[THEME_KEY]);
     });
-    chrome.storage.onChanged.addListener((c) => {
+    chrome.storage.onChanged.addListener((c, area) => {
+      if (area !== 'local') return;
       if (c[INPAGE_KEY]) setInpage(c[INPAGE_KEY].newValue === true);
       if (c[THEME_KEY] && c[THEME_KEY].newValue) applyTheme(c[THEME_KEY].newValue);
       if (c[PREFS_KEY]) applyPrefs(c[PREFS_KEY].newValue);
       if (c[REMOTE_KEY]) setRemote(c[REMOTE_KEY].newValue === true);
+      if (c[VOL_KEY]) volByHost = (c[VOL_KEY].newValue && typeof c[VOL_KEY].newValue === 'object') ? c[VOL_KEY].newValue : {}; // otra pestaña cambió un volumen: sin esto, la próxima escritura lo pisaría
     });
   } catch (_) { /* sin storage */ }
 

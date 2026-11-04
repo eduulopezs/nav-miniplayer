@@ -2,6 +2,7 @@
 // Cada paso lleva el almacenamiento de la versión n a la n+1; para añadir uno basta agregar su función al final de STEPS.
 (() => {
   const SCHEMA_KEY = 'mp_schema';
+  // Copias congeladas a propósito: un paso migra datos de su versión, no de la actual. No las sincronices con NMP.cfg.
   const SKIPS = [5, 10, 15, 30];
   const THEMES = ['glass', 'noir', 'crt', 'metal', 'minimal', 'ansi', 'dynamic'];
   const LEGACY_THEME = { brutal: 'noir', retro: 'crt', pixel: 'glass' };

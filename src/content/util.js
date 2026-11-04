@@ -15,7 +15,7 @@
 
   const pad2 = (n) => String(n).padStart(2, '0');
   // m:ss o h:mm:ss con minutos a dos cifras (lo usan CRT y Noir).
-  const fmt2 = (s) => { s = Math.max(0, Math.floor(s)); const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = s % 60; return (h ? String(h) + ':' : '') + pad2(h ? m : m) + ':' + pad2(x); };
+  const fmt2 = (s) => { s = Math.max(0, Math.floor(s)); const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = s % 60; return (h ? String(h) + ':' : '') + pad2(m) + ':' + pad2(x); };
   // Ruido determinista en [0, 1) a partir de dos enteros (no usa Math.random: el visualizador se ve igual entre fotogramas y entre pestañas).
   const hash = (a, b) => { let x = (a * 374761393 + b * 668265263) >>> 0; x = (x ^ (x >>> 13)) * 1274126177 >>> 0; return ((x ^ (x >>> 16)) >>> 0) / 4294967296; };
   const strSeed = (str) => { let h = 2166136261; for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };

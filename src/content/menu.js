@@ -25,7 +25,7 @@
   `;
 
   const RATES = [0.5, 0.75, 1, 1.25, 1.5, 2, 3];
-  const SKIPS = [5, 10, 15, 30];
+  const { SKIPS } = NMP.cfg;
 
   // o: { root, host, card, prefs, setPref(k, v), getMedia(), tunable(), setVolume(v), setRate(r), themes:[[id, texto]],
   //      getTheme(), setTheme(id), copyLink(), isPip() }

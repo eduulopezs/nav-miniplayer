@@ -2,9 +2,8 @@
 // Escribe en chrome.storage.local las mismas claves que usa el menú del reproductor; las pestañas abiertas las reciben por storage.onChanged.
 (() => {
   const NMP = globalThis.__NMP;
-  const { THEME_KEY, PREFS_KEY } = NMP.cfg;
+  const { THEME_KEY, PREFS_KEY, SKIPS } = NMP.cfg;
   const CAPTURE_KEY = 'mp_capture';
-  const SKIPS = [5, 10, 15, 30];
   const $ = (id) => document.getElementById(id);
   const t = NMP.t;
 
