@@ -21,6 +21,16 @@
       if (s.mp_capture !== undefined && typeof s.mp_capture !== 'boolean') out.remove.push('mp_capture');
       return out;
     },
+    // 2: el volumen por sitio pasa de un mapa (mp_vol) a una clave por sitio (mp_vol:<host>), para que dos pestañas no se pisen.
+    (s) => {
+      const out = { set: {}, remove: [] };
+      if (s.mp_vol === undefined) return out;
+      out.remove.push('mp_vol');
+      if (s.mp_vol && typeof s.mp_vol === 'object' && !Array.isArray(s.mp_vol)) {
+        for (const [h, v] of Object.entries(s.mp_vol).slice(-200)) if (h && typeof v === 'number' && v >= 0 && v <= 1) out.set['mp_vol:' + h] = v;
+      }
+      return out;
+    },
   ];
 
   async function migrate() {

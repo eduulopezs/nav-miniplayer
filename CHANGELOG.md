@@ -18,6 +18,12 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y e
 - `ACCESSIBILITY.md` con la declaración de accesibilidad (objetivo WCAG 2.2 AA), sus limitaciones conocidas y cómo informar de un problema (#73).
 - Ficheros de comunidad: `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md` y este registro de cambios.
 
+### Corregido
+
+- El volumen por sitio se guarda en una clave por sitio (`mp_vol:<sitio>`): dos pestañas que cambian el volumen a la vez ya no se pisan. La migración convierte el formato anterior.
+- La paleta de la carátula reintenta con espera creciente y un límite mientras el service worker descarga la anterior.
+- El botón «Abrir ventana» de Ajustes no depende de que la página se abra en una pestaña.
+
 ## [1.15.1] - 2026-10-30
 
 ### Seguridad

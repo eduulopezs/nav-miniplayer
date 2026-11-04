@@ -7,7 +7,7 @@ let env, server;
 before(async () => { server = await startServer(); env = await launch(); });
 after(async () => { await env.close(); await server.close(); });
 
-const reset = () => env.sw.evaluate(() => chrome.storage.local.remove(['mp_prefs', 'mp_vol']));
+const reset = () => env.sw.evaluate(async () => chrome.storage.local.remove(['mp_prefs', ...Object.keys(await chrome.storage.local.get(null)).filter((k) => k.startsWith('mp_vol:'))]));
 const vol = (p) => p.media(() => document.getElementById('a').volume);
 const COV = { glass: '.gl-cov', noir: '.nr-art', crt: '.cr-art', metal: '.lm-cov', minimal: '.mn-cov', ansi: '.an-cov', dynamic: '.dy-cov' };
 
@@ -47,7 +47,7 @@ for (const theme of Object.keys(COV)) {
     // clic en la mitad: volumen ≈ 50 %
     await p.click('vol');
     await p.waitFor(async () => Math.abs((await vol(p)) - 0.5) < 0.1);
-    await p.waitFor(() => env.sw.evaluate(async () => !!(await chrome.storage.local.get('mp_vol')).mp_vol));
+    await p.waitFor(() => env.sw.evaluate(async () => typeof (await chrome.storage.local.get('mp_vol:127.0.0.1'))['mp_vol:127.0.0.1'] === 'number'));
     await p.click('act:mute');
     await p.waitFor(async () => (await p.attr('vol', 'aria-valuetext')) === '0%');
     await p.page.close();
@@ -64,4 +64,17 @@ test('el regulador se ve también en Panorámico y Portada', async () => {
     assert.ok(b && b.w > 0 && b.h >= 24, `regulador visible en ${w}x${h}`);
   }
   await p.page.close();
+});
+
+test('el volumen guarda como mucho 200 sitios', async () => {
+  await reset();
+  await env.sw.evaluate(() => chrome.storage.local.set(Object.fromEntries(Array.from({ length: 200 }, (_, i) => ['mp_vol:s' + i + '.test', 0.3]))));
+  const p = await openPage(env, server, { theme: 'glass' });
+  await p.toggle();
+  await p.size(680, 100);
+  await p.click('vol');
+  const vols = () => env.sw.evaluate(async () => { const a = await chrome.storage.local.get(null); return { n: Object.keys(a).filter((k) => k.startsWith('mp_vol:')).length, own: typeof a['mp_vol:127.0.0.1'] }; });
+  await p.waitFor(async () => { const v = await vols(); return v.own === 'number' && v.n === 200; });
+  await p.page.close();
+  await reset();
 });

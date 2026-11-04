@@ -8,7 +8,7 @@
     THEME_KEY: 'mp_theme', // desarrollo: 'glass' | 'noir' | 'crt' | 'metal' | 'minimal' | 'ansi' | 'dynamic'
     PREFS_KEY: 'mp_prefs', // { skip }
     REMOTE_KEY: 'mp_remote', // true mientras la ventana aparte está abierta: las pestañas informan de su medio
-    VOL_KEY: 'mp_vol', // volumen recordado por sitio
+    VOL_PREFIX: 'mp_vol:', // + hostname: volumen recordado por sitio, una clave por sitio para que dos pestañas no se pisen
     INPAGE_KEY: 'mp_inpage', // solo pruebas: pinta la tarjeta en la página (en producción solo existe dentro de la ventana con marco)
     SITE_BUTTONS: {
       prev: ['.ytp-prev-button', '[data-testid="control-button-skip-back"]'],

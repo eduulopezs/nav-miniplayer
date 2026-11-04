@@ -3,7 +3,7 @@
   window.__glassMiniPlayer = true;
 
   const NMP = globalThis.__NMP;
-  const { MIN_DURATION, REMOTE_KEY, THEME_KEY, INPAGE_KEY, PREFS_KEY, VOL_KEY, SITE_BUTTONS, SKIPS } = NMP.cfg;
+  const { MIN_DURATION, REMOTE_KEY, THEME_KEY, INPAGE_KEY, PREFS_KEY, VOL_PREFIX, SITE_BUTTONS, SKIPS } = NMP.cfg;
   const { clamp, fmt, fmt2, pad2, strSeed, barcode, palette, DEFAULT_PAL } = NMP.util;
   const HOST_CSS = 'all:initial;position:fixed;right:24px;bottom:24px;z-index:2147483647;';
   const { skins: SK, viz, media: MEDIA } = NMP;
@@ -133,8 +133,13 @@ ${NMP.menuCss}
 
   // skip: segundos de los saltos.
   const prefs = { skip: 10, blur: false };
-  let volByHost = {}; // volumen recordado por sitio
-  const HOST_KEY = location.hostname;
+  let savedVol; // volumen recordado de este sitio
+  const VOL_ID = VOL_PREFIX + location.hostname, VOL_MAX = 200;
+  // shortcut: al pasar de VOL_MAX sitios se borran otros cualesquiera, no los menos usados; guarda la fecha de uso si llega a importar.
+  const trimVols = () => chrome.storage.local.get(null).then((all) => {
+    const ks = Object.keys(all).filter((k) => k.startsWith(VOL_PREFIX) && k !== VOL_ID);
+    if (ks.length >= VOL_MAX) return chrome.storage.local.remove(ks.slice(0, ks.length - VOL_MAX + 1));
+  }).catch(() => {});
   const applyPrefs = (v) => {
     if (!v || typeof v !== 'object') return;
     if (SKIPS.includes(v.skip)) prefs.skip = v.skip;
@@ -162,8 +167,9 @@ ${NMP.menuCss}
     if (!tunable()) return;
     v = clamp(v, 0, 1);
     media.volume = v; media.muted = v === 0;
-    volByHost[HOST_KEY] = Math.round(v * 100) / 100;
-    try { const keys = Object.keys(volByHost); if (keys.length > 200) delete volByHost[keys[0]]; chrome.storage.local.set({ [VOL_KEY]: volByHost }); } catch (_) { /* contexto invalidado */ }
+    const isNew = savedVol === undefined;
+    savedVol = Math.round(v * 100) / 100;
+    try { chrome.storage.local.set({ [VOL_ID]: savedVol }); if (isNew) trimVols(); } catch (_) { /* contexto invalidado */ }
   }
   const setRate = (r) => { if (tunable()) media.playbackRate = clamp(r, 0.25, 4); };
   const volApplied = new WeakSet();
@@ -374,11 +380,11 @@ ${NMP.menuCss}
     if (!src) return;
     const done = (im) => { if (curImg !== src) return; const p = palette(im, NMP.tokens.theme[theme]['bg-b']); if (p) setPalette(p); };
     const load = (u, cors, fail) => { const im = new Image(); if (cors) im.crossOrigin = 'anonymous'; im.onload = () => done(im); im.onerror = fail; im.src = u; };
-    // busy: el worker aún descarga la carátula anterior (una por pestaña); se reintenta mientras esta siga siendo la actual.
-    const ask = () => {
-      try { chrome.runtime.sendMessage({ type: 'img', url: src }, (r) => { void chrome.runtime.lastError; if (r && r.busy) setTimeout(() => { if (palSeq === id) ask(); }, 500); else if (r && r.data) load(r.data, false, () => {}); }); } catch (_) { /* sin background */ }
+    // busy: el worker aún descarga la carátula anterior (una por pestaña, 8 s como mucho); se reintenta con espera creciente (≈13 s en total).
+    const ask = (n = 0) => {
+      try { chrome.runtime.sendMessage({ type: 'img', url: src }, (r) => { void chrome.runtime.lastError; if (r && r.busy && n < 8) setTimeout(() => { if (palSeq === id) ask(n + 1); }, Math.min(500 * 2 ** n, 2000)); else if (r && r.data) load(r.data, false, () => {}); }); } catch (_) { /* sin background */ }
     };
-    load(src, true, ask);
+    load(src, true, () => ask());
   }
 
   let lastP = -1;
@@ -395,7 +401,7 @@ ${NMP.menuCss}
       if (host.ownerDocument !== document) NMP.syncFonts(host.ownerDocument);
     } else { vizStop(); menu.close(); }
     // Volumen recordado del sitio: se aplica una vez a cada medio la primera vez que el reproductor lo muestra.
-    if (visible && tunable() && !volApplied.has(media)) { volApplied.add(media); const v = volByHost[HOST_KEY]; if (typeof v === 'number' && v >= 0 && v <= 1) { media.volume = v; } }
+    if (visible && tunable() && !volApplied.has(media)) { volApplied.add(media); const v = savedVol; if (typeof v === 'number' && v >= 0 && v <= 1) { media.volume = v; } }
     if (!media) return;
 
     const md = navigator.mediaSession && navigator.mediaSession.metadata;
@@ -541,10 +547,10 @@ ${NMP.menuCss}
 
 
   try {
-    chrome.storage.local.get([INPAGE_KEY, THEME_KEY, PREFS_KEY, VOL_KEY, REMOTE_KEY], (r) => {
+    chrome.storage.local.get([INPAGE_KEY, THEME_KEY, PREFS_KEY, VOL_ID, REMOTE_KEY], (r) => {
       if (r && r[REMOTE_KEY] === true) setRemote(true);
       if (r && r[PREFS_KEY]) applyPrefs(r[PREFS_KEY]);
-      if (r && r[VOL_KEY] && typeof r[VOL_KEY] === 'object') volByHost = r[VOL_KEY];
+      if (r && typeof r[VOL_ID] === 'number') savedVol = r[VOL_ID];
       if (r && r[INPAGE_KEY] === true) setInpage(true);
       if (r && r[THEME_KEY]) applyTheme(r[THEME_KEY]);
     });
@@ -554,7 +560,7 @@ ${NMP.menuCss}
       if (c[THEME_KEY] && c[THEME_KEY].newValue) applyTheme(c[THEME_KEY].newValue);
       if (c[PREFS_KEY]) applyPrefs(c[PREFS_KEY].newValue);
       if (c[REMOTE_KEY]) setRemote(c[REMOTE_KEY].newValue === true);
-      if (c[VOL_KEY]) volByHost = (c[VOL_KEY].newValue && typeof c[VOL_KEY].newValue === 'object') ? c[VOL_KEY].newValue : {}; // otra pestaña cambió un volumen: sin esto, la próxima escritura lo pisaría
+      if (c[VOL_ID]) savedVol = typeof c[VOL_ID].newValue === 'number' ? c[VOL_ID].newValue : undefined; // otra pestaña del mismo sitio cambió el volumen
     });
   } catch (_) { /* sin storage */ }
 

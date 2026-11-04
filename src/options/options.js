@@ -80,7 +80,7 @@
     }
   }).catch(() => {});
   $('edit-keys').addEventListener('click', () => chrome.tabs.create({ url: 'chrome://extensions/shortcuts' }));
-  $('open-win').addEventListener('click', () => chrome.runtime.sendMessage({ type: 'open-window' }));
+  $('open-win').addEventListener('click', () => chrome.runtime.sendMessage({ type: 'open-window' }).catch(() => {}));
 
   // ---- Estado inicial y cambios hechos desde otro sitio (menú del icono, menú del reproductor)
   const apply = (r) => {
