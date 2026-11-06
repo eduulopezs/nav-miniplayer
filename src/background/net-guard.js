@@ -2,7 +2,7 @@
 // La URL la decide la página, así que se trata como entrada hostil: solo http(s) público, sin credenciales ni puertos raros.
 (function (g) {
   const MAX_URL = 2048;
-  const BLOCKED_SUFFIX = /\.(localhost|local|internal|lan|home|home\.arpa|corp|intranet|test|invalid|example)$/;
+  const BLOCKED_SUFFIX = /\.(localhost|localdomain[46]?|local|internal|lan|home|home\.arpa|corp|intranet|test|invalid|example)$/;
 
   function isPrivateV4(h) {
     const m = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/.exec(h);

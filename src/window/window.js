@@ -73,14 +73,16 @@ ${NMP.css}
 
   // ---------- Carátula y paleta: la descarga el service worker (reglas de red de net-guard) ----------
   const artCache = new Map(); // url -> { data, pal }
-  function loadArt(url) {
+  function loadArt(url, n = 0) {
     if (!url) { setPal(DEFAULT_PAL); card.style.setProperty('--art', 'none'); return; }
     const done = (c) => { if (lastArt !== url) return; card.style.setProperty('--art', `url("${c.data}")`); setPal(c.pal || DEFAULT_PAL); };
     if (artCache.has(url)) return done(artCache.get(url));
-    card.style.setProperty('--art', 'none'); setPal(DEFAULT_PAL);
+    if (!n) { card.style.setProperty('--art', 'none'); setPal(DEFAULT_PAL); }
     try {
       chrome.runtime.sendMessage({ type: 'art', url }, (r) => {
         void chrome.runtime.lastError;
+        // busy: el worker ya descarga otra carátula; se reintenta con espera creciente mientras siga siendo la pista actual.
+        if (r && r.busy && n < 8) { setTimeout(() => { if (lastArt === url) loadArt(url, n + 1); }, Math.min(500 * 2 ** n, 2000)); return; }
         if (!r || typeof r.data !== 'string') return;
         const im = new Image();
         im.onload = () => { const c = { data: r.data, pal: palette(im) }; if (artCache.size > 20) artCache.delete(artCache.keys().next().value); artCache.set(url, c); done(c); };
@@ -102,6 +104,8 @@ ${NMP.css}
     try {
       chrome.runtime.sendMessage({ type: 'fav', url }, (r) => {
         void chrome.runtime.lastError;
+        // busy: tope de descargas lleno; no cuenta como fallo y las pastillas se repintan en un segundo para volver a pedirlo.
+        if (r && r.busy) { favBusy.delete(url); setTimeout(() => { chipsKey = ''; renderChips(); }, 1000); return; }
         const d = r && typeof r.data === 'string' ? r.data : '';
         set(d); if (d) { chipsKey = ''; renderChips(); } // las pastillas se reconstruyen: la cacheada ya pinta el icono
       });

@@ -1,6 +1,6 @@
 # Política de privacidad
 
-Última revisión: versión 1.15.0 (se actualiza cuando cambian los permisos o el tratamiento de datos). Aplica a la extensión nav-miniplayer para Chrome y Edge (código en <https://github.com/eduulopezs/nav-miniplayer>).
+Última revisión: versión 1.18.4 (se actualiza cuando cambian los permisos o el tratamiento de datos). Aplica a la extensión nav-miniplayer para Chrome y Edge (código en <https://github.com/eduulopezs/nav-miniplayer>).
 
 ## Resumen
 - **No recopilamos, enviamos ni vendemos datos.** La extensión no tiene servidor propio, ni telemetría, ni analítica, ni publicidad, ni cuentas.
@@ -11,7 +11,7 @@
 | Dato | Para qué | Dónde se guarda |
 |---|---|---|
 | Metadatos del medio de la pestaña (título, artista, URL de la carátula, estado de reproducción) | Mostrarlos en el minirreproductor y en la ventana aparte | En memoria; con la ventana aparte abierta, en `chrome.storage.session` (se borra al cerrar el navegador o la ventana) |
-| Ajustes: tema, preferencias, volumen por sitio, opciones de captura y de ventana | Recordar tu configuración | `chrome.storage.local`, en tu equipo |
+| Ajustes: tema, preferencias, volumen por sitio, opciones de captura y de ventana | Recordar tu configuración | `chrome.storage.local`, en tu equipo. El volumen por sitio guarda una clave `mp_vol:<sitio>` por cada sitio donde lo cambias (hasta 200, sin caducidad), así que equivale a una lista de esos sitios; se borra al desinstalar la extensión |
 | Audio de la pestaña (solo si activas la captura) | Alimentar el visualizador | Se procesa al momento en un documento interno de la extensión; no se graba, no se guarda y no se envía a ninguna parte |
 
 La extensión no lee formularios, contraseñas ni cookies, ni el contenido de las páginas más allá de sus elementos de audio/vídeo y su Media Session.
