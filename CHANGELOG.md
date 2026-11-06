@@ -6,6 +6,8 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y e
 
 ## [Sin publicar]
 
+## [1.18.4] - 2026-11-06
+
 ### Corregido
 
 - El zip de la release incluye `_locales/`: sin esa carpeta Chrome no cargaba la extensión. `npm run zip` falla si faltan los mensajes del idioma por defecto (#82).
