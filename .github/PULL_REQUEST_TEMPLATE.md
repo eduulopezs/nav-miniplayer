@@ -2,7 +2,8 @@
 
 <!-- Qué cambia y por qué. -->
 
-Cierra #
+<!-- GitHub solo cierra la issue al integrar con palabras clave en inglés (Closes, Fixes). -->
+Closes #
 
 ## Lista de comprobación
 

@@ -7,7 +7,7 @@ Gracias por tu interés en Nav Miniplayer. Esta guía resume cómo proponer camb
 1. Abre (o elige) una **issue numerada** que describa el cambio o el fallo. Para dudas o ideas, empieza por ahí antes de escribir código.
 2. Crea una **rama** desde `main` con un nombre descriptivo, por ejemplo `issue-123-volumen`.
 3. Haz commits pequeños. Los mensajes van **en español**, en imperativo y sin prefijos de Conventional Commits (por ejemplo, `Corrige la expulsión de iframes caducados`).
-4. Abre una **pull request** hacia `main` que referencie la issue (`Cierra #123`). Describe qué cambia y cómo lo has probado. La CI debe estar en verde.
+4. Abre una **pull request** hacia `main` que referencie la issue (`Closes #123`; GitHub solo la cierra sola con palabras clave en inglés). Describe qué cambia y cómo lo has probado. La CI debe estar en verde.
 5. Las PR se integran con **squash merge**: el título de la PR pasa a ser el mensaje del commit, así que cuídalo.
 
 ## Versionado
