@@ -1,5 +1,5 @@
 // Empaqueta la extensión en dist/nav-miniplayer-<versión>.zip sin dependencias (zip con deflate hecho a mano).
-// Solo entra lo que usa el navegador: manifest, iconos y src.
+// Solo entra lo que usa el navegador: manifest, _locales, iconos y src.
 import { readFileSync, readdirSync, statSync, mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -8,8 +8,10 @@ import { deflateRawSync } from 'node:zlib';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const manifest = JSON.parse(readFileSync(join(root, 'manifest.json'), 'utf8'));
 const walk = (d) => readdirSync(d).flatMap((f) => { const p = join(d, f); return statSync(p).isDirectory() ? walk(p) : [p]; });
-const files = ['manifest.json', ...walk(join(root, 'icons')).map((p) => relative(root, p)), ...walk(join(root, 'src')).map((p) => relative(root, p))]
+const files = ['manifest.json', ...['_locales', 'icons', 'src'].flatMap((d) => walk(join(root, d)).map((p) => relative(root, p)))]
   .map((f) => f.replace(/\\/g, '/')).sort();
+// Sin los mensajes del idioma por defecto, Chrome rechaza la extensión.
+if (manifest.default_locale && !files.includes(`_locales/${manifest.default_locale}/messages.json`)) throw new Error('el zip no trae _locales');
 
 const T = new Int32Array(256).map((_, n) => { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; return c; });
 const crc32 = (b) => { let c = -1; for (const x of b) c = T[(c ^ x) & 255] ^ (c >>> 8); return (c ^ -1) >>> 0; };
