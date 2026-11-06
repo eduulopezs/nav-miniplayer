@@ -46,7 +46,11 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci --no-audit --no-fund
-      - run: npx playwright install --with-deps chromium
+      # Sin --with-deps: la imagen del runner ya trae Chrome y sus bibliotecas, y el apt de esas
+      # dependencias llegó a tardar 12 min (#91). Sin headless shell: los tests usan Chrome completo.
+      - name: Instalar Chromium
+        timeout-minutes: 5
+        run: npx playwright install --no-shell chromium
       - name: e2e
         run: |
           set -o pipefail
