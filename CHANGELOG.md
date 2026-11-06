@@ -6,6 +6,14 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y e
 
 ## [Sin publicar]
 
+## [2.0.0] - 2026-11-06
+
+Cierra la épica Nav Miniplayer 2.0 (#19): seguridad, rendimiento, tests e2e y CI, layout responsive, sistema de diseño v2 y diseños nuevos, detección de medios ampliada, volumen, velocidad y atajos, control entre pestañas y ventana aparte, ajustes e i18n, captura de audio de la pestaña y modo de menos permisos. El detalle está en las versiones 1.3.0 a 1.18.4.
+
+### Añadido
+
+- Test e2e de la actualización desde 1.14.0: comprueba que se conserva el permiso de host y que Ajustes solo se abre si falta (#50).
+
 ## [1.18.4] - 2026-11-06
 
 ### Corregido
