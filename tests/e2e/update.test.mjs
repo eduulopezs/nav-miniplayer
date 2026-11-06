@@ -40,16 +40,18 @@ async function update(version, required) {
     const cdp = await (await chromium.connectOverCDP(`http://127.0.0.1:${port}`)).newBrowserCDPSession();
     fs.writeFileSync(join(ext, 'manifest.json'), JSON.stringify(manifest));
     const next = ctx.waitForEvent('serviceworker', { timeout: 20000 });
+    // Solo cuenta un Ajustes abierto tras la actualización; uno tardío de la instalación no debe colar como acierto.
+    const opened = ctx.waitForEvent('page', { predicate: isOptions, timeout: 5000 }).then(() => true, () => false);
     await cdp.send('Extensions.loadUnpacked', { path: ext });
     const sw = await next;
-    await sleep(2000); // onInstalled espera a la reconciliación y luego decide si abre Ajustes
+    const options = await opened;
     return {
       ...await sw.evaluate(async () => ({
         version: chrome.runtime.getManifest().version,
         granted: await chrome.permissions.contains({ origins: ['<all_urls>'] }),
         scripts: (await chrome.scripting.getRegisteredContentScripts()).length,
       })),
-      options: ctx.pages().some(isOptions),
+      options,
     };
   } finally {
     await ctx.close();
