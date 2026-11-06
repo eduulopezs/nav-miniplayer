@@ -15,7 +15,7 @@ Las releases las genera el workflow [`release.yml`](../.github/workflows/release
 
 3. El workflow:
    - comprueba que el tag coincide con `version` de `manifest.json` (si no, falla);
-   - ejecuta `npm ci`, `npm test` y `npm run zip`;
+   - ejecuta `npm test` y `npm run zip` (sin instalar dependencias);
    - calcula el SHA256 y genera una attestation de procedencia;
    - crea la GitHub Release con notas autogeneradas y adjunta `nav-miniplayer-X.Y.Z.zip` y `nav-miniplayer-X.Y.Z.zip.sha256`.
 

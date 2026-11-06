@@ -8,6 +8,13 @@ dist/
 .env*
 *.pem
 *.key
+*.p12
+*.pfx
+*.jks
+*.crx
+credentials*.json
+client_secret*.json
+service-account*.json
 .claude/
 e2e.log
 coverage/

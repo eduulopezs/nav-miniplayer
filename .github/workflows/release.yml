@@ -19,10 +19,12 @@ jobs:
       version: ${{ steps.ver.outputs.version }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # Sin npm ci ni caché: npm test y npm run zip solo usan módulos de Node.
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 22
-          cache: npm
 
       - name: Comprobar que el tag coincide con manifest.json
         id: ver
@@ -36,7 +38,6 @@ jobs:
           fi
           echo "version=$version" >> "$GITHUB_OUTPUT"
 
-      - run: npm ci
       - run: npm test
       - run: npm run zip
 
