@@ -45,7 +45,7 @@ chrome.runtime.onMessage.addListener((m, sender, reply) => {
 chrome.runtime.onConnect.addListener((port) => {
   const tabId = port.sender && port.sender.tab && port.sender.tab.id;
   const cap = caps.get(tabId);
-  if (port.name !== 'viz' || port.sender.id !== chrome.runtime.id || !cap) { port.disconnect(); return; }
+  if (port.name !== 'viz' || port.sender.id !== chrome.runtime.id || port.sender.frameId !== 0 || !cap) { port.disconnect(); return; }
   cap.ports.add(port);
   port.onDisconnect.addListener(() => { cap.ports.delete(port); if (!cap.ports.size) setTimeout(() => { if (caps.get(tabId) === cap && !cap.ports.size) stop(tabId); }, 1500); });
 });

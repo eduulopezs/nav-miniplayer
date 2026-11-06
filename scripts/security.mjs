@@ -16,7 +16,7 @@ const t = (name, cond) => { if (!cond) fails++; console.log(`${cond ? '✓' : '�
 
 for (const u of ['https://i.ytimg.com/vi/abc/hqdefault.jpg', 'http://cdn.example.org/a.png', 'https://lh3.googleusercontent.com/x=w512', 'https://img.com:443/a.jpg']) t(`permite ${u}`, ok(u));
 for (const u of [
-  'http://127.0.0.1/a.png', 'http://127.1/a.png', 'http://2130706433/a.png', 'http://0x7f.0.0.1/a.png', 'http://localhost/a.png', 'http://foo.localhost/a.png',
+  'http://127.0.0.1/a.png', 'http://127.1/a.png', 'http://2130706433/a.png', 'http://0x7f.0.0.1/a.png', 'http://localhost/a.png', 'http://foo.localhost/a.png', 'http://localhost.localdomain/a.png', 'http://localhost6.localdomain6/a.png',
   'http://10.0.0.5/a.png', 'http://192.168.1.1/a.png', 'http://172.16.0.1/a.png', 'http://172.31.255.1/a.png', 'http://169.254.169.254/latest/meta-data', 'http://100.64.0.1/a.png', 'http://0.0.0.0/a.png',
   'http://[::1]/a.png', 'http://[fd00::1]/a.png', 'http://[::ffff:7f00:1]/a.png', 'http://router/a.png', 'http://nas.local/a.png', 'http://intranet.corp/a.png',
   'https://user:pw@evil.com/a.png', 'https://evil.com:8080/a.png', 'https://evil.com:22/a.png', 'file:///etc/passwd', 'ftp://x.com/a.png', 'javascript:alert(1)', 'data:image/png;base64,AAAA', 'blob:https://x.com/1', 'no es url', '',
@@ -47,10 +47,12 @@ t('el estado PiP solo cambia si la extensión lo pidió', /pipAsked/.test(player
 const off = read('src/offscreen/offscreen.js');
 t('la captura exige el ajuste opt-in y el clic en el icono', /mp_capture/.test(sw) && /startCapture\(tab\.id\)/.test(sw));
 t('el offscreen solo atiende a la extensión y rechaza mensajes de pestañas', /sender\.id !== chrome\.runtime\.id \|\| sender\.tab/.test(off) && /port\.sender\.id !== chrome\.runtime\.id/.test(off));
+t('el puerto del visualizador solo se acepta del marco superior', /port\.sender\.frameId !== 0/.test(off));
 t('el audio vuelve a los altavoces y a la página solo llegan números', /connect\(ctx\.destination\)/.test(off) && /getByteFrequencyData/.test(off) && !/postMessage\([^)]*stream/.test(off));
 const sess = read('src/background/sessions.js');
 t('las órdenes de la ventana solo salen de la página de la extensión y de una lista cerrada', /fromWindow\(sender\)/.test(sess) && /CMD\.test\(m\.cmd\)/.test(sess) && /\^\(\?:play\|pause\|toggle/.test(sess));
 t('las sesiones solo se aceptan del marco superior de una pestaña y con campos acotados', /m\.type === 'sess' && sender\.tab && sender\.frameId === 0/.test(sess) && /web\(m\.art\)/.test(sess));
+t('el fin de sesión solo se acepta del marco superior', /m\.type === 'sess-end' && sender\.tab && sender\.frameId === 0/.test(sess));
 t('las acciones anunciadas por la página se filtran', /KNOWN_ACTIONS/.test(player));
 
 // Service worker con fetch simulado: camino positivo y negativos de la descarga de carátulas.
@@ -107,6 +109,19 @@ t('las acciones anunciadas por la página se filtran', /KNOWN_ACTIONS/.test(play
   const first = ask('https://cdn.example.org/slow.png');
   r = await ask('https://cdn.example.org/second.png'); t('una descarga a la vez por pestaña (responde busy para que se reintente)', !r.data && r.busy === true);
   await new Promise((ok) => setTimeout(ok, 5)); release(); r = await first; t('la primera descarga termina bien', !!r.data);
+  // Tope de descargas de la ventana: 1 carátula y 4 favicons en vuelo; con el tope lleno responde busy y, al terminar una, vuelve a atender.
+  const pend = []; sctx.__next = () => new Promise((ok) => { pend.push(() => ok(mkRes(bytesPng))); });
+  const askArt = (url) => new Promise((ok) => { const r = listeners.map((l) => l({ type: 'art', url }, { id: 'me', url: 'chrome-extension://me/src/window/player.html' }, ok)).find((x) => x === true); if (r !== true) setTimeout(() => ok('sin respuesta'), 20); });
+  const art1 = askArt('https://cdn.example.org/art1.png');
+  r = await askArt('https://cdn.example.org/art2.png'); t('ventana: la 2.ª carátula en vuelo responde busy', r.busy === true && !r.data);
+  const favs = [1, 2, 3, 4].map((i) => askFav(`https://cdn.example.org/f${i}.png`));
+  r = await askFav('https://cdn.example.org/f5.png'); t('ventana: el 5.º favicon en vuelo responde busy', r.busy === true && !r.data);
+  await new Promise((ok) => setTimeout(ok, 5)); pend.splice(0).forEach((f) => f());
+  r = await art1; t('ventana: la carátula en vuelo termina bien', !!r.data);
+  t('ventana: los favicons en vuelo terminan bien', (await Promise.all(favs)).every((x) => !!x.data));
+  sctx.__next = () => mkRes(bytesPng);
+  r = await askArt('https://cdn.example.org/art3.png'); t('ventana: tras terminar, vuelve a atender carátulas', !!r.data);
+  r = await askFav('https://cdn.example.org/f6.png'); t('ventana: tras terminar, vuelve a atender favicons', !!r.data);
 }
 
 console.log(fails ? `\n${fails} comprobación(es) fallida(s)` : '\n✓ seguridad correcta');

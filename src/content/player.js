@@ -121,7 +121,7 @@ ${NMP.menuCss}
     return found;
   }
 
-  let pipAsked = false; // la ventana con marco solo se acepta como abierta si la extensión la pidió: la página no puede fingirlo
+  let pipAsked = false; // la ventana con marco solo se acepta como abierta si la extensión la pidió: la página puede fingir la respuesta, pero no abrirla sin que se pida
   const send = (name) => { if (name === '__pip') pipAsked = true; document.dispatchEvent(new CustomEvent('__mp_cmd', { detail: name })); };
 
   // ---------- Acciones ----------

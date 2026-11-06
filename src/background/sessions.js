@@ -10,6 +10,8 @@
   const num = (v, lo, hi, d) => (typeof v === 'number' && v >= lo && v <= hi ? v : d);
   const web = (v) => { v = str(v, 1000); return /^https?:\/\//i.test(v) ? v : ''; };
   const MAX_SESSIONS = 24;
+  // Descargas de la ventana en vuelo a la vez (las URL las anuncian las páginas): con el tope lleno se responde busy y la ventana reintenta.
+  const busy = { art: 0, fav: 0 }, CAP = { art: 1, fav: 4 };
 
   // Lectura, cambio y escritura en serie: varias pestañas informan a la vez.
   let chain = Promise.resolve();
@@ -40,7 +42,7 @@
         if (ids.length > MAX_SESSIONS) delete s[ids.sort((a, b) => s[a].at - s[b].at)[0]]; // se descarta la más antigua
         return s;
       });
-    } else if (m.type === 'sess-end' && sender.tab) {
+    } else if (m.type === 'sess-end' && sender.tab && sender.frameId === 0) {
       update((s) => { delete s[sender.tab.id]; return s; });
     } else if (m.type === 'rc-cmd' && fromWindow(sender)) {
       if (!Number.isInteger(m.tabId) || typeof m.cmd !== 'string' || !CMD.test(m.cmd)) return;
@@ -51,7 +53,9 @@
     } else if ((m.type === 'art' || m.type === 'fav') && fromWindow(sender)) {
       // 'fav': el icono del sitio (la URL la anuncia la página) pasa por las mismas reglas de red que la carátula; admite además .ico.
       if (typeof m.url !== 'string' || m.url.length > MAX_URL) { reply({}); return; }
-      fetchArtwork(m.url, undefined, m.type === 'fav').then((data) => reply({ data }), () => reply({}));
+      if (busy[m.type] >= CAP[m.type]) { reply({ busy: true }); return; }
+      busy[m.type]++;
+      fetchArtwork(m.url, undefined, m.type === 'fav').then((data) => reply({ data }), () => reply({})).finally(() => { busy[m.type]--; });
       return true;
     }
   });
