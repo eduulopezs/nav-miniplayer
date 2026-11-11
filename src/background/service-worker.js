@@ -23,6 +23,8 @@ const CAPTURE_KEY = 'mp_capture';
 async function startCapture(tabId) {
   try {
     if (!(await chrome.storage.local.get(CAPTURE_KEY))[CAPTURE_KEY]) return;
+    // Ya capturada (el offscreen tarda 1,5 s en soltarla al ocultarse): pedir otro id fallaría; basta con reconectar el reproductor.
+    if ((await chrome.tabCapture.getCapturedTabs()).some((c) => c.tabId === tabId && c.status === 'active')) { chrome.tabs.sendMessage(tabId, { type: 'viz-connect' }).catch(() => {}); return; }
     const streamId = await chrome.tabCapture.getMediaStreamId({ targetTabId: tabId });
     try { // solo puede haber un documento offscreen: si ya existe, createDocument falla y se reutiliza
       await chrome.offscreen.createDocument({ url: 'src/offscreen/offscreen.html', reasons: ['USER_MEDIA'], justification: chrome.i18n.getMessage('offscreenReason') });
@@ -97,6 +99,8 @@ const MAX_FRAME_MSG = 20000;
 function relayFrame(m, sender, tabId) {
   if (m.type === 'mp-frame' && sender.frameId > 0 && typeof m.list === 'string' && m.list.length <= MAX_FRAME_MSG) {
     chrome.tabs.sendMessage(tabId, { type: 'mp-frame', frame: sender.frameId, list: m.list }, { frameId: 0 }).catch(() => {});
+  } else if (m.type === 'mp-query' && sender.frameId === 0) {
+    chrome.tabs.sendMessage(tabId, { type: 'mp-query' }).catch(() => {}); // a todos los marcos; solo responden los agentes
   } else if (m.type === 'mp-cmd' && sender.frameId === 0 && Number.isInteger(m.frame) && m.frame > 0 && typeof m.cmd === 'string' && m.cmd.length < 40) {
     // Si el marco ya no existe, se vacía su lista en el marco superior para que el medio desaparezca sin esperar a que caduque.
     const frame = m.frame;
@@ -126,7 +130,7 @@ chrome.runtime.onMessage.addListener((m, sender, reply) => {
   if (sender.id !== chrome.runtime.id || !m) return;
   if (m.type === 'open-window') return void self.NMPSess.openWindow(); // desde una pestaña sin ventana con marco, o desde Ajustes (con o sin pestaña)
   if (tabId == null) return;
-  if (m.type === 'mp-frame' || m.type === 'mp-cmd') return void relayFrame(m, sender, tabId);
+  if (m.type === 'mp-frame' || m.type === 'mp-cmd' || m.type === 'mp-query') return void relayFrame(m, sender, tabId);
   if (m.type === 'font') {
     if (typeof m.file !== 'string' || !FONT_FILE.test(m.file)) return;
     readFont(m.file).then((data) => reply({ data }), () => reply({}));

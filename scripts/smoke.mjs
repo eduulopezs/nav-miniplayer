@@ -62,6 +62,10 @@ const N = ctx.__NMP;
   ok(M.remotes().length === 2, 'aún no caduca');
   M.expire(t0 + 7000);
   ok(M.remotes().length === 1, 'caduca el iframe mudo');
+  M.ingest('f4', JSON.stringify([{ i: 1, p: true, d: 90, r: 4 }]), () => {}, null, t0);
+  M.expire(t0 + 60000);
+  ok(M.remotes().length === 2, 'un iframe en pausa no caduca (no hay latido)');
+  M.ingest('f4', '[]', () => {});
 }
 console.log('✓ medios remotos y política de selección');
 

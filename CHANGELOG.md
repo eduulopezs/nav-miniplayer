@@ -6,6 +6,17 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y e
 
 ## [Sin publicar]
 
+### Corregido
+
+- Volver a mostrar el reproductor poco después de ocultarlo ya no deja la captura de audio a medias.
+- Los medios en pausa dentro de iframes ya no envían un latido cada 2 s; el marco superior pide su estado al llegar. Los cambios de velocidad en un iframe se notifican.
+- La ventana aparte no se abre dos veces con dos clics seguidos y no muestra sesiones antiguas al reabrirse.
+- Arrastrar la barra de progreso de la ventana aparte envía como mucho una orden cada 150 ms.
+
+### Interno
+
+- Tests de validación de sesiones y órdenes de la ventana aparte; la ventana y Ajustes comparten la carga de fuentes.
+
 ## [2.0.0] - 2026-11-06
 
 Cierra la épica Nav Miniplayer 2.0 (#19): seguridad, rendimiento, tests e2e y CI, layout responsive, sistema de diseño v2 y diseños nuevos, detección de medios ampliada, volumen, velocidad y atajos, control entre pestañas y ventana aparte, ajustes e i18n, captura de audio de la pestaña y modo de menos permisos. El detalle está en las versiones 1.3.0 a 1.18.4.
