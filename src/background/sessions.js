@@ -62,7 +62,10 @@
 
   chrome.tabs.onRemoved.addListener((tabId) => { update((s) => { delete s[tabId]; return s; }); });
 
-  async function openWindow() {
+  // Dos clics seguidos comparten la misma apertura: sin el cerrojo, ambos ven WINID vacío y abren dos ventanas.
+  let opening = null;
+  const openWindow = () => (opening ||= doOpen().finally(() => { opening = null; }));
+  async function doOpen() {
     const id = (await chrome.storage.session.get(WINID_KEY))[WINID_KEY];
     if (id != null) { try { await chrome.windows.update(id, { focused: true }); return; } catch (_) { /* ya no existe */ } }
     const b = (await chrome.storage.local.get(WIN_KEY))[WIN_KEY];
@@ -70,12 +73,15 @@
     if (b && [b.left, b.top, b.width, b.height].every((v) => Number.isFinite(v))) Object.assign(o, { left: Math.round(b.left), top: Math.round(b.top), width: Math.max(240, Math.round(b.width)), height: Math.max(140, Math.round(b.height)) });
     const w = await chrome.windows.create(o);
     await chrome.storage.session.set({ [WINID_KEY]: w.id });
+    await update(() => ({})); // restos de informes que llegaron tras cerrar la anterior
     await chrome.storage.local.set({ [REMOTE_KEY]: true });
   }
   chrome.windows.onRemoved.addListener(async (id) => {
     if ((await chrome.storage.session.get(WINID_KEY))[WINID_KEY] !== id) return;
-    await chrome.storage.session.remove([WINID_KEY, SESS_KEY]);
     await chrome.storage.local.set({ [REMOTE_KEY]: false });
+    await chrome.storage.session.remove(WINID_KEY);
+    // Por la cadena: un informe en vuelo no puede reescribir lo borrado.
+    await (chain = chain.then(() => chrome.storage.session.remove(SESS_KEY)).catch(() => {}));
   });
   // Si el navegador se cerró con la ventana abierta, no queda marcada como abierta al arrancar.
   chrome.runtime.onStartup.addListener(() => { chrome.storage.local.set({ [REMOTE_KEY]: false }); });

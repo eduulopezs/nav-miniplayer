@@ -58,6 +58,7 @@ t('las acciones anunciadas por la página se filtran', /KNOWN_ACTIONS/.test(play
 // Service worker con fetch simulado: camino positivo y negativos de la descarga de carátulas.
 {
   let listener = null, calls = [];
+  const sstore = {}, sent = []; // storage.session en memoria y mensajes enviados a pestañas
   const listeners = []; // varios módulos registran su onMessage: la ventana habla con el de sessions.js
   const bytesPng = Uint8Array.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0, 0, 0, 1, 2, 3, 4]);
   const mkRes = (body, { ok = true, len } = {}) => ({ ok, status: ok ? 200 : 500, headers: { get: (k) => (k === 'content-length' && len != null ? String(len) : null) },
@@ -65,8 +66,8 @@ t('las acciones anunciadas por la página se filtran', /KNOWN_ACTIONS/.test(play
   const sctx = vm.createContext({
     URL, AbortController, setTimeout, clearTimeout, btoa: (s) => Buffer.from(s, 'binary').toString('base64'), console,
     importScripts(...fs) { for (const f of fs) vm.runInContext(read('src/background/' + f), sctx); },
-    chrome: { runtime: { id: 'me', getURL: (p) => 'chrome-extension://me/' + p, onMessage: { addListener: (f) => { listener = f; listeners.push(f); } }, onInstalled: { addListener() {} }, onStartup: { addListener() {} } }, tabs: { onRemoved: { addListener() {} } }, windows: { onRemoved: { addListener() {} } }, action: { onClicked: { addListener() {} } }, commands: { onCommand: { addListener() {} } },
-      scripting: {}, permissions: { onAdded: { addListener() {} }, onRemoved: { addListener() {} } }, storage: { onChanged: { addListener() {} }, local: { get() {}, set() {} }, session: { get: async () => ({}), set: async () => {}, remove: async () => {} } }, contextMenus: { onClicked: { addListener() {} }, removeAll() {}, create() {}, update() {} } },
+    chrome: { runtime: { id: 'me', getURL: (p) => 'chrome-extension://me/' + p, onMessage: { addListener: (f) => { listener = f; listeners.push(f); } }, onInstalled: { addListener() {} }, onStartup: { addListener() {} } }, tabs: { onRemoved: { addListener() {} }, sendMessage: async (...a) => { sent.push(a); } }, windows: { onRemoved: { addListener() {} } }, action: { onClicked: { addListener() {} } }, commands: { onCommand: { addListener() {} } },
+      scripting: {}, permissions: { onAdded: { addListener() {} }, onRemoved: { addListener() {} } }, storage: { onChanged: { addListener() {} }, local: { get() {}, set() {} }, session: { get: async (k) => (k in sstore ? { [k]: sstore[k] } : {}), set: async (o) => { Object.assign(sstore, o); }, remove: async (k) => { delete sstore[k]; } } }, contextMenus: { onClicked: { addListener() {} }, removeAll() {}, create() {}, update() {} } },
     fetch: async (u, o) => { calls.push([u, o]); return sctx.__next(u); },
   });
   sctx.self = sctx;
@@ -122,6 +123,24 @@ t('las acciones anunciadas por la página se filtran', /KNOWN_ACTIONS/.test(play
   sctx.__next = () => mkRes(bytesPng);
   r = await askArt('https://cdn.example.org/art3.png'); t('ventana: tras terminar, vuelve a atender carátulas', !!r.data);
   r = await askFav('https://cdn.example.org/f6.png'); t('ventana: tras terminar, vuelve a atender favicons', !!r.data);
+
+  // Sesiones: lo que informa una pestaña se acota antes de guardarse, y las órdenes solo salen de la ventana hacia pestañas que informaron.
+  const win = { id: 'me', url: 'chrome-extension://me/src/window/player.html' }, tick = () => new Promise((d) => setTimeout(d, 10));
+  const say = (m, sender) => listeners.forEach((l) => l(m, sender, () => {}));
+  say({ type: 'sess', title: 'x'.repeat(10000), art: 'javascript:alert(1)', fav: 'data:x', t: -5, rate: 1e9 }, { id: 'me', tab: { id: 7 }, frameId: 0 });
+  say({ type: 'sess', title: 'iframe' }, { id: 'me', tab: { id: 8 }, frameId: 2 });
+  await tick();
+  const s7 = (sstore.mp_sessions || {})[7];
+  t('sesión: acota el título y descarta URL y números falseados', s7 && s7.title.length === 200 && s7.art === '' && s7.fav === '' && s7.t === 0 && s7.rate === 1);
+  t('sesión: solo la informa el marco superior', !(8 in (sstore.mp_sessions || {})));
+  say({ type: 'rc-cmd', tabId: 7, cmd: 'pause' }, { id: 'me', tab: { id: 1 }, frameId: 0, url: 'https://evil.example/' });
+  say({ type: 'rc-cmd', tabId: 7, cmd: 'seek:1;x' }, win);
+  say({ type: 'rc-cmd', tabId: 9, cmd: 'pause' }, win);
+  await tick();
+  t('orden: rechaza remitente que no es la ventana, orden mal formada y pestaña sin sesión', !sent.some((a) => a[1] && a[1].type === 'rc-cmd'));
+  say({ type: 'rc-cmd', tabId: 7, cmd: 'pause' }, win);
+  await tick();
+  t('orden: la ventana controla una pestaña que informó', sent.some((a) => a[0] === 7 && a[1].type === 'rc-cmd' && a[1].cmd === 'pause'));
 }
 
 console.log(fails ? `\n${fails} comprobación(es) fallida(s)` : '\n✓ seguridad correcta');

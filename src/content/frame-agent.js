@@ -28,14 +28,15 @@
   function publish() {
     queued = false;
     const list = [...document.querySelectorAll('video,audio')].filter((el) => el.readyState > 0).slice(0, MAX).map(snap).concat(bridged);
-    // Sonando: cada 500 ms. Con medios en pausa: un latido cada 2 s, para que un marco superior que llega tarde los vea y no caduquen.
-    const want = list.some((s) => !s.p && !s.e) ? 500 : list.length ? 2000 : 0;
+    // Sonando: cada 500 ms para el progreso. En pausa no hay latido: se informa por eventos y cuando el marco superior lo pide (mp-query).
+    // shortcut: el intervalo de 500 ms corre aunque el reproductor esté oculto; si se nota en batería, que el marco superior lo active solo al mostrarse.
+    const want = list.some((s) => !s.p && !s.e) ? 500 : 0;
     if (want !== period) { clearInterval(timer); timer = want ? setInterval(publish, want) : 0; period = want; }
     const json = JSON.stringify(list);
     try { chrome.runtime.sendMessage({ type: 'mp-frame', list: json }); } catch (_) { /* contexto invalidado */ }
   }
   const schedule = () => { if (!queued) { queued = true; queueMicrotask(publish); } };
-  ['play', 'pause', 'ended', 'loadedmetadata', 'durationchange', 'emptied', 'seeked', 'volumechange'].forEach((ev) => document.addEventListener(ev, schedule, true));
+  ['play', 'pause', 'ended', 'loadedmetadata', 'durationchange', 'emptied', 'seeked', 'volumechange', 'ratechange'].forEach((ev) => document.addEventListener(ev, schedule, true));
   addEventListener('pagehide', () => { try { chrome.runtime.sendMessage({ type: 'mp-frame', list: '[]' }); } catch (_) { /* ya no hay a quién avisar */ } });
   document.addEventListener('__mp_media', (e) => {
     try {
@@ -49,7 +50,9 @@
 
   // Órdenes `m:<id>:play|pause|seek:<segundos>` del marco superior.
   chrome.runtime.onMessage.addListener((m, sender) => {
-    if (sender.id !== chrome.runtime.id || !m || m.type !== 'mp-cmd' || typeof m.cmd !== 'string') return;
+    if (sender.id !== chrome.runtime.id || !m) return;
+    if (m.type === 'mp-query') return void schedule(); // el marco superior acaba de llegar y no ha visto los informes anteriores
+    if (m.type !== 'mp-cmd' || typeof m.cmd !== 'string') return;
     const c = /^m:(\d+):(play|pause|seek)(?::(\d{1,9}(?:\.\d+)?))?$/.exec(m.cmd);
     if (c && +c[1] > BRIDGE) return void document.dispatchEvent(new CustomEvent('__mp_cmd', { detail: m.cmd.replace(/^m:\d+/, 'm:' + (+c[1] - BRIDGE)) }));
     const el = c && byId.get(+c[1])?.deref();

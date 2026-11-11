@@ -28,7 +28,7 @@
 
   // Cada origen (el puente de la página, o un iframe) publica su lista completa; las claves llevan el origen delante.
   const remotes = new Map(); // `${origen}:${id}` -> RemoteMedia
-  const STALE_MS = 6000; // un iframe que deja de dar señales (se cerró o se descargó) se descarta; el agente avisa cada 2 s como mucho
+  const STALE_MS = 6000; // un iframe que suena y deja de dar señales (el agente avisa cada 500 ms) se descarta; en pausa no hay latido
   // `send(orden)` manda una orden al origen; `onPlay(m)` avisa de un medio remoto que acaba de empezar a sonar.
   function ingest(source, detail, send, onPlay, now = Date.now()) {
     let list;
@@ -47,7 +47,8 @@
     for (const [key, m] of remotes) if (key.startsWith(source + ':') && !seen.has(key)) { m.alive = false; remotes.delete(key); }
   }
   function expire(now = Date.now()) {
-    for (const [key, m] of remotes) if (now - m.at > STALE_MS && !key.startsWith('p:')) { m.alive = false; remotes.delete(key); }
+    // Un iframe en pausa se vacía al descargarse (pagehide) o cuando una orden ya no llega (service-worker.js).
+    for (const [key, m] of remotes) if (now - m.at > STALE_MS && !key.startsWith('p:') && !m.paused && !m.ended) { m.alive = false; remotes.delete(key); }
   }
 
   // Un medio cuenta si ya tiene datos, dura lo bastante (o es un directo) y no es un vídeo de fondo (silenciado y en bucle).

@@ -34,10 +34,7 @@
     set('[data-v=cur]', '1:24'); set('[data-v=dur]', '3:42'); set('[data-v=cur2]', '01:24'); set('[data-v=dur2]', '03:42');
     root.querySelectorAll('[data-bar] i').forEach((e) => { e.style.width = '38%'; });
     previews[id] = root;
-    for (const [family, weight, file] of NMP.fontFiles[id] || []) {
-      fetch(chrome.runtime.getURL(`src/fonts/${file}-normal.woff2`)).then((r) => r.arrayBuffer())
-        .then((buf) => { const f = new FontFace(family, buf, { weight: String(weight) }); return f.load().then(() => document.fonts.add(f)); }).catch(() => {});
-    }
+    NMP.loadPageFonts(id);
   }
   const markTheme = () => { for (const [id, b] of Object.entries(cards)) b.setAttribute('aria-checked', String(id === theme)); };
 

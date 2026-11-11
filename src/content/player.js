@@ -77,6 +77,7 @@ ${NMP.menuCss}
     });
   } catch (_) { /* contexto invalidado */ }
   document.dispatchEvent(new CustomEvent('__mp_query'));
+  try { chrome.runtime.sendMessage({ type: 'mp-query' }).catch(() => {}); } catch (_) { /* contexto invalidado */ } // los agentes de iframes vuelven a informar
 
   // Registro de medios: se reescanea solo cuando un medio avisa (play, carga, fin...) o, como máximo, una vez por segundo.
   let scanAt = 0, scanDirty = true, picked = null;

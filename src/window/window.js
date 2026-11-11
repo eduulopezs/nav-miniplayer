@@ -35,19 +35,6 @@ ${NMP.css}
   const current = () => (sel != null && sessions[sel]) || ordered()[0] || null;
   const timeOf = (s) => { const t = s.t + (playingNow(s) ? (Date.now() - s.at) / 1000 * s.rate : 0); return s.d > 0 ? Math.min(t, s.d) : t; };
 
-  // ---------- Fuentes: se cargan de la propia extensión ----------
-  const fontDone = new Set();
-  function loadFonts(skin) {
-    for (const [family, weight, file] of NMP.fontFiles[skin] || []) {
-      if (fontDone.has(file)) continue;
-      fontDone.add(file);
-      fetch(chrome.runtime.getURL(`src/fonts/${file}-normal.woff2`)).then((r) => r.arrayBuffer()).then((buf) => {
-        const face = new FontFace(family, buf, { weight: String(weight), display: 'swap' });
-        return face.load().then(() => document.fonts.add(face));
-      }).catch(() => fontDone.delete(file));
-    }
-  }
-
   // ---------- Diseño ----------
   function applyTheme(t) {
     if (!SK[t]) t = 'glass';
@@ -61,7 +48,7 @@ ${NMP.css}
     card.insertAdjacentHTML('afterbegin', SK[t].tpl() + '<i class="probe" aria-hidden="true"></i>');
     applySkip();
     if (SK[t].setup) SK[t].setup(vizCtx);
-    loadFonts(t);
+    NMP.loadPageFonts(t);
     lastKey = ''; lastP = -1; lastArt = '';
     render();
   }
@@ -188,20 +175,28 @@ ${NMP.css}
     else return;
     e.preventDefault();
   });
-  // Barra de progreso: pulsar o arrastrar busca en el medio de la pestaña.
+  // Barra de progreso: pulsar o arrastrar busca en el medio de la pestaña. Al arrastrar va como mucho una orden cada 150 ms (cada una
+  // despierta al service worker y a la pestaña); al soltar, la posición final si cambió.
   const frac = (e, b) => { const r = b.getBoundingClientRect(); return Math.max(0, Math.min(1, (e.clientX - r.left) / Math.max(1, r.width))); };
+  let seekAt = 0, lastSeek = '';
+  const seekTo = (e, b, s) => { seekAt = performance.now(); lastSeek = (frac(e, b) * s.d).toFixed(2); send('seek:' + lastSeek); };
   card.addEventListener('pointerdown', (e) => {
     const b = e.button === 0 && e.target.closest('[data-bar]'), s = current();
     if (!b || !s || s.live || !s.d) return;
-    b.setPointerCapture(e.pointerId); b.classList.add('drag'); send('seek:' + (frac(e, b) * s.d).toFixed(2));
+    b.setPointerCapture(e.pointerId); b.classList.add('drag'); seekTo(e, b, s);
   });
   card.addEventListener('pointermove', (e) => {
     const b = e.target.closest('[data-bar]'), s = current();
     if (!b || !s || s.live || !s.d) return;
     b.title = fmt(frac(e, b) * s.d);
-    if (b.classList.contains('drag')) send('seek:' + (frac(e, b) * s.d).toFixed(2));
+    if (b.classList.contains('drag') && performance.now() - seekAt >= 150) seekTo(e, b, s);
   });
-  const endBar = (e) => { const b = e.target.closest('[data-bar]'); if (b) b.classList.remove('drag'); };
+  const endBar = (e) => {
+    const b = e.target.closest('[data-bar]'), s = current();
+    if (!b || !b.classList.contains('drag')) return;
+    b.classList.remove('drag');
+    if (e.type === 'pointerup' && s && !s.live && s.d && (frac(e, b) * s.d).toFixed(2) !== lastSeek) seekTo(e, b, s);
+  };
   card.addEventListener('pointerup', endBar); card.addEventListener('pointercancel', endBar);
   // Ir a la pestaña que suena.
   $('go').addEventListener('click', () => {
