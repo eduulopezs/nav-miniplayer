@@ -1,6 +1,6 @@
 # Política de privacidad
 
-Última revisión: versión 1.18.4 (se actualiza cuando cambian los permisos o el tratamiento de datos). Aplica a la extensión nav-miniplayer para Chrome y Edge (código en <https://github.com/eduulopezs/nav-miniplayer>).
+Última revisión: versión 2.0 (se actualiza cuando cambian los permisos o el tratamiento de datos). Aplica a la extensión nav-miniplayer para Chrome y Edge (código en <https://github.com/eduulopezs/nav-miniplayer>).
 
 ## Resumen
 - **No recopilamos, enviamos ni vendemos datos.** La extensión no tiene servidor propio, ni telemetría, ni analítica, ni publicidad, ni cuentas.

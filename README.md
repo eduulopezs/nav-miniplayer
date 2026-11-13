@@ -21,7 +21,7 @@ Play/pausa, ±10 s, pista anterior y siguiente, barra de progreso y siete diseñ
 ## Instalar
 Mismo código para Chrome y Edge (requiere la versión 116 o superior).
 
-**Desde GitHub Releases** (cuando haya una versión publicada):
+**Desde GitHub Releases** (recomendado):
 1. Descarga el `.zip` de la última versión en [Releases](https://github.com/eduulopezs/nav-miniplayer/releases) y descomprímelo.
 2. Abre `chrome://extensions` (o `edge://extensions`), activa **Modo de desarrollador** y pulsa **Cargar descomprimida** (en Edge, **Cargar desempaquetada**).
 3. Elige la carpeta descomprimida (la que contiene `manifest.json`).
@@ -123,7 +123,7 @@ src/
   options/                       página de Ajustes
   window/                        ventana aparte (todas las pestañas)
   fonts/                         fuentes woff2 y LICENSES.txt
-scripts/                         zip.mjs, build-tokens.mjs, contrast.mjs, check.mjs, security.mjs y smoke.mjs
+scripts/                         zip, build-tokens, check, contrast, security, smoke y manual-sites (.mjs); config.mjs y groups.mjs los comparten
 tests/e2e/                       pruebas e2e con Playwright
 docs/screenshots/                capturas de este README
 ```
@@ -140,6 +140,7 @@ Requiere Node 22 o superior.
 - `npm test`: verificación rápida sin navegador (manifest, sintaxis, tokens, contraste, seguridad y humo).
 - `npm run e2e`: pruebas en Chromium con la extensión cargada. La primera vez: `npm ci` y `npx playwright install chromium`. Las capturas de los diseños quedan en `tests/e2e/__shots__/` (ignorada por git); las de este README son copias en `docs/screenshots/`.
 - `npm run zip`: genera `dist/nav-miniplayer-<versión>.zip`.
+- `npm run manual`: abre sitios reales (YouTube, Spotify, SoundCloud, Twitch, Vimeo) con la extensión cargada; no forma parte de la CI.
 - GitHub Actions (`.github/workflows/ci.yml`) ejecuta en cada PR dos jobs separados: las verificaciones rápidas (`npm test` y `npm run zip`, que sube el zip como artefacto) y las pruebas e2e en Chromium.
 
 La versión vive solo en el campo `version` de `manifest.json`.

@@ -21,7 +21,7 @@ Play/pause, ±10 s, previous and next track, a progress bar and seven designs, w
 ## Install
 Same code for Chrome and Edge (version 116 or later).
 
-**From GitHub Releases** (once a release is published):
+**From GitHub Releases** (recommended):
 1. Download the `.zip` of the latest version from [Releases](https://github.com/eduulopezs/nav-miniplayer/releases) and unzip it.
 2. Open `chrome://extensions` (or `edge://extensions`), turn on **Developer mode** and click **Load unpacked**.
 3. Pick the unzipped folder (the one containing `manifest.json`).
@@ -123,7 +123,7 @@ src/
   options/                       Settings page
   window/                        separate window (all tabs)
   fonts/                         woff2 fonts and LICENSES.txt
-scripts/                         zip.mjs, build-tokens.mjs, contrast.mjs, check.mjs, security.mjs and smoke.mjs
+scripts/                         zip, build-tokens, check, contrast, security, smoke and manual-sites (.mjs); config.mjs and groups.mjs are shared by them
 tests/e2e/                       Playwright e2e tests
 docs/screenshots/                screenshots used by this README
 ```
@@ -140,6 +140,7 @@ Requires Node 22 or later.
 - `npm test`: fast check with no browser (manifest, syntax, tokens, contrast, security and smoke).
 - `npm run e2e`: tests in Chromium with the extension loaded. First time: `npm ci` and `npx playwright install chromium`. Design screenshots land in `tests/e2e/__shots__/` (git-ignored); the ones in this README are copies in `docs/screenshots/`.
 - `npm run zip`: builds `dist/nav-miniplayer-<version>.zip`.
+- `npm run manual`: opens real sites (YouTube, Spotify, SoundCloud, Twitch, Vimeo) with the extension loaded; not part of CI.
 - GitHub Actions (`.github/workflows/ci.yml`) runs two separate jobs on every PR: the quick checks (`npm test` and `npm run zip`, which uploads the zip as an artifact) and the e2e tests in Chromium.
 
 The version lives only in the `version` field of `manifest.json`.

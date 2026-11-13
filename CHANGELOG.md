@@ -13,9 +13,16 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y e
 - La ventana aparte no se abre dos veces con dos clics seguidos y no muestra sesiones antiguas al reabrirse.
 - Arrastrar la barra de progreso de la ventana aparte envía como mucho una orden cada 150 ms.
 
+- La captura de audio se reutiliza en lugar de reiniciarse, y el documento offscreen se cierra al quedar inactivo (`cap-idle`, con reintentos) (#102).
+- La captura solo empieza cuando el clic en el icono abre el reproductor; `NMP.toggle` devuelve si lo muestra u oculta (#102).
+- `bestArtwork` recibe el medio como parámetro en lugar de cambiar `media` a mano (#104).
+
 ### Interno
 
 - Tests de validación de sesiones y órdenes de la ventana aparte; la ventana y Ajustes comparten la carga de fuentes.
+- Prueba manual contra sitios reales (`npm run manual`, `scripts/manual-sites.mjs`) más robusta (#99).
+- Configuración compartida `NMP.cfg` (`SKINS`, `CMD`, `themeKey`) y `scripts/config.mjs`; el volumen por sitio pasa a `src/content/volume.js` (#102).
+- `npm run security` comprueba el comportamiento de `CMD` (#102).
 
 ## [2.0.0] - 2026-11-06
 

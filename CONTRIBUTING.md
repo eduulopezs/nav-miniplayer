@@ -52,7 +52,7 @@ El estado y las limitaciones están en [`ACCESSIBILITY.md`](ACCESSIBILITY.md). S
 ## Seguridad
 
 - Nada de `eval`, `new Function` ni de cargar o ejecutar código remoto.
-- No añadas permisos nuevos (ni amplíes `host_permissions`) sin justificarlo en la PR. Consulta [SECURITY.md](SECURITY.md) para las decisiones sobre permisos.
+- No añadas permisos nuevos (ni amplíes los permisos de host) sin justificarlo en la PR. Consulta [SECURITY.md](SECURITY.md) para las decisiones sobre permisos.
 - No registres ni envíes datos del usuario; consulta [PRIVACY.md](PRIVACY.md).
 - Si encuentras una vulnerabilidad, **no abras una issue pública**: sigue las instrucciones de [SECURITY.md](SECURITY.md).
 
