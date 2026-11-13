@@ -254,7 +254,24 @@ ${NMP.menuCss}
   };
 
   // ---------- Ventana aparte (#16) ----------
-  const { setRemote, schedReport } = NMP.createRemote({ pickMedia, refreshMedia: () => (media = pickMedia()), bestArtwork, hasAction: (n) => actions.has(n), findSiteButton, seekTo, ACT, render });
+  // Qué suena, para el informe a la ventana aparte.
+  const nowPlaying = () => {
+    const m = pickMedia();
+    if (!m) return null;
+    const md = navigator.mediaSession && navigator.mediaSession.metadata;
+    return { m, md, art: bestArtwork(md, m), next: actions.has('nexttrack') || !!findSiteButton('next'), prev: actions.has('previoustrack') || !!findSiteButton('prev') };
+  };
+  // Orden de la ventana aparte ya validada con CMD (c = CMD.exec): actúa sobre el medio que esta pestaña mostraría.
+  const runRemote = (c) => {
+    media = pickMedia();
+    if (!media) return;
+    if (c[1] === 'play') { if (media.paused) media.play().catch(() => {}); }
+    else if (c[1] === 'pause') media.pause();
+    else if (c[2] != null) seekTo(+c[2]);
+    else ACT[c[1] === 'toggle' ? 'play' : c[1]]();
+    render();
+  };
+  const { setRemote, schedReport } = NMP.createRemote({ nowPlaying, run: runRemote });
 
   // Ventana flotante con marco (Document PiP): la abre el puente y mueve aquí el host. Si no se puede abrir, se usa la ventana aparte (#16).
   const openWindowFallback = () => { try { chrome.runtime.sendMessage({ type: 'open-window' }); } catch (_) { /* sin background */ } };

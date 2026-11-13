@@ -4,6 +4,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
 import { CFG } from './config.mjs';
+import { GROUPS } from './groups.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const read = (f) => readFileSync(join(root, f), 'utf8');
@@ -51,7 +52,7 @@ t('el offscreen solo atiende a la extensión y rechaza mensajes de pestañas', /
 t('el puerto del visualizador solo se acepta del marco superior', /port\.sender\.frameId !== 0/.test(off));
 t('el audio vuelve a los altavoces y a la página solo llegan números', /connect\(ctx\.destination\)/.test(off) && /getByteFrequencyData/.test(off) && !/postMessage\([^)]*stream/.test(off));
 const sess = read('src/background/sessions.js');
-t('las órdenes de la ventana solo salen de la página de la extensión y de una lista cerrada', /fromWindow\(sender\)/.test(sess) && /CMD\.test\(m\.cmd\)/.test(sess) && /CMD = self\.__NMP\.cfg\.CMD/.test(sess) && ['play', 'pause', 'toggle', 'back', 'fwd', 'prev', 'next', 'mute', 'seek:12', 'seek:1.5'].every((c) => CFG.CMD.test(c)) && ['', 'play ', 'xplay', 'seek:', 'seek:-1', 'seek:1e9', 'seek:1234567890', 'seek:1.', 'eval'].every((c) => !CFG.CMD.test(c)) && CFG.CMD.exec('seek:12.5')[2] === '12.5' && CFG.CMD.exec('play')[2] === undefined && /RC\.exec\(m\.cmd\)/.test(remote) && /c\[2\] != null\) d\.seekTo\(\+c\[2\]\)/.test(remote));
+t('las órdenes de la ventana solo salen de la página de la extensión y de una lista cerrada', /fromWindow\(sender\)/.test(sess) && /CMD\.test\(m\.cmd\)/.test(sess) && /CMD = self\.__NMP\.cfg\.CMD/.test(sess) && ['play', 'pause', 'toggle', 'back', 'fwd', 'prev', 'next', 'mute', 'seek:12', 'seek:1.5'].every((c) => CFG.CMD.test(c)) && ['', 'play ', 'xplay', 'seek:', 'seek:-1', 'seek:1e9', 'seek:1234567890', 'seek:1.', 'eval'].every((c) => !CFG.CMD.test(c)) && CFG.CMD.exec('seek:12.5')[2] === '12.5' && CFG.CMD.exec('play')[2] === undefined && /RC\.exec\(m\.cmd\)/.test(remote) && /c\[2\] != null\) seekTo\(\+c\[2\]\)/.test(player) && /sender\.id !== chrome\.runtime\.id \|\| sender\.tab/.test(remote) && GROUPS.find((g) => g.id === 'ui').js.join().includes('remote.js,src/content/player.js'));
 t('las sesiones solo se aceptan del marco superior de una pestaña y con campos acotados', /m\.type === 'sess' && sender\.tab && sender\.frameId === 0/.test(sess) && /web\(m\.art\)/.test(sess));
 t('el fin de sesión solo se acepta del marco superior', /m\.type === 'sess-end' && sender\.tab && sender\.frameId === 0/.test(sess));
 t('las acciones anunciadas por la página se filtran', /KNOWN_ACTIONS/.test(player));
