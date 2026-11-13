@@ -27,6 +27,7 @@
         'src/content/skins/dynamic.js',
         'src/content/styles.js',
         'src/content/menu.js',
+        'src/content/remote.js',
         'src/content/player.js',
       ],
     },

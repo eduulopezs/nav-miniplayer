@@ -9,6 +9,7 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y e
 ### Interno
 
 - Los nombres antiguos de diseño (`LEGACY`) pasan a `NMP.cfg` y `npm test` comprueba que apuntan a diseños existentes (#116).
+- El informe a la ventana aparte y sus órdenes salen de `player.js` a `src/content/remote.js`, sin cambios de comportamiento (#117).
 
 ## [2.0.5] - 2026-11-13
 

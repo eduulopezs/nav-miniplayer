@@ -118,6 +118,7 @@ src/
     menu.js                      menú del clic derecho sobre la tarjeta
     storyboard.js                miniatura al pasar por la barra (YouTube)
     skins/                       los siete diseños: glass, noir, crt, metal, minimal, ansi, dynamic
+    remote.js                    informe a la ventana aparte y órdenes que llegan de ella
     player.js                    DOM, estado, ventana con marco y teclado
   offscreen/                     documento que analiza el audio capturado
   options/                       página de Ajustes
