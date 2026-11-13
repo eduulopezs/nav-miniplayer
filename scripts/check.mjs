@@ -93,7 +93,7 @@ if (!/^\d+\.\d+\.\d+$/.test(manifest.version)) errors.push(`versión no válida:
   walk('src');
   // Los diseños salen de NMP.cfg.SKINS: cada uno lleva su clave de idioma themeXxx y su fichero en src/content/skins.
   const skins = CFG.SKINS;
-  for (const id of skins) used.add('theme' + id[0].toUpperCase() + id.slice(1));
+  for (const id of skins) used.add(CFG.themeKey(id));
   const files = readdirSync(join(root, 'src/content/skins')).map((f) => f.replace(/\.js$/, ''));
   if (skins.some((id) => !files.includes(id)) || files.some((id) => !skins.includes(id))) errors.push('NMP.cfg.SKINS no coincide con src/content/skins');
   for (const [, k] of JSON.stringify(manifest).matchAll(/__MSG_(\w+)__/g)) used.add(k);

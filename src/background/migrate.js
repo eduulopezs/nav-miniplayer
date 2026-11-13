@@ -2,9 +2,9 @@
 // Cada paso lleva el almacenamiento de la versión n a la n+1; para añadir uno basta agregar su función al final de STEPS.
 (() => {
   const SCHEMA_KEY = 'mp_schema';
-  // Los diseños salen de NMP.cfg (config.js se carga antes que este fichero). Los saltos son una copia congelada: un paso migra datos de su versión.
+  // Copias congeladas a propósito: un paso migra datos de su versión, no de la actual. No las sincronices con NMP.cfg.
   const SKIPS = [5, 10, 15, 30];
-  const THEMES = self.__NMP.cfg.SKINS;
+  const THEMES = ['glass', 'noir', 'crt', 'metal', 'minimal', 'ansi', 'dynamic'];
   const LEGACY_THEME = { brutal: 'noir', retro: 'crt', pixel: 'glass' };
 
   const STEPS = [

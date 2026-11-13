@@ -56,7 +56,7 @@ async function startCapture(tabId) {
     chrome.action.setBadgeBackgroundColor({ tabId, color: '#c0392b' }).catch(() => {});
     chrome.action.setBadgeText({ tabId, text: '!' }).catch(() => {});
     chrome.action.setTitle({ tabId, title: chrome.i18n.getMessage('captureUnavailable', msg.slice(0, 160)) }).catch(() => {});
-    badgeTimers.set(tabId, setTimeout(() => { chrome.action.setBadgeText({ tabId, text: '' }).catch(() => {}); chrome.action.setTitle({ tabId, title: chrome.i18n.getMessage('actionTitle') }).catch(() => {}); }, 6000)); /* pestaña no capturable (chrome://, ya capturada...): sigue el visualizador simulado */
+    badgeTimers.set(tabId, setTimeout(() => { badgeTimers.delete(tabId); chrome.action.setBadgeText({ tabId, text: '' }).catch(() => {}); chrome.action.setTitle({ tabId, title: chrome.i18n.getMessage('actionTitle') }).catch(() => {}); }, 6000)); /* pestaña no capturable (chrome://, ya capturada...): sigue el visualizador simulado */
   } finally { starting--; }
 }
 
@@ -139,10 +139,17 @@ async function readFont(file) {
   fontCache.set(file, data);
   return data;
 }
+// El navegador tarda un poco en dar la captura por terminada: si aún consta como activa, se reintenta unas veces antes de dejar el documento abierto.
+function closeIfIdle(tries = 0) {
+  chrome.tabCapture.getCapturedTabs().then((l) => {
+    if (!starting && !l.some((c) => c.status === 'active')) return (closing = chrome.offscreen.closeDocument().catch(() => {}));
+    if (tries < 5) setTimeout(() => closeIfIdle(tries + 1), 1000);
+  }).catch(() => {});
+}
 chrome.runtime.onMessage.addListener((m, sender) => {
   if (sender.id !== chrome.runtime.id || sender.tab || !m) return;
   // Se cierra solo si no queda ninguna captura activa ni en arranque: una captura nueva pudo reutilizar el documento justo antes de que llegara este aviso.
-  if (m.type === 'cap-idle') chrome.tabCapture.getCapturedTabs().then((l) => { if (!starting && !l.some((c) => c.status === 'active')) return (closing = chrome.offscreen.closeDocument().catch(() => {})); }).catch(() => {});
+  if (m.type === 'cap-idle') closeIfIdle();
 });
 const inflight = new Set(); // una descarga a la vez por pestaña
 const inflightSb = new Set(); // ídem para las hojas del storyboard
@@ -173,7 +180,7 @@ chrome.runtime.onMessage.addListener((m, sender, reply) => {
 
 // Clic derecho en el icono: captura de audio, ventana aparte y (para desarrollo) el diseño.
 const THEME_KEY = 'mp_theme';
-const THEMES = Object.fromEntries(self.__NMP.cfg.SKINS.map((id) => [id, 'theme' + id[0].toUpperCase() + id.slice(1)])); // claves de idioma themeGlass, themeNoir...
+const THEMES = Object.fromEntries(self.__NMP.cfg.SKINS.map((id) => [id, self.__NMP.cfg.themeKey(id)])); // claves de idioma themeGlass, themeNoir...
 const syncMenu = (theme, capture) => {
   const up = (id, checked) => chrome.contextMenus.update(id, { checked }, () => void chrome.runtime.lastError);
   if (theme) for (const id of Object.keys(THEMES)) up('th:' + id, id === theme);
