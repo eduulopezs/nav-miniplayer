@@ -319,11 +319,12 @@ ${NMP.menuCss}
   });
 
   // Clic izquierdo en el icono: abre o cierra la ventana flotante; sin Document PiP, abre la ventana aparte.
-  NMP.isOpen = () => pip || (inpage && !dismissed); // el service worker lo consulta antes de alternar, para no capturar audio al cerrar
+  // Devuelve true si este clic lo abre (el service worker solo captura audio al abrir); así basta una ejecución y el gesto del clic no se retrasa.
   NMP.toggle = () => { // lo invoca el service worker desde el mundo aislado; la página no puede alcanzarlo
-    if (pip) return send('__pip');
-    if (inpage) { dismissed = !dismissed; return render(); }
+    if (pip) { send('__pip'); return false; }
+    if (inpage) { dismissed = !dismissed; render(); return !dismissed; }
     if (actions.has('@pip')) send('__pip'); else openWindowFallback();
+    return true;
   };
 
 

@@ -109,6 +109,7 @@ src/
     config.js                    constantes y claves de almacenamiento
     util.js                      clamp y formato de tiempo
     media.js                     medios remotos (del puente y de iframes) y política de selección
+    volume.js                    volumen recordado por sitio
     frame-agent.js               agente sin interfaz en cada iframe: informa al marco superior y ejecuta sus órdenes
     tokens.js                    GENERADO desde design/tokens.json (variables CSS y colores de la paleta)
     styles.js                    CSS del reproductor; solo usa var(--token)

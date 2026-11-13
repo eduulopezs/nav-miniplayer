@@ -24,16 +24,19 @@ const callPlayer = async (tabId, method, arg) => {
 };
 chrome.action.onClicked.addListener(async (tab) => {
   if (tab.id == null) return;
-  const wasOpen = await callPlayer(tab.id, 'isOpen'); // si estaba abierto, este clic lo cierra y no hay nada que capturar
-  callPlayer(tab.id, 'toggle');
-  if (!wasOpen) startCapture(tab.id); // el clic en el icono es el gesto que autoriza la captura (activeTab)
+  // toggle devuelve true solo si este clic abre el reproductor: al cerrarlo, o si no se pudo ejecutar, no hay nada que capturar.
+  if (await callPlayer(tab.id, 'toggle')) startCapture(tab.id); // el clic en el icono es el gesto que autoriza la captura (activeTab)
 });
 
 // Audio real de la pestaña para el visualizador (opt-in desde el menú del icono). tabCapture da un id de flujo que consume el documento
 // offscreen (src/offscreen), que analiza el audio y manda el espectro al content script por un puerto. Sin captura, el visualizador es simulado.
 const CAPTURE_KEY = 'mp_capture';
+let starting = 0; // capturas en arranque: aún no figuran como activas en getCapturedTabs, pero el documento offscreen no debe cerrarse bajo ellas
+const badgeTimers = new Map(); // tabId -> temporizador del aviso de fallo, para que uno viejo no borre el de un fallo nuevo
 async function startCapture(tabId) {
+  starting++;
   try {
+    clearTimeout(badgeTimers.get(tabId));
     if (!(await chrome.storage.local.get(CAPTURE_KEY))[CAPTURE_KEY]) return;
     // Limpia el aviso de un fallo anterior: el temporizador de abajo no sobrevive si el service worker se duerme.
     chrome.action.setBadgeText({ tabId, text: '' }).catch(() => {}); chrome.action.setTitle({ tabId, title: chrome.i18n.getMessage('actionTitle') }).catch(() => {});
@@ -51,7 +54,8 @@ async function startCapture(tabId) {
     chrome.action.setBadgeBackgroundColor({ tabId, color: '#c0392b' }).catch(() => {});
     chrome.action.setBadgeText({ tabId, text: '!' }).catch(() => {});
     chrome.action.setTitle({ tabId, title: chrome.i18n.getMessage('captureUnavailable', msg.slice(0, 160)) }).catch(() => {});
-    setTimeout(() => { chrome.action.setBadgeText({ tabId, text: '' }).catch(() => {}); chrome.action.setTitle({ tabId, title: chrome.i18n.getMessage('actionTitle') }).catch(() => {}); }, 6000); /* pestaña no capturable (chrome://, ya capturada...): sigue el visualizador simulado */ }
+    badgeTimers.set(tabId, setTimeout(() => { chrome.action.setBadgeText({ tabId, text: '' }).catch(() => {}); chrome.action.setTitle({ tabId, title: chrome.i18n.getMessage('actionTitle') }).catch(() => {}); }, 6000)); /* pestaña no capturable (chrome://, ya capturada...): sigue el visualizador simulado */
+  } finally { starting--; }
 }
 
 // Atajos de teclado (chrome.commands, configurables en chrome://extensions/shortcuts): se ejecutan sobre la pestaña activa.
@@ -135,8 +139,8 @@ async function readFont(file) {
 }
 chrome.runtime.onMessage.addListener((m, sender) => {
   if (sender.id !== chrome.runtime.id || sender.tab || !m) return;
-  // Se cierra solo si no queda ninguna captura activa: una captura nueva pudo reutilizar el documento justo antes de que llegara este aviso.
-  if (m.type === 'cap-idle') chrome.tabCapture.getCapturedTabs().then((l) => { if (!l.some((c) => c.status === 'active')) return chrome.offscreen.closeDocument(); }).catch(() => {});
+  // Se cierra solo si no queda ninguna captura activa ni en arranque: una captura nueva pudo reutilizar el documento justo antes de que llegara este aviso.
+  if (m.type === 'cap-idle') chrome.tabCapture.getCapturedTabs().then((l) => { if (!starting && !l.some((c) => c.status === 'active')) return chrome.offscreen.closeDocument(); }).catch(() => {});
 });
 const inflight = new Set(); // una descarga a la vez por pestaña
 const inflightSb = new Set(); // ídem para las hojas del storyboard

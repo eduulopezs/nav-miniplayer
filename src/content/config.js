@@ -7,7 +7,7 @@
     SKINS: ['glass', 'noir', 'crt', 'metal', 'minimal', 'ansi', 'dynamic'], // diseños, en el orden de menús y ajustes
     CMD: /^(play|pause|toggle|back|fwd|prev|next|mute|seek:(\d{1,9}(?:\.\d+)?))$/, // órdenes de la ventana aparte: las valida el service worker y las ejecuta la pestaña
     MIN_DURATION: 30, // s; ignora sonidos/clips cortos
-    THEME_KEY: 'mp_theme', // desarrollo: 'glass' | 'noir' | 'crt' | 'metal' | 'minimal' | 'ansi' | 'dynamic'
+    THEME_KEY: 'mp_theme', // id de uno de SKINS
     PREFS_KEY: 'mp_prefs', // { skip }
     REMOTE_KEY: 'mp_remote', // true mientras la ventana aparte está abierta: las pestañas informan de su medio
     VOL_PREFIX: 'mp_vol:', // + hostname: volumen recordado por sitio, una clave por sitio para que dos pestañas no se pisen

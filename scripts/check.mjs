@@ -5,6 +5,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
 import { GROUPS } from './groups.mjs';
+import { CFG } from './config.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const manifest = JSON.parse(readFileSync(join(root, 'manifest.json'), 'utf8'));
@@ -91,7 +92,7 @@ if (!/^\d+\.\d+\.\d+$/.test(manifest.version)) errors.push(`versión no válida:
   });
   walk('src');
   // Los diseños salen de NMP.cfg.SKINS: cada uno lleva su clave de idioma themeXxx y su fichero en src/content/skins.
-  const skins = [...readFileSync(join(root, 'src/content/config.js'), 'utf8').match(/SKINS: \[([^\]]*)\]/)[1].matchAll(/'(\w+)'/g)].map((x) => x[1]);
+  const skins = CFG.SKINS;
   for (const id of skins) used.add('theme' + id[0].toUpperCase() + id.slice(1));
   const files = readdirSync(join(root, 'src/content/skins')).map((f) => f.replace(/\.js$/, ''));
   if (skins.some((id) => !files.includes(id)) || files.some((id) => !skins.includes(id))) errors.push('NMP.cfg.SKINS no coincide con src/content/skins');

@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
+import { CFG } from './config.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const ctx = vm.createContext({});
@@ -29,7 +30,7 @@ const pairs = [];
 // Pares de los tokens compartidos: anillo de foco (componente de interfaz, 3:1; WCAG 1.4.11 y 2.4.11) y texto del toast sobre su velo, que se compone sobre el fondo del diseño.
 const base = (k) => k['bg-b']; // fondo sobre el que se compone la tarjeta (el que usa la paleta de la carátula)
 const veil = (key) => (k) => hex(over(k[key], base(k)));
-for (const th of ['glass', 'noir', 'crt', 'metal', 'minimal', 'ansi', 'dynamic']) {
+for (const th of CFG.SKINS) {
   pairs.push([th, 'foco', 'focus', base, 3]);
   pairs.push([th, 'toast', 'on-overlay', veil('scrim-toast'), 4.5]);
 }

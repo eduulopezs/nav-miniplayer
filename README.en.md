@@ -109,6 +109,7 @@ src/
     config.js                    constants and storage keys
     util.js                      clamp and time formatting
     media.js                     remote media (from the bridge and iframes) and selection policy
+    volume.js                    per-site remembered volume
     frame-agent.js               headless agent in each iframe: reports to the top frame and runs its commands
     tokens.js                    GENERATED from design/tokens.json (CSS variables and palette colours)
     styles.js                    player CSS; only uses var(--token)
