@@ -24,9 +24,9 @@ const byAct = async (cdp, root, act) => { for (const n of inShadow(root, (x) => 
 // Medio principal de un marco: el de mayor duración. Devuelve [en pausa, tiempo, ¿duración finita? (falso en directos), duración].
 const mainMedia = () => { const m = [...document.querySelectorAll('video,audio')].sort((a, b) => (b.duration || 0) - (a.duration || 0))[0]; return m ? [m.paused, m.currentTime, Number.isFinite(m.duration), m.duration || 0] : null; };
 
-async function probe(env, page, tabId, name, url) {
+async function probe(env, page, before, name, url) {
   const { ctx, sw } = env;
-  const r = { name, url, tabId, notes: [] };
+  const r = { name, url, notes: [] };
   try {
     if (url === 'data:embed') {
       await page.route('https://embed.test/', (rt) => rt.fulfill({ contentType: 'text/html', body: '<!doctype html><title>Embed</title><iframe src="https://player.vimeo.com/video/76979871" width=640 height=360 allow="autoplay"></iframe>' }));
@@ -34,7 +34,7 @@ async function probe(env, page, tabId, name, url) {
     } else await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
     await sleep(6000);
     // Cierra el aviso de cookies habitual: solo botones cuyo nombre es exactamente uno de estos, para no pulsar otros ajenos.
-    for (const t of ['Accept all', 'Aceptar todo', 'Accept', 'Aceptar', 'I agree', 'Acepto']) {
+    for (const t of ['Accept all', 'Aceptar todo', 'Aceptar y continuar', 'Accepter tout', 'Tout accepter', 'Alle akzeptieren', 'Accetta tutto', 'Accept', 'Aceptar', 'I agree', 'Acepto']) {
       const b = page.getByRole('button', { name: t, exact: true }).first();
       if (await b.count().catch(() => 0) && await b.click({ timeout: 1500 }).then(() => true, () => false)) break;
     }
@@ -64,11 +64,15 @@ async function probe(env, page, tabId, name, url) {
       const card = inShadow(root, (x) => hasClass(x, 'card'))[0], play = await byAct(cdp, root, 'play');
       return { shown: !!card && hasClass(card, 'show'), label: play ? attr(play, 'aria-label') : null };
     };
-    // La tarjeta puede haberse mostrado sola al empezar a reproducir: alternar entonces la ocultaría.
-    for (let i = 0; i < 8; i++) { r.card = await state(); if (r.card.shown) break; await sleep(400); }
-    if (!r.card.shown) {
-      await sw.evaluate((id) => chrome.scripting.executeScript({ target: { tabId: id }, func: () => globalThis.__NMP?.toggle?.() }), tabId);
-      for (let i = 0; i < 20; i++) { await sleep(400); r.card = await state(); if (r.card.shown) break; }
+    // La pestaña es una de las nuevas (id que no estaba en `before`); si hay varias, la de la URL actual (sin hash, por si redirige).
+    const tabId = await sw.evaluate(async ([known, u]) => { const t = (await chrome.tabs.query({})).filter((x) => !known.includes(x.id)); return (t.find((x) => (x.url || '').split('#')[0] === u) || t[0])?.id; }, [[...before], page.url().split('#')[0]]);
+    if (tabId == null) throw new Error('no se encontró la pestaña del sitio');
+    r.tabId = tabId;
+    // La tarjeta puede haberse mostrado sola al empezar a reproducir: se espera un poco antes de alternarla, porque alternarla entonces la ocultaría.
+    for (let i = 0; i < 24; i++) {
+      r.card = await state(); if (r.card.shown) break;
+      if (i === 4) await sw.evaluate((id) => chrome.scripting.executeScript({ target: { tabId: id }, func: () => globalThis.__NMP?.toggle?.() }), tabId);
+      await sleep(400);
     }
     if (r.card.shown) {
       // Entre todos los marcos, el medio de mayor duración (los directos, Infinity, ganan): un iframe de anuncios no debe medirse en su lugar.
@@ -82,8 +86,8 @@ async function probe(env, page, tabId, name, url) {
       const a = await mediaState(); await click('play'); const b = await mediaState(); await click('play'); const c = await mediaState();
       r.controls = { antes: a, trasPulsar: b, trasOtraVez: c, pausa: !!a && !!b && a[0] !== b[0], reanuda: !!b && !!c && b[0] !== c[0] };
       // En un directo no se puede avanzar: no cuenta como fallo.
-      if (c && !c[2]) r.controls.adelante10 = null;
-      else { const t0 = c ? c[1] : 0; await click('fwd'); const d = await mediaState(); r.controls.adelante10 = !!d && d[1] >= t0 + 8; }
+      if (!c || !c[2]) r.controls.adelante10 = null;
+      else { const t0 = c[1]; await click('fwd'); const d = await mediaState(); r.controls.adelante10 = !!d && d[1] >= t0 + 8; }
     }
     r.shot = `tests/e2e/__shots__/site-${name.replace(/\W+/g, '_')}.png`;
     await page.screenshot({ path: r.shot }).catch(() => {});
@@ -97,18 +101,15 @@ const env = await launch();
 try {
   await env.sw.evaluate(() => chrome.storage.local.set({ mp_inpage: true }));
   for (const [name, url] of sites) {
-    const ids = async () => new Set(await env.sw.evaluate(async () => (await chrome.tabs.query({})).map((t) => t.id)));
-    const before = await ids();
+    const before = await env.sw.evaluate(async () => (await chrome.tabs.query({})).map((t) => t.id));
     const page = await env.ctx.newPage();
-    // La pestaña nueva es la única cuyo id no estaba antes (la URL puede cambiar por redirecciones o hash).
-    const tabId = [...await ids()].find((id) => !before.has(id));
     // Un sitio que se cuelga no debe bloquear el resto: al vencer el plazo se cierra la pestaña, lo que corta la sonda.
-    const run = probe(env, page, tabId, name, url);
+    const run = probe(env, page, before, name, url);
     let timer;
     const r = await Promise.race([run, new Promise((ok) => { timer = setTimeout(() => ok({ name, url, notes: ['tiempo agotado (90 s)'] }), 90000); })]);
     clearTimeout(timer);
     await page.close().catch(() => {});
-    await run; // espera a que la sonda termine de verdad antes de pasar al sitio siguiente
+    await Promise.race([run, sleep(5000)]); // espera a que la sonda termine antes del sitio siguiente, sin colgarse si no lo hace
     console.log(JSON.stringify(r));
     const c = r.controls || {};
     const why = [];
