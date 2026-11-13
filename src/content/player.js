@@ -9,6 +9,10 @@
   const { skins: SK, viz, media: MEDIA, siteVol } = NMP;
 
   // ---------- DOM ----------
+  // Tras recargar o actualizar la extensión, el reproductor de la versión anterior sigue en la pestaña con su host. El puente
+  // mueve a la ventana flotante el primer host que encuentra, así que se retira el huérfano para que no haya dos.
+  const stale = document.getElementById('glass-mini-player-host');
+  if (stale) stale.remove();
   const host = document.createElement('div');
   host.id = 'glass-mini-player-host';
   host.style.cssText = HOST_CSS;

@@ -161,6 +161,19 @@ test('el clic izquierdo del icono (toggle, sin argumento) se ejecuta en la pesta
   await page.close();
 });
 
+// Reproductor huérfano de una versión anterior: el puente mueve el primer host con ese id a la ventana flotante, así que no puede haber dos.
+test('al arrancar, el reproductor retira un host huérfano de una versión anterior', async () => {
+  const page = await env.ctx.newPage();
+  await page.addInitScript(() => document.addEventListener('DOMContentLoaded', () => {
+    const h = document.createElement('div'); h.id = 'glass-mini-player-host'; h.dataset.stale = '1'; document.body.prepend(h);
+  }));
+  await page.goto(`${server.base}/`);
+  await sleep(600);
+  const hosts = await page.evaluate(() => [...document.querySelectorAll('#glass-mini-player-host')].map((h) => !!h.dataset.stale));
+  assert.deepEqual(hosts, [false], 'solo queda el host nuevo');
+  await page.close();
+});
+
 // Pestaña abierta antes de actualizar: su toggle viene de una versión que no devolvía nada. El clic del icono debe distinguirlo de «cerrado» (false).
 test('callPlayer devuelve undefined si el toggle de la pestaña es de una versión anterior', async () => {
   await env.sw.evaluate(() => chrome.storage.local.set({ mp_inpage: true }));
