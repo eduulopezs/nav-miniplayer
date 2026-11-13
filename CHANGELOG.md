@@ -6,6 +6,8 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y e
 
 ## [Sin publicar]
 
+## [2.0.10] - 2026-11-13
+
 ### Eliminado
 
 - El diseño Dynamic. Quien lo tenía elegido pasa a Glass (migración del esquema a la versión 3) (#125).
