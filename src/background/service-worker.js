@@ -1,31 +1,50 @@
-importScripts('net-guard.js', 'sessions.js', 'migrate.js', 'injection.js');
+importScripts('../content/config.js', 'net-guard.js', 'sessions.js', 'migrate.js', 'injection.js');
 const { isAllowedArtworkUrl, isStoryboardUrl, sniffImage, MAX_URL } = self.NMPNet;
 
 // Clic izquierdo: se ejecuta un script en la pestaña desde el propio clic, para que cuente como gesto del usuario
 // y el navegador deje abrir la ventana flotante al momento. Corre en el mundo aislado de la extensión (el mismo
 // que el content script), así que llama a una función que la página no puede ver ni invocar.
 // Si la pestaña no lleva los scripts (sin permiso de host: solo activeTab, concedido por este mismo clic o atajo), se inyectan en ese momento.
-const callPlayer = (tabId, method, arg) => {
-  const call = (method, arg) => chrome.scripting.executeScript({ target: { tabId }, args: [method, arg ?? null], func: (m, a) => { const n = globalThis.__NMP; if (n && typeof n[m] === 'function') { n[m](a); return true; } return false; } });
-  const run = () => call(method, arg);
-  // Si la primera ejecución rechaza también se intenta la inyección: si tampoco hay acceso, falla ahí y se registra.
-  return run().catch(() => null).then(async (res) => { if (res && res[0] && res[0].result) return; const late = await self.NMPInject.injectInto(tabId); await run(); if (late && !(await chrome.permissions.contains({ origins: ['<all_urls>'] }).catch(() => true))) await call('lateBridge'); }).catch((e) => console.warn('[Nav Miniplayer] no se pudo ejecutar la orden en la pestaña:', (e && e.message) || e));
+// Devuelve lo que responda el método (true/false) o false si no se pudo ejecutar.
+const callPlayer = async (tabId, method, arg) => {
+  // La función corre en la pestaña; null si el método no existe (scripts sin inyectar).
+  const exec = async (method, arg) => {
+    const [r] = await chrome.scripting.executeScript({ target: { tabId }, args: [method, arg ?? null], func: (m, a) => { const n = globalThis.__NMP; return n && typeof n[m] === 'function' ? { v: n[m](a) === true } : null; } });
+    return r && r.result;
+  };
+  try {
+    let res = await exec(method, arg).catch(() => null);
+    if (res) return res.v;
+    // Si la primera ejecución rechaza también se intenta la inyección: si tampoco hay acceso, falla ahí y se registra.
+    const late = await self.NMPInject.injectInto(tabId);
+    res = await exec(method, arg);
+    if (late && !(await chrome.permissions.contains({ origins: ['<all_urls>'] }).catch(() => true))) await exec('lateBridge');
+    return !!res && res.v;
+  } catch (e) { console.warn('[Nav Miniplayer] no se pudo ejecutar la orden en la pestaña:', (e && e.message) || e); return false; }
 };
-chrome.action.onClicked.addListener((tab) => {
+chrome.action.onClicked.addListener(async (tab) => {
   if (tab.id == null) return;
-  callPlayer(tab.id, 'toggle');
-  startCapture(tab.id); // el clic en el icono es el gesto que autoriza la captura (activeTab)
+  // toggle devuelve true solo si este clic abre el reproductor: al cerrarlo, o si no se pudo ejecutar, no hay nada que capturar.
+  if (await callPlayer(tab.id, 'toggle')) startCapture(tab.id); // el clic en el icono es el gesto que autoriza la captura (activeTab)
 });
 
 // Audio real de la pestaña para el visualizador (opt-in desde el menú del icono). tabCapture da un id de flujo que consume el documento
 // offscreen (src/offscreen), que analiza el audio y manda el espectro al content script por un puerto. Sin captura, el visualizador es simulado.
 const CAPTURE_KEY = 'mp_capture';
+let closing = Promise.resolve(); // cierre del offscreen en curso: una captura nueva espera a que termine antes de crear el documento
+let starting = 0; // capturas en arranque: aún no figuran como activas en getCapturedTabs, pero el documento offscreen no debe cerrarse bajo ellas
+const badgeTimers = new Map(); // tabId -> temporizador del aviso de fallo, para que uno viejo no borre el de un fallo nuevo
 async function startCapture(tabId) {
+  starting++;
   try {
+    clearTimeout(badgeTimers.get(tabId));
     if (!(await chrome.storage.local.get(CAPTURE_KEY))[CAPTURE_KEY]) return;
+    // Limpia el aviso de un fallo anterior: el temporizador de abajo no sobrevive si el service worker se duerme.
+    chrome.action.setBadgeText({ tabId, text: '' }).catch(() => {}); chrome.action.setTitle({ tabId, title: chrome.i18n.getMessage('actionTitle') }).catch(() => {});
     // Ya capturada (el offscreen tarda 1,5 s en soltarla al ocultarse): pedir otro id fallaría; basta con reconectar el reproductor.
     if ((await chrome.tabCapture.getCapturedTabs()).some((c) => c.tabId === tabId && c.status === 'active')) { chrome.tabs.sendMessage(tabId, { type: 'viz-connect' }).catch(() => {}); return; }
     const streamId = await chrome.tabCapture.getMediaStreamId({ targetTabId: tabId });
+    await closing;
     try { // solo puede haber un documento offscreen: si ya existe, createDocument falla y se reutiliza
       await chrome.offscreen.createDocument({ url: 'src/offscreen/offscreen.html', reasons: ['USER_MEDIA'], justification: chrome.i18n.getMessage('offscreenReason') });
     } catch (e) { if (!/single offscreen/i.test(String(e && e.message))) throw e; }
@@ -37,7 +56,8 @@ async function startCapture(tabId) {
     chrome.action.setBadgeBackgroundColor({ tabId, color: '#c0392b' }).catch(() => {});
     chrome.action.setBadgeText({ tabId, text: '!' }).catch(() => {});
     chrome.action.setTitle({ tabId, title: chrome.i18n.getMessage('captureUnavailable', msg.slice(0, 160)) }).catch(() => {});
-    setTimeout(() => { chrome.action.setBadgeText({ tabId, text: '' }).catch(() => {}); chrome.action.setTitle({ tabId, title: chrome.i18n.getMessage('actionTitle') }).catch(() => {}); }, 6000); /* pestaña no capturable (chrome://, ya capturada...): sigue el visualizador simulado */ }
+    badgeTimers.set(tabId, setTimeout(() => { badgeTimers.delete(tabId); chrome.action.setBadgeText({ tabId, text: '' }).catch(() => {}); chrome.action.setTitle({ tabId, title: chrome.i18n.getMessage('actionTitle') }).catch(() => {}); }, 6000)); /* pestaña no capturable (chrome://, ya capturada...): sigue el visualizador simulado */
+  } finally { starting--; }
 }
 
 // Atajos de teclado (chrome.commands, configurables en chrome://extensions/shortcuts): se ejecutan sobre la pestaña activa.
@@ -119,9 +139,17 @@ async function readFont(file) {
   fontCache.set(file, data);
   return data;
 }
+// El navegador tarda un poco en dar la captura por terminada: si aún consta como activa, se reintenta unas veces antes de dejar el documento abierto.
+function closeIfIdle(tries = 0) {
+  chrome.tabCapture.getCapturedTabs().then((l) => {
+    if (!starting && !l.some((c) => c.status === 'active')) return (closing = chrome.offscreen.closeDocument().catch(() => {}));
+    if (tries < 5) setTimeout(() => closeIfIdle(tries + 1), 1000);
+  }).catch(() => {});
+}
 chrome.runtime.onMessage.addListener((m, sender) => {
   if (sender.id !== chrome.runtime.id || sender.tab || !m) return;
-  if (m.type === 'cap-idle') chrome.offscreen.closeDocument().catch(() => {});
+  // Se cierra solo si no queda ninguna captura activa ni en arranque: una captura nueva pudo reutilizar el documento justo antes de que llegara este aviso.
+  if (m.type === 'cap-idle') closeIfIdle();
 });
 const inflight = new Set(); // una descarga a la vez por pestaña
 const inflightSb = new Set(); // ídem para las hojas del storyboard
@@ -152,7 +180,7 @@ chrome.runtime.onMessage.addListener((m, sender, reply) => {
 
 // Clic derecho en el icono: captura de audio, ventana aparte y (para desarrollo) el diseño.
 const THEME_KEY = 'mp_theme';
-const THEMES = { glass: 'themeGlass', noir: 'themeNoir', crt: 'themeCrt', metal: 'themeMetal', minimal: 'themeMinimal', ansi: 'themeAnsi', dynamic: 'themeDynamic' };
+const THEMES = Object.fromEntries(self.__NMP.cfg.SKINS.map((id) => [id, self.__NMP.cfg.themeKey(id)])); // claves de idioma themeGlass, themeNoir...
 const syncMenu = (theme, capture) => {
   const up = (id, checked) => chrome.contextMenus.update(id, { checked }, () => void chrome.runtime.lastError);
   if (theme) for (const id of Object.keys(THEMES)) up('th:' + id, id === theme);

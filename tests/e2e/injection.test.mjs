@@ -151,10 +151,12 @@ test('el clic izquierdo del icono (toggle, sin argumento) se ejecuta en la pesta
   const warns = await env.sw.evaluate(async (id) => {
     const seen = [], orig = console.warn;
     console.warn = (...a) => { seen.push(a.join(' ')); };
-    try { await callPlayer(id, 'toggle'); await callPlayer(id, 'toggle'); } finally { console.warn = orig; }
-    return seen;
+    let opened;
+    try { opened = [await callPlayer(id, 'toggle'), await callPlayer(id, 'toggle')]; } finally { console.warn = orig; }
+    return { seen, opened };
   }, tab);
-  assert.deepEqual(warns, []);
+  assert.deepEqual(warns.seen, []);
+  assert.deepEqual(warns.opened, [true, false], 'toggle devuelve true solo cuando abre el reproductor');
   assert.equal((await has(env.sw, tab)).ui, true);
   await page.close();
 });

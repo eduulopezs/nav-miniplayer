@@ -5,6 +5,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
 import { GROUPS } from './groups.mjs';
+import { CFG } from './config.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const manifest = JSON.parse(readFileSync(join(root, 'manifest.json'), 'utf8'));
@@ -88,9 +89,13 @@ if (!/^\d+\.\d+\.\d+$/.test(manifest.version)) errors.push(`versión no válida:
     const text = readFileSync(join(root, p), 'utf8');
     for (const [, k] of text.matchAll(/(?:NMP\.t|\bt|getMessage)\(\s*'(\w+)'/g)) used.add(k);
     for (const [, k] of text.matchAll(/data-i18n(?:-label|-title)?="(\w+)"/g)) used.add(k);
-    for (const [, k] of text.matchAll(/'(theme(?:Glass|Noir|Crt|Metal|Minimal|Ansi|Dynamic))'/g)) used.add(k);
   });
   walk('src');
+  // Los diseños salen de NMP.cfg.SKINS: cada uno lleva su clave de idioma themeXxx y su fichero en src/content/skins.
+  const skins = CFG.SKINS;
+  for (const id of skins) used.add(CFG.themeKey(id));
+  const files = readdirSync(join(root, 'src/content/skins')).map((f) => f.replace(/\.js$/, ''));
+  if (skins.some((id) => !files.includes(id)) || files.some((id) => !skins.includes(id))) errors.push('NMP.cfg.SKINS no coincide con src/content/skins');
   for (const [, k] of JSON.stringify(manifest).matchAll(/__MSG_(\w+)__/g)) used.add(k);
   for (const k of used) if (!(k in es)) errors.push(`clave de i18n sin definir: ${k}`);
   for (const k of Object.keys(es)) if (!used.has(k)) errors.push(`mensaje sin usar: ${k}`);

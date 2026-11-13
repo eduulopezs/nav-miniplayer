@@ -5,7 +5,7 @@
 (() => {
   const SESS_KEY = 'mp_sessions', REMOTE_KEY = 'mp_remote', WIN_KEY = 'mp_win', WINID_KEY = 'mp_winid';
   const PAGE = 'src/window/player.html';
-  const CMD = /^(?:play|pause|toggle|back|fwd|prev|next|mute|seek:\d{1,9}(?:\.\d+)?)$/;
+  const CMD = self.__NMP.cfg.CMD;
   const str = (v, n) => (typeof v === 'string' ? v.slice(0, n) : '');
   const num = (v, lo, hi, d) => (typeof v === 'number' && v >= lo && v <= hi ? v : d);
   const web = (v) => { v = str(v, 1000); return /^https?:\/\//i.test(v) ? v : ''; };
@@ -19,7 +19,7 @@
     const cur = (await chrome.storage.session.get(SESS_KEY))[SESS_KEY] || {};
     const next = fn(cur) || cur;
     await chrome.storage.session.set({ [SESS_KEY]: next });
-  }).catch(() => {}));
+  }).catch((e) => { console.warn('[Nav Miniplayer] no se pudo guardar la sesión:', (e && e.message) || e); }));
 
   // La ventana aparte es una pestaña de una ventana emergente (sender.tab existe): se reconoce por la URL de la página de la extensión.
   const fromWindow = (sender) => sender.id === chrome.runtime.id && typeof sender.url === 'string' && sender.url.startsWith(chrome.runtime.getURL(PAGE));

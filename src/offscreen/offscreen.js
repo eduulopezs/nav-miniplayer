@@ -32,12 +32,15 @@ function stop(tabId) {
   cap.stream.getTracks().forEach((tr) => tr.stop());
   cap.ctx.close().catch(() => {});
   for (const p of cap.ports) { try { p.disconnect(); } catch (_) { /* ya cerrado */ } }
-  if (!caps.size) chrome.runtime.sendMessage({ type: 'cap-idle' }).catch(() => {});
+  idleCheck();
 }
+
+// Sin capturas, el service worker puede cerrar este documento.
+function idleCheck() { if (!caps.size) chrome.runtime.sendMessage({ type: 'cap-idle' }).catch(() => {}); }
 
 chrome.runtime.onMessage.addListener((m, sender, reply) => {
   if (sender.id !== chrome.runtime.id || sender.tab || !m || m.target !== 'offscreen' || !Number.isInteger(m.tabId)) return;
-  if (m.type === 'cap-start' && typeof m.streamId === 'string') { start(m.tabId, m.streamId).then(() => reply({ ok: true }), () => reply({ ok: false })); return true; }
+  if (m.type === 'cap-start' && typeof m.streamId === 'string') { start(m.tabId, m.streamId).then(() => reply({ ok: true }), () => { reply({ ok: false }); idleCheck(); }); return true; }
   if (m.type === 'cap-stop') { stop(m.tabId); reply({ ok: true }); }
 });
 
