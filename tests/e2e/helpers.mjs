@@ -98,9 +98,9 @@ export async function launch({ capture = false, optional = false } = {}) {
   return { ctx, sw, close: async () => { await ctx.close(); fs.rmSync(dir, { recursive: true, force: true }); } };
 }
 
-const find = (n, pred, out = []) => { if (pred(n)) out.push(n); for (const c of [...(n.children || []), ...(n.shadowRoots || [])]) find(c, pred, out); return out; };
-const attr = (n, k) => { const a = n.attributes || []; const i = a.indexOf(k); return i >= 0 ? a[i + 1] : null; };
-const hasClass = (n, c) => (attr(n, 'class') || '').split(/\s+/).includes(c);
+export const find = (n, pred, out = []) => { if (pred(n)) out.push(n); for (const c of [...(n.children || []), ...(n.shadowRoots || [])]) find(c, pred, out); return out; };
+export const attr = (n, k) => { const a = n.attributes || []; const i = a.indexOf(k); return i >= 0 ? a[i + 1] : null; };
+export const hasClass = (n, c) => (attr(n, 'class') || '').split(/\s+/).includes(c);
 // Selectores del inspector: 'card' (clase), 'act:play' (data-act), 't:title' (data-t), 'v:cur' (data-v) y 'bar' (data-bar).
 const match = (n, sel) => {
   const [k, v] = sel.split(':');
