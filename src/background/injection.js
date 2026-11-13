@@ -13,6 +13,7 @@
         'src/content/config.js',
         'src/content/util.js',
         'src/content/media.js',
+        'src/content/volume.js',
         'src/content/storyboard.js',
         'src/content/tokens.js',
         'src/content/fonts.js',
