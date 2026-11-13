@@ -31,6 +31,7 @@ chrome.action.onClicked.addListener(async (tab) => {
 // Audio real de la pestaña para el visualizador (opt-in desde el menú del icono). tabCapture da un id de flujo que consume el documento
 // offscreen (src/offscreen), que analiza el audio y manda el espectro al content script por un puerto. Sin captura, el visualizador es simulado.
 const CAPTURE_KEY = 'mp_capture';
+let closing = Promise.resolve(); // cierre del offscreen en curso: una captura nueva espera a que termine antes de crear el documento
 let starting = 0; // capturas en arranque: aún no figuran como activas en getCapturedTabs, pero el documento offscreen no debe cerrarse bajo ellas
 const badgeTimers = new Map(); // tabId -> temporizador del aviso de fallo, para que uno viejo no borre el de un fallo nuevo
 async function startCapture(tabId) {
@@ -43,6 +44,7 @@ async function startCapture(tabId) {
     // Ya capturada (el offscreen tarda 1,5 s en soltarla al ocultarse): pedir otro id fallaría; basta con reconectar el reproductor.
     if ((await chrome.tabCapture.getCapturedTabs()).some((c) => c.tabId === tabId && c.status === 'active')) { chrome.tabs.sendMessage(tabId, { type: 'viz-connect' }).catch(() => {}); return; }
     const streamId = await chrome.tabCapture.getMediaStreamId({ targetTabId: tabId });
+    await closing;
     try { // solo puede haber un documento offscreen: si ya existe, createDocument falla y se reutiliza
       await chrome.offscreen.createDocument({ url: 'src/offscreen/offscreen.html', reasons: ['USER_MEDIA'], justification: chrome.i18n.getMessage('offscreenReason') });
     } catch (e) { if (!/single offscreen/i.test(String(e && e.message))) throw e; }
@@ -140,7 +142,7 @@ async function readFont(file) {
 chrome.runtime.onMessage.addListener((m, sender) => {
   if (sender.id !== chrome.runtime.id || sender.tab || !m) return;
   // Se cierra solo si no queda ninguna captura activa ni en arranque: una captura nueva pudo reutilizar el documento justo antes de que llegara este aviso.
-  if (m.type === 'cap-idle') chrome.tabCapture.getCapturedTabs().then((l) => { if (!starting && !l.some((c) => c.status === 'active')) return chrome.offscreen.closeDocument(); }).catch(() => {});
+  if (m.type === 'cap-idle') chrome.tabCapture.getCapturedTabs().then((l) => { if (!starting && !l.some((c) => c.status === 'active')) return (closing = chrome.offscreen.closeDocument().catch(() => {})); }).catch(() => {});
 });
 const inflight = new Set(); // una descarga a la vez por pestaña
 const inflightSb = new Set(); // ídem para las hojas del storyboard
