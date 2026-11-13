@@ -96,6 +96,7 @@ if (!/^\d+\.\d+\.\d+$/.test(manifest.version)) errors.push(`versión no válida:
   for (const id of skins) used.add(CFG.themeKey(id));
   const files = readdirSync(join(root, 'src/content/skins')).map((f) => f.replace(/\.js$/, ''));
   if (skins.some((id) => !files.includes(id)) || files.some((id) => !skins.includes(id))) errors.push('NMP.cfg.SKINS no coincide con src/content/skins');
+  for (const [old, now] of Object.entries(CFG.LEGACY)) if (!skins.includes(now) || skins.includes(old)) errors.push(`NMP.cfg.LEGACY: ${old} -> ${now} no es válido`);
   for (const [, k] of JSON.stringify(manifest).matchAll(/__MSG_(\w+)__/g)) used.add(k);
   for (const k of used) if (!(k in es)) errors.push(`clave de i18n sin definir: ${k}`);
   for (const k of Object.keys(es)) if (!used.has(k)) errors.push(`mensaje sin usar: ${k}`);

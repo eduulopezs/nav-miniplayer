@@ -41,11 +41,10 @@ ${NMP.menuCss}
   let lastKey = '', lastKeyHadArt = false, lastPlaying = null, pip = false, curTitle = '', curArtist = '', curImg = '', lastTrack = '', trackNo = 0;
   let theme = 'glass';
   // Diseño activo: cada diseño trae su plantilla, su CSS y su visualizador (skins/*.js). Los nombres antiguos se reasignan al más parecido.
-  const LEGACY = { brutal: 'noir', retro: 'crt', pixel: 'glass' };
   const vizCtx = { card, skin: '' };
   let fontSkin = '';
   function applyTheme(t) {
-    t = LEGACY[t] || t;
+    t = NMP.cfg.LEGACY[t] || t;
     if (!SK[t]) t = 'glass';
     if (t === theme && vizCtx.skin === t) return;
     theme = t; vizCtx.skin = t;

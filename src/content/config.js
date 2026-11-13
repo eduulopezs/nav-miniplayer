@@ -7,6 +7,7 @@
     themeKey: (id) => 'theme' + id[0].toUpperCase() + id.slice(1), // clave de idioma de un diseño: themeGlass, themeNoir...
     SKINS: ['glass', 'noir', 'crt', 'metal', 'minimal', 'ansi', 'dynamic'], // diseños, en el orden de menús y ajustes
     CMD: /^(play|pause|toggle|back|fwd|prev|next|mute|seek:(\d{1,9}(?:\.\d+)?))$/, // órdenes de la ventana aparte: las valida el service worker y las ejecuta la pestaña
+    LEGACY: { brutal: 'noir', retro: 'crt', pixel: 'glass' }, // nombres antiguos de diseño y el que los sustituye; migrate.js guarda su propia copia congelada
     MIN_DURATION: 30, // s; ignora sonidos/clips cortos
     THEME_KEY: 'mp_theme', // id de uno de SKINS
     PREFS_KEY: 'mp_prefs', // { skip }
