@@ -121,7 +121,8 @@ async function readFont(file) {
 }
 chrome.runtime.onMessage.addListener((m, sender) => {
   if (sender.id !== chrome.runtime.id || sender.tab || !m) return;
-  if (m.type === 'cap-idle') chrome.offscreen.closeDocument().catch(() => {});
+  // Se cierra solo si no queda ninguna captura activa: una captura nueva pudo reutilizar el documento justo antes de que llegara este aviso.
+  if (m.type === 'cap-idle') chrome.tabCapture.getCapturedTabs().then((l) => { if (!l.some((c) => c.status === 'active')) return chrome.offscreen.closeDocument(); }).catch(() => {});
 });
 const inflight = new Set(); // una descarga a la vez por pestaña
 const inflightSb = new Set(); // ídem para las hojas del storyboard
