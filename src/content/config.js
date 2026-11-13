@@ -5,7 +5,7 @@
   NMP.cfg = {
     SKIPS: [5, 10, 15, 30], // s que pueden saltar los botones ±; migrate.js guarda su propia copia congelada, igual que la de SKINS
     themeKey: (id) => 'theme' + id[0].toUpperCase() + id.slice(1), // clave de idioma de un diseño: themeGlass, themeNoir...
-    SKINS: ['glass', 'noir', 'crt', 'metal', 'minimal', 'ansi', 'dynamic'], // diseños, en el orden de menús y ajustes
+    SKINS: ['glass', 'noir', 'crt', 'metal', 'minimal', 'ansi'], // diseños, en el orden de menús y ajustes
     CMD: /^(play|pause|toggle|back|fwd|prev|next|mute|seek:(\d{1,9}(?:\.\d+)?))$/, // órdenes de la ventana aparte: las valida el service worker y las ejecuta la pestaña
     LEGACY: { brutal: 'noir', retro: 'crt', pixel: 'glass' }, // nombres antiguos de diseño y el que los sustituye; migrate.js guarda su propia copia congelada
     MIN_DURATION: 30, // s; ignora sonidos/clips cortos
