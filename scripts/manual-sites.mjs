@@ -17,10 +17,12 @@ if (!sites.length) { console.error(`Ningún sitio coincide con "${filter}".`); p
 
 // Los botones se buscan por data-act (desde 1.5.0 no llevan clase) y se usa el primero visible: cada diseño repite algunos según el formato.
 const visible = async (cdp, n) => { try { const q = (await cdp.send('DOM.getBoxModel', { backendNodeId: n.backendNodeId })).model.border; return Math.abs(q[2] - q[0]) > 0 && Math.abs(q[5] - q[1]) > 0 ? q : null; } catch (_) { return null; } };
-const byAct = async (cdp, root, act) => { for (const n of find(root, (x) => attr(x, 'data-act') === act)) if (await visible(cdp, n)) return n; return null; };
+// La interfaz del reproductor vive en shadow roots: se ignora cualquier .card o data-act de la propia página.
+const inShadow = (root, pred) => find(root, (n) => (n.shadowRoots || []).length).flatMap((n) => n.shadowRoots.flatMap((s) => find(s, pred)));
+const byAct = async (cdp, root, act) => { for (const n of inShadow(root, (x) => attr(x, 'data-act') === act)) if (await visible(cdp, n)) return n; return null; };
 
-// Medio principal de un marco: el de mayor duración. Devuelve [en pausa, tiempo, ¿duración finita? (falso en directos)].
-const mainMedia = () => { const m = [...document.querySelectorAll('video,audio')].sort((a, b) => (b.duration || 0) - (a.duration || 0))[0]; return m ? [m.paused, m.currentTime, Number.isFinite(m.duration)] : null; };
+// Medio principal de un marco: el de mayor duración. Devuelve [en pausa, tiempo, ¿duración finita? (falso en directos), duración].
+const mainMedia = () => { const m = [...document.querySelectorAll('video,audio')].sort((a, b) => (b.duration || 0) - (a.duration || 0))[0]; return m ? [m.paused, m.currentTime, Number.isFinite(m.duration), m.duration || 0] : null; };
 
 async function probe(env, page, tabId, name, url) {
   const { ctx, sw } = env;
@@ -59,8 +61,7 @@ async function probe(env, page, tabId, name, url) {
     const cdp = await ctx.newCDPSession(page);
     const state = async () => {
       const root = (await cdp.send('DOM.getDocument', { depth: -1, pierce: true })).root;
-      // La tarjeta vive en un shadow root: se ignora cualquier .card que tenga la propia página.
-      const card = find(root, (n) => (n.shadowRoots || []).length).flatMap((n) => n.shadowRoots.flatMap((s) => find(s, (x) => hasClass(x, 'card'))))[0], play = await byAct(cdp, root, 'play');
+      const card = inShadow(root, (x) => hasClass(x, 'card'))[0], play = await byAct(cdp, root, 'play');
       return { shown: !!card && hasClass(card, 'show'), label: play ? attr(play, 'aria-label') : null };
     };
     // La tarjeta puede haberse mostrado sola al empezar a reproducir: alternar entonces la ocultaría.
@@ -70,7 +71,8 @@ async function probe(env, page, tabId, name, url) {
       for (let i = 0; i < 20; i++) { await sleep(400); r.card = await state(); if (r.card.shown) break; }
     }
     if (r.card.shown) {
-      const mediaState = async () => { for (const f of page.frames()) { const v = await f.evaluate(mainMedia).catch(() => null); if (v) return v; } return null; };
+      // Entre todos los marcos, el medio de mayor duración (los directos, Infinity, ganan): un iframe de anuncios no debe medirse en su lugar.
+      const mediaState = async () => { const all = []; for (const f of page.frames()) { const v = await f.evaluate(mainMedia).catch(() => null); if (v) all.push(v); } return all.sort((a, b) => b[3] - a[3])[0] || null; };
       const click = async (act) => {
         const root = (await cdp.send('DOM.getDocument', { depth: -1, pierce: true })).root;
         const q = await byAct(cdp, root, act).then((n) => n && visible(cdp, n));
