@@ -97,12 +97,12 @@ ${NMP.menuCss}
 
   // La carátula la decide la página: solo se admiten http(s), blob e imágenes en data URL.
   const safeArt = (src) => (typeof src === 'string' && /^(https?:|blob:|data:image\/(png|jpe?g|gif|webp|avif);)/i.test(src) ? src : '');
-  function bestArtwork(md) {
+  function bestArtwork(md, m = media) {
     if (md && md.artwork && md.artwork.length) {
       const size = (a) => parseInt(String(a.sizes || '').split(/[x\s]/)[0], 10) || 0;
       return safeArt([...md.artwork].sort((a, b) => size(b) - size(a))[0].src);
     }
-    if (media && media.poster) return safeArt(media.poster);
+    if (m && m.poster) return safeArt(m.poster);
     const yt = /[?&]v=([\w-]{11})/.exec(location.href);
     if (yt && /youtube\.com$/.test(location.hostname)) return `https://i.ytimg.com/vi/${yt[1]}/hqdefault.jpg`;
     return '';
@@ -260,7 +260,7 @@ ${NMP.menuCss}
     const m = pickMedia();
     if (!m) { if (repKey) { repKey = ''; try { chrome.runtime.sendMessage({ type: 'sess-end' }); } catch (_) { /* sin background */ } } return; }
     const md = navigator.mediaSession && navigator.mediaSession.metadata;
-    const prevMedia = media; media = m; const art = bestArtwork(md); media = prevMedia; // bestArtwork mira el medio activo para el póster
+    const art = bestArtwork(md, m);
     const msg = {
       type: 'sess', title: (md && md.title) || document.title || location.hostname, artist: (md && (md.artist || md.album)) || location.hostname.replace(/^www\./, ''),
       host: location.hostname.replace(/^www\./, ''), fav: favicon(), art: /^https?:/i.test(art) ? art : '',
