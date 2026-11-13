@@ -6,6 +6,12 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y e
 
 ## [Sin publicar]
 
+## [2.0.9] - 2026-11-13
+
+### Cambiado
+
+- La descripción de la extensión en español se acorta a 132 caracteres, el máximo de la Chrome Web Store (#120).
+
 ### Interno
 
 - Los nombres antiguos de diseño (`LEGACY`) pasan a `NMP.cfg` y `npm test` comprueba que apuntan a diseños existentes (#116).

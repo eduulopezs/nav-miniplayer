@@ -3,7 +3,7 @@
     "message": "Nav Miniplayer"
   },
   "extDesc": {
-    "message": "Minirreproductor flotante con estilo glass para controlar el audio/vídeo de la pestaña: play/pausa, ±10 s, anterior/siguiente y progreso en el borde."
+    "message": "Minirreproductor flotante estilo glass para el audio/vídeo de la pestaña: play/pausa, ±10 s, anterior/siguiente y progreso."
   },
   "actionTitle": {
     "message": "Mostrar/ocultar minirreproductor"
