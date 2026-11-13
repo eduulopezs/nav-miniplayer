@@ -1,6 +1,6 @@
 # Publicación en la Chrome Web Store
 
-Preparación de la ficha y decisiones para Chrome Web Store y Edge Add-ons. Cierra la issue #120.
+Preparación de la ficha y decisiones para Chrome Web Store y Edge Add-ons. Resuelve la parte de estudio de la issue #120; se cierra al enviar la ficha.
 
 ## Decisiones
 
@@ -14,7 +14,7 @@ Preparación de la ficha y decisiones para Chrome Web Store y Edge Add-ons. Cier
 
 - **Nombre**: Nav Miniplayer (`extName`).
 - **Categoría**: Productivity (alternativa: Entertainment).
-- **Descripción corta**: se toma de `extDesc` en cada idioma (máx. 132 caracteres: `en` mide 132, `es` mide 149 y hay que acortarla).
+- **Descripción corta**: se toma de `extDesc` en cada idioma (máx. 132 caracteres: `en` mide 132 y `es` 123).
 - **Descripción larga** (es / en): qué hace (control flotante del audio/vídeo de la pestaña, Media Session, ventana aparte, visualizador opcional, skins), que no recopila datos y que el acceso a todos los sitios es opcional.
 - **Icono**: `icons/128.png`.
 - **Capturas**: las de `docs/screenshots` miden 356×172 y la tienda exige mínimo 640×400 (recomendado 1280×800, PNG o JPEG sin transparencia). Hay que rehacerlas a 1280×800 mostrando el reproductor sobre una página real, en es y en en.
@@ -58,4 +58,3 @@ Puntos que la revisión suele observar: sin código remoto, `eval` ni `new Funct
 
 - Crear la cuenta de desarrollador y pagar la cuota (acción del mantenedor).
 - Rehacer capturas a 1280×800 y crear la tesela de 440×280.
-- Acortar `extDesc` de `es` (149) a 132 caracteres o menos; cambia `_locales`, así que sube versión.
