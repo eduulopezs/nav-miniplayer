@@ -292,7 +292,7 @@ ${NMP.menuCss}
   ['play', 'pause', 'ended', 'loadedmetadata', 'durationchange', 'seeked', 'ratechange', 'volumechange'].forEach((ev) => document.addEventListener(ev, schedReport, true));
   window.addEventListener('pagehide', () => { if (remoteOn && repKey) { try { chrome.runtime.sendMessage({ type: 'sess-end' }); } catch (_) { /* sin background */ } } });
   // Órdenes de la ventana aparte (por el service worker): solo nombres conocidos; actúan sobre el medio que esta pestaña mostraría.
-  const RC = /^(play|pause|toggle|back|fwd|prev|next|mute|seek:(\d{1,9}(?:\.\d+)?))$/;
+  const RC = NMP.cfg.CMD;
   try {
     chrome.runtime.onMessage.addListener((m, sender) => {
       if (sender.id !== chrome.runtime.id || sender.tab || !m || m.type !== 'rc-cmd' || typeof m.cmd !== 'string') return;
@@ -328,6 +328,7 @@ ${NMP.menuCss}
   });
 
   // Clic izquierdo en el icono: abre o cierra la ventana flotante; sin Document PiP, abre la ventana aparte.
+  NMP.isOpen = () => pip || (inpage && !dismissed); // el service worker lo consulta antes de alternar, para no capturar audio al cerrar
   NMP.toggle = () => { // lo invoca el service worker desde el mundo aislado; la página no puede alcanzarlo
     if (pip) return send('__pip');
     if (inpage) { dismissed = !dismissed; return render(); }

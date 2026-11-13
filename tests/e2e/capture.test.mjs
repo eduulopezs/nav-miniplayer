@@ -14,7 +14,10 @@ test('el documento offscreen rechaza peticiones inválidas y puertos sin captura
   assert.equal(bad && bad.ok, false, 'un id de flujo falso no debe capturar nada');
   const ignored = await sw.evaluate(() => chrome.runtime.sendMessage({ target: 'offscreen', type: 'cap-start', tabId: 'x', streamId: 1 }).then((r) => (r === undefined ? 'ignorado' : 'respondido'), () => 'ignorado'));
   assert.equal(ignored, 'ignorado', 'tipos inválidos se ignoran');
-  await sw.evaluate(() => chrome.offscreen.closeDocument());
+  // Tras el fallo no queda ninguna captura: el documento avisa con cap-idle y el service worker lo cierra solo.
+  let open = true;
+  for (let i = 0; i < 20 && open; i++) { await sleep(100); open = await sw.evaluate(() => chrome.runtime.getContexts({ contextTypes: ['OFFSCREEN_DOCUMENT'] }).then((c) => c.length > 0)); }
+  assert.equal(open, false, 'sin capturas, el documento offscreen se cierra');
 });
 
 // Con tabCapture permitido por bandera, se comprueba la cadena completa: id de flujo, documento offscreen y puerto con el reproductor visible.

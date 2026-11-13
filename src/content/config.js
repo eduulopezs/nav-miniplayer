@@ -4,6 +4,8 @@
   // Constantes compartidas por todos los módulos del content script.
   NMP.cfg = {
     SKIPS: [5, 10, 15, 30], // s que pueden saltar los botones ±; el paso de migración guarda su propia copia
+    SKINS: ['glass', 'noir', 'crt', 'metal', 'minimal', 'ansi', 'dynamic'], // diseños, en el orden de menús y ajustes
+    CMD: /^(play|pause|toggle|back|fwd|prev|next|mute|seek:(\d{1,9}(?:\.\d+)?))$/, // órdenes de la ventana aparte: las valida el service worker y las ejecuta la pestaña
     MIN_DURATION: 30, // s; ignora sonidos/clips cortos
     THEME_KEY: 'mp_theme', // desarrollo: 'glass' | 'noir' | 'crt' | 'metal' | 'minimal' | 'ansi' | 'dynamic'
     PREFS_KEY: 'mp_prefs', // { skip }
