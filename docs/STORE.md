@@ -16,7 +16,7 @@ Preparación de la ficha y decisiones para Chrome Web Store y Edge Add-ons. Resu
 - **Categoría**: Productivity (alternativa: Entertainment).
 - **Descripción corta**: se toma de `extDesc` en cada idioma (máx. 132 caracteres: `en` mide 132 y `es` 123).
 - **Descripción larga** (es / en): qué hace (control flotante del audio/vídeo de la pestaña, Media Session, ventana aparte, visualizador opcional, skins), que no recopila datos y que el acceso a todos los sitios es opcional.
-- **Icono**: `icons/128.png`.
+- **Icono**: `icons/128.jpeg`.
 - **Capturas**: hechas en `docs/store/es` y `docs/store/en` (1280×800, cinco diseños, sobre fondo opaco). Las de `docs/screenshots` (356×172) no valen: la tienda exige mínimo 640×400.
 - **Teselas promocionales**: la pequeña (440×280) está en `docs/store/tile-440x280.png`; la grande es opcional.
 - **Idioma por defecto**: es (`default_locale`); añadir la ficha en en.
