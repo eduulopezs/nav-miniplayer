@@ -161,6 +161,19 @@ test('el clic izquierdo del icono (toggle, sin argumento) se ejecuta en la pesta
   await page.close();
 });
 
+// Pestaña abierta antes de actualizar: su toggle viene de una versión que no devolvía nada. El clic del icono debe distinguirlo de «cerrado» (false).
+test('callPlayer devuelve undefined si el toggle de la pestaña es de una versión anterior', async () => {
+  await env.sw.evaluate(() => chrome.storage.local.set({ mp_inpage: true }));
+  const page = await env.ctx.newPage();
+  await page.goto(`${server.base}/`);
+  await sleep(400);
+  const tab = await tabOf(env.sw, `${server.base}/*`);
+  await env.sw.evaluate((id) => chrome.scripting.executeScript({ target: { tabId: id }, func: () => { globalThis.__NMP.toggle = () => {}; } }), tab);
+  const r = await env.sw.evaluate((id) => callPlayer(id, 'toggle').then((v) => (v === undefined ? 'undefined' : String(v))), tab);
+  assert.equal(r, 'undefined');
+  await page.close();
+});
+
 test('injectInto avisa de que el puente llega tarde solo la primera vez', async () => {
   await env.sw.evaluate(() => chrome.scripting.unregisterContentScripts({ ids: ['nmp-agent', 'nmp-bridge', 'nmp-ui'] }));
   const page = await env.ctx.newPage();
