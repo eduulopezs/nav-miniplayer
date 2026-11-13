@@ -36,7 +36,7 @@ t('rechaza HTML', sniffImage(Uint8Array.from(str('<!doctype html><script>alert(1
 t('rechaza vacío', sniffImage(new Uint8Array(0)) === null);
 
 // Comprobaciones estáticas del aislamiento
-const player = read('src/content/player.js'), bridge = read('src/page/media-session-bridge.js'), sw = read('src/background/service-worker.js');
+const player = read('src/content/player.js'), remote = read('src/content/remote.js'), bridge = read('src/page/media-session-bridge.js'), sw = read('src/background/service-worker.js');
 t('shadow root cerrado', /attachShadow\(\{ mode: 'closed' \}\)/.test(player) && !/mode:\s*'open'/.test(player));
 t('el puente no deja banderas globales', !/window\.__\w+/.test(bridge));
 t('toggle ya no pasa por un evento del DOM', !/__mp_toggle/.test(player + sw));
@@ -51,7 +51,7 @@ t('el offscreen solo atiende a la extensión y rechaza mensajes de pestañas', /
 t('el puerto del visualizador solo se acepta del marco superior', /port\.sender\.frameId !== 0/.test(off));
 t('el audio vuelve a los altavoces y a la página solo llegan números', /connect\(ctx\.destination\)/.test(off) && /getByteFrequencyData/.test(off) && !/postMessage\([^)]*stream/.test(off));
 const sess = read('src/background/sessions.js');
-t('las órdenes de la ventana solo salen de la página de la extensión y de una lista cerrada', /fromWindow\(sender\)/.test(sess) && /CMD\.test\(m\.cmd\)/.test(sess) && /CMD = self\.__NMP\.cfg\.CMD/.test(sess) && ['play', 'pause', 'toggle', 'back', 'fwd', 'prev', 'next', 'mute', 'seek:12', 'seek:1.5'].every((c) => CFG.CMD.test(c)) && ['', 'play ', 'xplay', 'seek:', 'seek:-1', 'seek:1e9', 'seek:1234567890', 'seek:1.', 'eval'].every((c) => !CFG.CMD.test(c)) && CFG.CMD.exec('seek:12.5')[2] === '12.5' && CFG.CMD.exec('play')[2] === undefined && /RC\.exec\(m\.cmd\)/.test(player) && /c\[2\] != null\) seekTo\(\+c\[2\]\)/.test(player));
+t('las órdenes de la ventana solo salen de la página de la extensión y de una lista cerrada', /fromWindow\(sender\)/.test(sess) && /CMD\.test\(m\.cmd\)/.test(sess) && /CMD = self\.__NMP\.cfg\.CMD/.test(sess) && ['play', 'pause', 'toggle', 'back', 'fwd', 'prev', 'next', 'mute', 'seek:12', 'seek:1.5'].every((c) => CFG.CMD.test(c)) && ['', 'play ', 'xplay', 'seek:', 'seek:-1', 'seek:1e9', 'seek:1234567890', 'seek:1.', 'eval'].every((c) => !CFG.CMD.test(c)) && CFG.CMD.exec('seek:12.5')[2] === '12.5' && CFG.CMD.exec('play')[2] === undefined && /RC\.exec\(m\.cmd\)/.test(remote) && /c\[2\] != null\) d\.seekTo\(\+c\[2\]\)/.test(remote));
 t('las sesiones solo se aceptan del marco superior de una pestaña y con campos acotados', /m\.type === 'sess' && sender\.tab && sender\.frameId === 0/.test(sess) && /web\(m\.art\)/.test(sess));
 t('el fin de sesión solo se acepta del marco superior', /m\.type === 'sess-end' && sender\.tab && sender\.frameId === 0/.test(sess));
 t('las acciones anunciadas por la página se filtran', /KNOWN_ACTIONS/.test(player));

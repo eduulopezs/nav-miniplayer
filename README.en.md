@@ -118,6 +118,7 @@ src/
     menu.js                      right-click menu on the card
     storyboard.js                hover thumbnail on the bar (YouTube)
     skins/                       the seven designs: glass, noir, crt, metal, minimal, ansi, dynamic
+    remote.js                    reports to the separate window and handles its commands
     player.js                    DOM, state, framed window and keyboard
   offscreen/                     document that analyses the captured audio
   options/                       Settings page
