@@ -6,6 +6,12 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y e
 
 ## [Sin publicar]
 
+## [2.0.11] - 2026-11-13
+
+### Cambiado
+
+- Los iconos de la extensión pasan de PNG a JPEG (#129).
+
 ## [2.0.10] - 2026-11-13
 
 ### Eliminado
