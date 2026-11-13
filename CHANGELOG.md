@@ -6,6 +6,10 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y e
 
 ## [Sin publicar]
 
+### Interno
+
+- Los nombres antiguos de diseño (`LEGACY`) pasan a `NMP.cfg` y `npm test` comprueba que apuntan a diseños existentes (#116).
+
 ## [2.0.5] - 2026-11-13
 
 ### Corregido
@@ -28,6 +32,7 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y e
 - Configuración compartida `NMP.cfg` (`SKINS`, `CMD`, `themeKey`) y `scripts/config.mjs`; el volumen por sitio pasa a `src/content/volume.js` (#102).
 - `npm run security` comprueba el comportamiento de `CMD` (#102).
 - Checklist de prueba manual del clic en el icono en `CONTRIBUTING.md` (#112).
+
 
 ## [2.0.0] - 2026-11-06
 
