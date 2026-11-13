@@ -9,9 +9,11 @@ Este documento describe cómo notificar vulnerabilidades de nav-miniplayer y el 
 | Anteriores | No: actualiza a la última |
 
 ## Notificar un fallo
-**No abras una issue pública** para una vulnerabilidad. Si el enlace no está disponible, abre una issue sin detalles técnicos pidiendo un canal privado. Usa el aviso privado de GitHub (Private Vulnerability Reporting):
+**No abras una issue pública** para una vulnerabilidad. Usa el aviso privado de GitHub (Private Vulnerability Reporting):
 
 **<https://github.com/eduulopezs/nav-miniplayer/security/advisories/new>**
+
+Si ese enlace no está disponible, abre una issue sin detalles técnicos pidiendo un canal privado.
 
 Incluye la versión, los pasos para reproducirlo, el impacto que ves y, si puedes, una prueba de concepto mínima. Los fallos que no sean explotables (endurecimiento, dudas) pueden ir como issue normal.
 
