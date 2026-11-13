@@ -31,6 +31,8 @@
       }
       return out;
     },
+    // 3: el diseño Dynamic desaparece; quien lo tenía elegido pasa a Glass.
+    (s) => (s.mp_theme === 'dynamic' ? { set: { mp_theme: 'glass' }, remove: [] } : { set: {}, remove: [] }),
   ];
 
   async function migrate() {
