@@ -35,6 +35,16 @@ Ejecuta `npm test` antes de cada commit y `npm run e2e` cuando toques comportami
 3. Pulsa **Cargar descomprimida** y elige la carpeta raíz del repositorio (donde está `manifest.json`).
 4. Tras editar el código, pulsa el botón de recargar de la extensión.
 
+### Prueba manual del clic en el icono
+
+Los tests e2e no pueden dar un gesto de usuario real, que `tabCapture` y Document PiP exigen. Si tocas el clic en el icono, la captura de audio o la ventana flotante, comprueba a mano:
+
+1. Con el acceso a sitios concedido en Ajustes, abre una página con audio o vídeo (por ejemplo YouTube) y reprodúcelo.
+2. Pulsa el icono: se abre la ventana flotante con el reproductor y no queda ninguna tarjeta en la pestaña.
+3. Con el visualizador con audio real activado, comprueba que reacciona al sonido.
+4. Pulsa el icono otra vez: la ventana se cierra y el audio sigue sonando.
+5. Repite con una pestaña que ya estaba abierta antes de recargar la extensión: debe funcionar igual, sin recargar la pestaña.
+
 ## Internacionalización
 
 - Todo texto visible para el usuario va en `_locales/en/messages.json` y `_locales/es/messages.json`.
