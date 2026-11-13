@@ -17,8 +17,8 @@ Preparación de la ficha y decisiones para Chrome Web Store y Edge Add-ons. Resu
 - **Descripción corta**: se toma de `extDesc` en cada idioma (máx. 132 caracteres: `en` mide 132 y `es` 123).
 - **Descripción larga** (es / en): qué hace (control flotante del audio/vídeo de la pestaña, Media Session, ventana aparte, visualizador opcional, skins), que no recopila datos y que el acceso a todos los sitios es opcional.
 - **Icono**: `icons/128.png`.
-- **Capturas**: las de `docs/screenshots` miden 356×172 y la tienda exige mínimo 640×400 (recomendado 1280×800, PNG o JPEG sin transparencia). Hay que rehacerlas a 1280×800 mostrando el reproductor sobre una página real, en es y en en.
-- **Teselas promocionales**: la pequeña (440×280) es obligatoria; la grande es opcional.
+- **Capturas**: hechas en `docs/store/es` y `docs/store/en` (1280×800, cinco diseños, sobre fondo opaco). Las de `docs/screenshots` (356×172) no valen: la tienda exige mínimo 640×400.
+- **Teselas promocionales**: la pequeña (440×280) está en `docs/store/tile-440x280.png`; la grande es opcional.
 - **Idioma por defecto**: es (`default_locale`); añadir la ficha en en.
 
 ## Justificación de permisos (para la revisión)
@@ -57,4 +57,3 @@ Puntos que la revisión suele observar: sin código remoto, `eval` ni `new Funct
 ## Pendiente (fuera de este PR)
 
 - Crear la cuenta de desarrollador y pagar la cuota (acción del mantenedor).
-- Rehacer capturas a 1280×800 y crear la tesela de 440×280.
