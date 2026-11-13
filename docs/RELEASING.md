@@ -33,3 +33,7 @@ Las releases las genera el workflow [`release.yml`](../.github/workflows/release
 ## Si algo falla
 
 Si el tag no coincide con el manifest o fallan los tests, el workflow no publica nada. Borra el tag (`git push origin :refs/tags/vX.Y.Z` y `git tag -d vX.Y.Z`), corrige y vuelve a etiquetar.
+
+## Chrome Web Store y Edge Add-ons
+
+La publicación en las tiendas es manual y se hace con el zip de la release. Ficha, justificación de permisos, privacidad y pasos en [`STORE.md`](STORE.md).
