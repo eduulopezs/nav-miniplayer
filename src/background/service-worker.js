@@ -5,11 +5,11 @@ const { isAllowedArtworkUrl, isStoryboardUrl, sniffImage, MAX_URL } = self.NMPNe
 // y el navegador deje abrir la ventana flotante al momento. Corre en el mundo aislado de la extensión (el mismo
 // que el content script), así que llama a una función que la página no puede ver ni invocar.
 // Si la pestaña no lleva los scripts (sin permiso de host: solo activeTab, concedido por este mismo clic o atajo), se inyectan en ese momento.
-// Devuelve lo que responda el método (true/false) o false si no se pudo ejecutar.
+// Devuelve lo que responda el método (true/false; undefined si lo ejecutó una versión anterior de los scripts que no devolvía nada) o false si no se pudo ejecutar.
 const callPlayer = async (tabId, method, arg) => {
   // La función corre en la pestaña; null si el método no existe (scripts sin inyectar).
   const exec = async (method, arg) => {
-    const [r] = await chrome.scripting.executeScript({ target: { tabId }, args: [method, arg ?? null], func: (m, a) => { const n = globalThis.__NMP; return n && typeof n[m] === 'function' ? { v: n[m](a) === true } : null; } });
+    const [r] = await chrome.scripting.executeScript({ target: { tabId }, args: [method, arg ?? null], func: (m, a) => { const n = globalThis.__NMP; return n && typeof n[m] === 'function' ? { v: n[m](a) } : null; } });
     return r && r.result;
   };
   try {
@@ -19,13 +19,15 @@ const callPlayer = async (tabId, method, arg) => {
     const late = await self.NMPInject.injectInto(tabId);
     res = await exec(method, arg);
     if (late && !(await chrome.permissions.contains({ origins: ['<all_urls>'] }).catch(() => true))) await exec('lateBridge');
-    return !!res && res.v;
+    return res ? res.v : false;
   } catch (e) { console.warn('[Nav Miniplayer] no se pudo ejecutar la orden en la pestaña:', (e && e.message) || e); return false; }
 };
 chrome.action.onClicked.addListener(async (tab) => {
   if (tab.id == null) return;
-  // toggle devuelve true solo si este clic abre el reproductor: al cerrarlo, o si no se pudo ejecutar, no hay nada que capturar.
-  if (await callPlayer(tab.id, 'toggle')) startCapture(tab.id); // el clic en el icono es el gesto que autoriza la captura (activeTab)
+  // toggle devuelve true solo si este clic abre el reproductor: al cerrarlo (false), o si no se pudo ejecutar, no hay nada que capturar.
+  // undefined: la pestaña se abrió antes de actualizar y su toggle antiguo no informa; se intenta capturar (el offscreen la corta si el reproductor no se ve).
+  const opened = await callPlayer(tab.id, 'toggle');
+  if (opened !== false) startCapture(tab.id); // el clic en el icono es el gesto que autoriza la captura (activeTab)
 });
 
 // Audio real de la pestaña para el visualizador (opt-in desde el menú del icono). tabCapture da un id de flujo que consume el documento
