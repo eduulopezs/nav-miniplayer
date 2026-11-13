@@ -16,6 +16,7 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y e
 - La captura de audio se reutiliza en lugar de reiniciarse, y el documento offscreen se cierra al quedar inactivo (`cap-idle`, con reintentos) (#102).
 - La captura solo empieza cuando el clic en el icono abre el reproductor; `NMP.toggle` devuelve si lo muestra u oculta (#102).
 - En pestañas abiertas antes de actualizar, el clic en el icono vuelve a iniciar la captura de audio sin recargar la pestaña (#108).
+- La ventana flotante ya no sale en blanco si queda un reproductor huérfano de la versión anterior en la pestaña: el nuevo retira el host viejo al arrancar (#110).
 - `bestArtwork` recibe el medio como parámetro en lugar de cambiar `media` a mano (#104).
 
 ### Interno
