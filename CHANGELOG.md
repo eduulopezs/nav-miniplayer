@@ -10,6 +10,7 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y e
 
 - Los nombres antiguos de diseño (`LEGACY`) pasan a `NMP.cfg` y `npm test` comprueba que apuntan a diseños existentes (#116).
 - El informe a la ventana aparte y sus órdenes salen de `player.js` a `src/content/remote.js`, sin cambios de comportamiento (#117).
+- `remote.js` comprueba sus dependencias al arrancar y envía los mensajes con un único `send`; `npm run security` valida también el remitente de las órdenes y el orden de inyección (#121).
 
 ## [2.0.5] - 2026-11-13
 

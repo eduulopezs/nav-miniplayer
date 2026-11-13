@@ -4,6 +4,8 @@
   // Ventana aparte (#16): informe de la pestaña al service worker y órdenes que llegan de él.
   // `d` trae lo que necesita del reproductor: pickMedia, refreshMedia (elige y guarda el medio activo), bestArtwork, hasAction, findSiteButton, seekTo, ACT y render.
   NMP.createRemote = (d) => {
+    for (const k of ['pickMedia', 'refreshMedia', 'bestArtwork', 'hasAction', 'findSiteButton', 'seekTo', 'ACT', 'render']) if (!d[k]) throw new Error('createRemote: falta ' + k);
+    const send = (msg) => { try { chrome.runtime.sendMessage(msg); } catch (_) { /* sin background */ } };
     // Mientras la ventana aparte de la extensión está abierta (mp_remote), esta pestaña informa de su medio al service worker y obedece sus
     // órdenes. Sin ventana no se informa de nada: no hay temporizador ni mensajes.
     let remoteOn = false, repT = 0, repKey = '';
@@ -11,7 +13,7 @@
     function report(force) {
       if (!remoteOn) return;
       const m = d.pickMedia();
-      if (!m) { if (repKey) { repKey = ''; try { chrome.runtime.sendMessage({ type: 'sess-end' }); } catch (_) { /* sin background */ } } return; }
+      if (!m) { if (repKey) { repKey = ''; send({ type: 'sess-end' }); } return; }
       const md = navigator.mediaSession && navigator.mediaSession.metadata;
       const art = d.bestArtwork(md, m);
       const msg = {
@@ -23,7 +25,7 @@
       const key = JSON.stringify([msg.title, msg.artist, msg.art, msg.playing, msg.live, Math.round(msg.d), msg.muted, msg.next, msg.prev, msg.rate]);
       if (!force && key === repKey && !msg.playing) return; // parado y sin cambios: nada que decir
       repKey = key;
-      try { chrome.runtime.sendMessage(msg); } catch (_) { /* sin background */ }
+      send(msg);
     }
     let repQ = 0;
     const schedReport = () => { if (remoteOn && !repQ) repQ = setTimeout(() => { repQ = 0; report(true); }, 50); };
@@ -34,7 +36,7 @@
       if (on) { repT = setInterval(() => report(false), 2000); report(true); }
     }
     ['play', 'pause', 'ended', 'loadedmetadata', 'durationchange', 'seeked', 'ratechange', 'volumechange'].forEach((ev) => document.addEventListener(ev, schedReport, true));
-    window.addEventListener('pagehide', () => { if (remoteOn && repKey) { try { chrome.runtime.sendMessage({ type: 'sess-end' }); } catch (_) { /* sin background */ } } });
+    window.addEventListener('pagehide', () => { if (remoteOn && repKey) { send({ type: 'sess-end' }); } });
     // Órdenes de la ventana aparte (por el service worker): solo nombres conocidos; actúan sobre el medio que esta pestaña mostraría.
     const RC = NMP.cfg.CMD;
     try {
