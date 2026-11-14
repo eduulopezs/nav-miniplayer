@@ -75,3 +75,18 @@ test('el service worker rechaza órdenes que no vienen de la ventana ni de una s
   assert.equal(await a.paused(), true);
   await w.close(); await a.page.close();
 });
+
+test('si la ventana flotante se cierra nada más abrirse, se abre la ventana aparte', async () => {
+  await env.sw.evaluate(() => chrome.storage.local.remove(['mp_win', 'mp_remote']));
+  const a = await openPage(env, server, { title: 'Pista A', inpage: false });
+  await a.play();
+  // Simula un Chrome que cierra el Document PiP a los pocos milisegundos (visto en Chrome 157 sobre YouTube).
+  await a.page.evaluate(() => {
+    const dp = documentPictureInPicture, open = dp.requestWindow.bind(dp);
+    dp.requestWindow = async (o) => { const w = await open(o); setTimeout(() => w.close(), 20); return w; };
+  });
+  await a.page.mouse.click(450, 250); // activación transitoria, que requestWindow exige
+  await a.toggle();
+  const w = await until(findWin);
+  await w.close(); await a.page.close();
+});
