@@ -21,7 +21,9 @@ Play/pausa, ±10 s, pista anterior y siguiente, barra de progreso y seis diseño
 ## Instalar
 Mismo código para Chrome y Edge (requiere la versión 116 o superior).
 
-**Desde GitHub Releases** (recomendado):
+**Desde la Chrome Web Store** (recomendado): [instala Nav Miniplayer](https://chromewebstore.google.com/detail/aoinjdblpaefbgmgdmocdjbbkdafbopm) y pulsa **Añadir a Chrome**. Se actualiza sola.
+
+**Desde GitHub Releases** (manual):
 1. Descarga el `.zip` de la última versión en [Releases](https://github.com/eduulopezs/nav-miniplayer/releases) y descomprímelo.
 2. Abre `chrome://extensions` (o `edge://extensions`), activa **Modo de desarrollador** y pulsa **Cargar descomprimida** (en Edge, **Cargar desempaquetada**).
 3. Elige la carpeta descomprimida (la que contiene `manifest.json`).

@@ -21,7 +21,9 @@ Play/pause, ±10 s, previous and next track, a progress bar and six designs, wit
 ## Install
 Same code for Chrome and Edge (version 116 or later).
 
-**From GitHub Releases** (recommended):
+**From the Chrome Web Store** (recommended): [install Nav Miniplayer](https://chromewebstore.google.com/detail/aoinjdblpaefbgmgdmocdjbbkdafbopm) and click **Add to Chrome**. It updates itself.
+
+**From GitHub Releases** (manual):
 1. Download the `.zip` of the latest version from [Releases](https://github.com/eduulopezs/nav-miniplayer/releases) and unzip it.
 2. Open `chrome://extensions` (or `edge://extensions`), turn on **Developer mode** and click **Load unpacked**.
 3. Pick the unzipped folder (the one containing `manifest.json`).
