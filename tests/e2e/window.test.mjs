@@ -90,3 +90,17 @@ test('si la ventana flotante se cierra nada más abrirse, se abre la ventana apa
   const w = await until(findWin);
   await w.close(); await a.page.close();
 });
+
+test('si el usuario cierra la ventana flotante con el icono nada más abrirla, no se abre la ventana aparte', async () => {
+  await env.sw.evaluate(() => chrome.storage.local.remove(['mp_win', 'mp_remote']));
+  const a = await openPage(env, server, { title: 'Pista A', inpage: false });
+  await a.play();
+  await a.page.mouse.click(450, 250);
+  await a.toggle();
+  await until(() => a.page.evaluate(() => !!documentPictureInPicture.window));
+  await a.toggle(); // cierre pedido por la extensión, aunque sea en menos de 1 s
+  await until(() => a.page.evaluate(() => !documentPictureInPicture.window));
+  await sleep(1500);
+  assert.equal(findWin(), undefined);
+  await a.page.close();
+});

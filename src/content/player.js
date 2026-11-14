@@ -279,7 +279,7 @@ ${NMP.menuCss}
   document.addEventListener('__mp_pip', (e) => {
     const d = String(e.detail);
     if (d === 'closed' ? !pip : !pipAsked || !(d === 'open' || d.startsWith('error:'))) return; // evento no pedido o falso
-    pipAsked = false;
+    const asked = pipAsked; pipAsked = false;
     if (d === 'open') {
       pip = true; pipAt = Date.now();
       host.style.cssText = 'all:initial;position:fixed;inset:0;';
@@ -289,7 +289,8 @@ ${NMP.menuCss}
       card.classList.remove('pip');
       host.style.cssText = HOST_CSS;
       (document.body || document.documentElement).append(host);
-      if (Date.now() - pipAt < 1000) openWindowFallback(); // shortcut: cierre en <1 s = el navegador la rechazó (visto en Chrome 157); si el usuario la cierra tan rápido, se abre la ventana aparte igualmente
+      const fast = Date.now() - pipAt < 1000; pipAt = 0;
+      if (fast && !asked) openWindowFallback(); // shortcut: cierre en <1 s que no pidió la extensión = el navegador la rechazó (visto en Chrome 157); un cierre con el icono o el menú no cuenta. La página aún podría fingirlo: solo abre la ventana aparte, que valida el service worker
     } else openWindowFallback();
     render();
   });
