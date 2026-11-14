@@ -6,6 +6,10 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y e
 
 ## [Sin publicar]
 
+### Corregido
+
+- Si el navegador cierra la ventana flotante nada más abrirla, se abre la ventana aparte.
+
 ## [2.0.11] - 2026-11-13
 
 ### Cambiado

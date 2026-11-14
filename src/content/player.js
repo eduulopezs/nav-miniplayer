@@ -125,6 +125,7 @@ ${NMP.menuCss}
     return found;
   }
 
+  let pipAt = 0;
   let pipAsked = false; // la ventana con marco solo se acepta como abierta si la extensión la pidió: la página puede fingir la respuesta, pero no abrirla sin que se pida
   const send = (name) => { if (name === '__pip') pipAsked = true; document.dispatchEvent(new CustomEvent('__mp_cmd', { detail: name })); };
 
@@ -278,9 +279,9 @@ ${NMP.menuCss}
   document.addEventListener('__mp_pip', (e) => {
     const d = String(e.detail);
     if (d === 'closed' ? !pip : !pipAsked || !(d === 'open' || d.startsWith('error:'))) return; // evento no pedido o falso
-    pipAsked = false;
+    const asked = pipAsked; pipAsked = false;
     if (d === 'open') {
-      pip = true;
+      pip = true; pipAt = Date.now();
       host.style.cssText = 'all:initial;position:fixed;inset:0;';
       card.classList.add('pip');
     } else if (d === 'closed') {
@@ -288,6 +289,8 @@ ${NMP.menuCss}
       card.classList.remove('pip');
       host.style.cssText = HOST_CSS;
       (document.body || document.documentElement).append(host);
+      const fast = Date.now() - pipAt < 1000; pipAt = 0;
+      if (fast && !asked) openWindowFallback(); // shortcut: cierre en <1 s que no pidió la extensión = el navegador la rechazó (visto en Chrome 157); un cierre con el icono o el menú no cuenta. La página aún podría fingirlo: solo abre la ventana aparte, que valida el service worker
     } else openWindowFallback();
     render();
   });
